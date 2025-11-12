@@ -1,0 +1,12 @@
+
+
+1 IE = 32.768 nm
+offset 4.5e6 IE
+initialise at front
+
+red DL LED only turns off after first movement
+-> move to offset = 4_500_000 as first step
+check blue LED when external mode/FCM is active
+
+position error tolerance 300
+max master slave distance <= 5000
