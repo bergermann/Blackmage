@@ -1,3 +1,8 @@
+name = "Blackmage"
+uuid = "94fbf62c-7f84-4dac-b8e8-d17b7072c94a"
+authors = ["Dominik Bergermann <dominik.bergermann@rwth-aachen.de>"]
+version = "0.1.0"
+
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
