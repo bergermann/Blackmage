@@ -251,8 +251,52 @@ Non-flexdriven motor control for sub-step precision corrections after target acq
 
 [NYI]
 """
-function mcTargetP(device::TCPSocket,target::Real,unit::Symbol)
+function mcTargetP(device::TCPSocket,addr::Int,target::Real,unit::Symbol;
+        ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
+        correctess::Bool=true)
+        
     throw(ErrorException("Not yet implemented."))
+
+    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+    @assert 10 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
+    @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
+    @assert maxsteps > 0 "maxsteps needs to be positive."
+    @assert maxiter > 0 "maxiter needs to be positive."
+    
+    ess = round(Int,abs(ess)/1e-12)
+
+    d0 = getAxisDisplacement(device,req,addr)
+    t = round(Int,target*units[unit]/1e-12)
+    dt = abs(t-d0)
+
+    nsteps = 1; rss = 100
+
+    i = 1
+
+    while i <= maxiter
+        i += 1
+
+        dir = Int(t > d0)
+
+        if dt > ess
+            nsteps = min(div(dt,ess),maxsteps); rss = 100
+
+            mcMove(device,addr,dir,nsteps)
+        else
+            nsteps = 1; rss = div(100*dt,ess)
+
+            if rss < mrss/2; break; else; rss = max(rss,mrss); end
+
+            mcMove(device,addr,dir,1; rss=rss)
+        end
+
+        d1 = getAxisDisplacement(device,req,addr)
+
+        if correctess; ess = round(Int,abs(d1-d0)/nsteps); end
+        dt = abs(t-d1); d0 = d1
+
+        if 2*dt < ess*mrss/100; break; end
+    end
 
     return
 end
