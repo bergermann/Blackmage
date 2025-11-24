@@ -2,6 +2,7 @@
 using Sockets
 const D = Device = TCPSocket
 
+export connect
 
 function send(socket::TCPSocket,msg::String)
     write(socket,codeunits(msg))
