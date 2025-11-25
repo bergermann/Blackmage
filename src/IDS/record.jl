@@ -1,4 +1,7 @@
 
+export record!, stop_record!
+export plot
+
 """
     record_!(d::Displacement,device::TCPSocket,req::Dict,tmax::Real;
         interval::Real=0.1,nreset::Int=5,treset::Real=1)

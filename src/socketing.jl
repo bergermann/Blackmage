@@ -3,6 +3,7 @@ using Sockets
 const D = Device = TCPSocket
 
 
+
 function send(socket::TCPSocket,msg::String)
     write(socket,codeunits(msg))
 end
@@ -16,6 +17,7 @@ function recv(socket::TCPSocket,nb::Integer)
     refreshBuffer(socket)
     return read(socket,nb)
 end
+
 
 
 function getBufferSize(socket::TCPSocket)
