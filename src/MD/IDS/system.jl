@@ -1,12 +1,4 @@
 
-export getCurrentMode, getDeviceType
-export getSystemError, resetError
-export getInitMode, setInitMode
-export resetAxis, resetAxes
-export getMasterAxis, setMasterAxis
-export getPassMode, setPassMode
-
-
 function getCurrentMode(device::D,req::Dict)
     return request(device,req,:system,"getCurrentMode")[2]
 end
@@ -16,34 +8,6 @@ function getDeviceType(device::D,req::Dict)
 end
 
 
-"""
-    getSystemError(device::D,req::Dict)
-
-Return IDS if one is present.
-"""
-function getSystemError(device::D,req::Dict)
-    return request(device,req,:system,"getSystemError")[1]
-end
-
-"""
-    resetError(device::D,req::Dict)
-
-Attempt to reset IDS error if one is present.
-"""
-function resetError(device::D,req::Dict)
-    return request(device,req,:system,"resetError"; params=["FALSE"])[1]
-end
-
-
-function getInitMode(device::D,req::Dict)
-    return request(device,req,:system,"getInitMode")[2]
-end
-
-function setInitMode(device::D,req::Dict,mode::Int)
-    @assert mode == 0 || mode == 1 "Init mode must be 0 or 1."
-
-    request(device,req,:system,"setInitMode"; params=[mode]); return
-end
 
 
 """
@@ -54,24 +18,6 @@ Re-zero relative values of all IDS axes at their current positions.
 function resetAxes(device::D,req::Dict)
     request(device,req,:system,"resetAxes"); return
 end
-
-"""
-    resetAxis(device::TCPSocket,req::Dict,axis::Int)
-
-Re-zero relative value of IDS `axis` at it's current position.
-"""
-function resetAxis(device::D,req::Dict,axis::Int)
-    @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-
-    request(device,req,:system,"resetAxes"; params=[axis-1]); return
-end
-
-"""
-    resetAxes(device::TCPSocket,req::Dict,axis::Int)
-
-Re-zero relative value of IDS `axis` at it's current position.
-"""
-resetAxes(device::D,req::Dict,axis::Int) = resetAxis(device,req,axis)
 
 """
     getMasterAxis(device::TCPSocket,req::Dict)

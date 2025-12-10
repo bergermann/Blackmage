@@ -1,6 +1,4 @@
 
-export enablePL, disablePL
-
 """
     enablePL(device::D,req::Dict)
 
