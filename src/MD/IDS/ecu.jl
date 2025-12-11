@@ -1,21 +1,25 @@
 
 
 """
-    enableECU(device::D,req::Dict)
+    enableECU(md::MultiDevice,req::Dict)
 
-Enable IDS environmental control unit (duh).
+Enable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
-function enableECU(device::D,req::Dict)
-    request(device,req,:ecu,"enable"); return
+function enableECU(md::MultiDevice,req::Dict)
+    for i in eachindex(md.ids)
+        enableECU(md.ids[i],req)
+    end; return
 end
 
 """
-    disableECU(device::D,req::Dict)
+    disableECU(md::MultiDevice,req::Dict)
 
-Disable IDS environmental control unit (duh).
+Disable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
-function disableECU(device::D,req::Dict)
-    request(device,req,:ecu,"disable"); return
+function disableECU(md::MultiDevice,req::Dict)
+    for i in eachindex(md.ids)
+        disableECU(md.ids[i],req)
+    end; return
 end
 
 
