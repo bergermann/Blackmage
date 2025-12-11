@@ -121,6 +121,43 @@ function mcSetupFCM(device::TCPSocket;
     return
 end
 
+"""
+    mcReSetupFCM(device::TCPSocket;
+        master::Int=1,
+        stepsize::Int=100,
+        tol::Int=300,
+        maxdist::Int=5000,
+        freqmaster::Int=50,
+        freqslave::Int=70,
+        temp::Int=300)
+
+Put motors back into external drive mode while flexdrive module is still active. Use e.g.
+after having used a direct drive command while in flexdrive mode, to perform another
+flexdrive command. See [`mcSetupFCM`](@ref).
+"""
+function mcReSetupFCM(device::TCPSocket;
+        master::Int=1,
+        stepsize::Int=100,
+        tol::Int=300,
+        maxdist::Int=5000,
+        freqmaster::Int=50,
+        freqslave::Int=70,
+        temp::Int=300)
+
+    @assert 1 <= master <= 3 "Master must be 1, 2 or 3."
+    @assert freqslave > 0 "Slave frequency freq must be positive"
+    if freqmaster > freqslave; @warn "Master frequency is larger than slave frequency."; end
+    @assert 1 <= stepsize <= 100 "Stepsize must be between 0 and 1."
+    @assert 4 <= temp <= 300 "Environment temperature [K] must be between 4 and 300."
+    @assert tol > 0 "Error tolerance must be non-negative."
+    @assert maxdist > 0 "Maximum distance must be non-negative."
+
+    for i in 1:3
+        mcMotorToEXT(device,i,i==master ? freqmaster : freqslave,temp)
+    end
+
+    return
+end
 
 
 """
