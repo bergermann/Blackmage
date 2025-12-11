@@ -14,7 +14,6 @@ export now, connect
 include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
-
-include("MD/MC/motor_control.jl")
+include("multidevice.jl")
 
 end

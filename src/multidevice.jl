@@ -49,6 +49,5 @@ function Base.length(md::MultiDevice)
     return length(md.mc)
 end
 
-include("MC/motor_control_CL.jl")
-include("MC/motor_control_OL.jl")
 
+include("MD/motor_control.jl")
