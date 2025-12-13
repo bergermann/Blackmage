@@ -8,6 +8,8 @@ Control interface for combined Attocube IDS system and JPE CADM4/FCM2 motor cont
 """
 module Blackmage
 
+export units
+
 using Sockets, Dates, JSON, Statistics, Plots
 export now, connect, @ip_str
 
@@ -17,3 +19,7 @@ include("MC/MC.jl")
 include("multidevice.jl")
 
 end
+
+# to fix:
+# exports
+# targetP doc
