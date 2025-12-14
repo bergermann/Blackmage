@@ -11,7 +11,7 @@ module Blackmage
 export units
 
 using Sockets, Dates, JSON, Statistics, Plots
-export now, connect, @ip_str
+export connect, TCPSocket, now, @ip_str
 
 include("socketing.jl")
 include("IDS/IDS.jl")

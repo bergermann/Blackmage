@@ -67,7 +67,7 @@ function getAbsolutePosition(device::D,req::Dict,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
 
     return request(device,req,:displace,"getAbsolutePosition";
-        params=[axis-1])
+        params=[axis-1])[2]
 end
 
 """
