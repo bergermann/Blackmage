@@ -122,6 +122,8 @@ Plot displacement, contrast and speed (averaged over 2 consecutive steps).
 """
 function Plots.plot(d::Displacement)
     idx = findlast(!iszero,d.dT)
+    @assert !isnothing(idx) "Displacement record is empty."
+    
     dV = speed(d)
 
     p1 = plot(d.dT[1:idx]/1e3,d.dX[:,1:idx]'./1e12/1e-3;

@@ -22,4 +22,5 @@ end
 
 # to fix:
 # exports
-# targetP doc
+# targetP, targetP_abs doc
+# add axes(device,axis) functions
