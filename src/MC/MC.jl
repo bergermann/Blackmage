@@ -14,6 +14,7 @@ const units = Base.ImmutableDict(
     :mm => 1e-3,
     :µm => 1e-6,
     :nm => 1e-9,
+    :pm => 1e-12,
 )
 
 """
