@@ -67,7 +67,7 @@ function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::
         mcMoveDirect(device_mc,device_ids,target,unit)
     end
 
-    # mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
+    mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
 
     return
 end
@@ -87,31 +87,39 @@ function checkStalling(device_ids::TCPSocket,master::Int,interval::Real,ss::Int)
 end
 
 function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        interval::Real=0.1,targettol::Int=100,ess::NTuple{3,Float64}=(1.5e-6,1.5e-6,1.5e-6),
+        interval::Real=0.1,targettol::Int=10,ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),
         timeout::Real=Inf)
 
     @assert timeout > 0 "Timeout time must be positive."
 
     ess = @. abs(ess)/1e-12
     t = round(Int,target*units[unit]/1e-12)
-    d0 = getAxesDisplacement(device_ids,req); dt = d0-t
+    dt = getAxesDisplacement(device_ids,req).-t
 
-    if any(@. abs(dt) < ess*targettol); return; end
-    if !(all(x->x>0,dt) || all(x->x<0,dt)); return; end
+    tnr = @. abs(dt) > ess*targettol    # target not reached
 
-    dir = Int(dt[1]>0)
+    if !any(tnr); println("target already reached"); return; end
+
+    dir = @. Int(dt<0)
+    axes = [1,2,3][tnr]
     
     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
     t0 = now()
 
-    mcMove(device_mc,[1,2,3],dir,0)
+    for axis in axes
+        mcMove(device_mc,axis,dir[axis],0)
+    end
 
-    while now()-t0 < timeout
+    while now()-t0 < timeout && any(tnr)
         sleep(interval)
 
         d = getAxesDisplacement(device_ids,req)
 
-        if any(@. ((-1)^dir)*(d-t) < ess*targettol); break; end
+        for axis in axes
+            if ((-1)^dir[axis])*(d[axis]-t) < ess[axis]*targettol
+                mcStop(device_mc,axis); tnr[axis] = false
+            end
+        end
     end
 
     mcStopAllMotors(device_mc)
