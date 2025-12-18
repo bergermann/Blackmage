@@ -1,7 +1,7 @@
 
 export mcEnableFCM, mcDisableFCM, mcSetupFCM, mcReSetupFCM, mcStopAll
 export mcTargetFCM, mcWaitForTarget, mcStatusFCM, mcTargetP
-export measurePos
+export autoAlign
 
 
 
@@ -309,12 +309,12 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     dt = abs(d0-t)
 
     for i in 1:maxiter
-        dir = Int(t > d0)
-        
         # println("Iter: $i")
         # println("Distance to target:  $(dt/1e12/1e-6) µm")
         # println("Estimated step size: $(ess/1e12/1e-6) µm")
-
+        
+        dir = Int(t > d0)
+        
         if dt > ess
             nsteps = min(div(dt,ess),maxsteps); rss = 100
         else
@@ -325,7 +325,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
 
         # println("nsteps: $nsteps, rss: $rss")
 
-        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(5*nsteps/50)
+        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
         d1 = getAxisDisplacement(device_ids,req,addr)
         
@@ -397,7 +397,7 @@ function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,targ
 
         # println("nsteps: $nsteps, rss: $rss")
 
-        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(5*nsteps/50)
+        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
         d1 = getAbsolutePosition(device_ids,req,addr)
         
@@ -435,20 +435,112 @@ function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,u
 end
 
 
-"""
-    measurePos(device::TCPSocket,n::Int; dt::Real=0.)
 
-Measure IDS position `n` times, return mean and standard deviation of the distribution.
-Enforce delay `dt` between each measurement.
-"""
-function measurePos(device::TCPSocket,n::Int; dt::Real=0.)
-    data = zeros(3,n)
+function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+        master::Int=1,nsteps::Int=250,
+        mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
 
-    for i in 1:n
-        data[:,i] = getAxesDisplacement(device,req)
-        sleep(dt)   
+    mcStopAll(device_mc)
+    mcSetupFCM(device_mc; master=master)
+
+    mcTargetFCM(device_mc,target,unit); mcWaitForTarget(device_mc); sleep(1)
+    mcTargetP(device_mc,device_ids,target,unit; mrss=mrss,ess=ess,maxiter=10); sleep(1)
+
+    p0 = getAxesDisplacement(device_ids,req); p1 = copy(p0); p2 = copy(p0)
+
+    for axis in 1:3
+        if axis==master; continue; end
+
+        mcMove(device_mc,axis,0,nsteps); sleep(1+nsteps/50)
+
+        p1[axis] = getAxisDisplacement(device_ids,req,axis)
+
+        mcReSetupFCM(device_mc; master=master)    
+
+        mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
+        mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
+        
+        mcMove(device_mc,axis,1,nsteps); sleep(1+nsteps/50)
+
+        p2[axis] = getAxisDisplacement(device_ids,req,axis)
+        
+        mcReSetupFCM(device_mc; master=master)
+        
+        mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
+        mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
     end
-    
-    return mean(data; dims=2)[:], std(data; dims=2)[:]
+
+    for axis in 1:3
+        p = round(Int,(p1[axis]+p2[axis])/2)
+
+        mcTargetP(device_mc,device_ids,axis,p,:pm; mrss=mrss[axis],ess=ess[axis],
+            maxsteps=50,maxiter=10)
+    end
+
+
+    return p0, p1, p2
 end
 
+function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+            master::Int=1,niter::Int=1,nsteps::Union{Int,AbstractArray{Int}}=250,
+            mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
+
+    @assert niter > 0 "Iteration number niter must be positive."
+
+    if niter != length(nsteps); @warn "Iteration number doesn't match steps input!"; end
+
+    for i in 1:niter
+        nsteps_ = nsteps[min(i,length(nsteps))]
+
+        autoAlign(device_mc,device_ids,target,unit;
+            master=master,nsteps=nsteps_,mrss=mrss,ess=ess)
+
+        resetAxes(device_ids,req)
+    end
+    
+    return
+end
+
+
+
+function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+        master::Int=1,
+        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
+        stallsteps::Int=10,timeout::Real=Inf)
+
+    @assert timeout > 0
+
+    mcStopAll(device_mc)
+
+    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout/1000))
+    t0 = now()
+
+    nstall = 0
+    
+    while nstall <= nstalltol
+        mcSetupFCM(device_mc)
+
+        mcTargetFCM(device_mc,target,unit)
+
+        target = false
+
+        while now()-t0 < timeout
+            active, status, p0 = mcStatusFCM(device)
+            target = status[master]
+
+            if target; break; end
+            
+
+
+            sleep(0.1)
+        end
+        
+        if target; break; end
+
+        nstall += 1
+    end
+
+    mcTargetP(device_mc,device_ids,target,unit; maxsteps=100)
+
+    return
+end

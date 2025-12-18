@@ -1,5 +1,5 @@
 
-export record!, stop_record!
+export record!, stop_record!, measurePos
 export plot
 
 """
@@ -165,4 +165,23 @@ function speed(d::Displacement)
     return dV
     
     # return @. (d.dX[:,1:idx-1]-d.dX[:,2:idx])/(d.dT[1:idx-1]-d.dT[2:idx])'
+end
+
+
+
+"""
+    measurePos(device::TCPSocket,n::Int; dt::Real=0.)
+
+Measure IDS position `n` times, return mean and standard deviation of the distribution.
+Enforce delay `dt` between each measurement.
+"""
+function measurePos(device::TCPSocket,n::Int; dt::Real=0.)
+    data = zeros(3,n)
+
+    for i in 1:n
+        data[:,i] = getAxesDisplacement(device,req)
+        sleep(dt)   
+    end
+    
+    return mean(data; dims=2)[:], std(data; dims=2)[:]
 end
