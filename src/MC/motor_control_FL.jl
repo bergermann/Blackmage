@@ -64,6 +64,8 @@ function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::
     end
 
     if override
+        @warn "Activating override mode."
+        
         mcMoveDirect(device_mc,device_ids,target,unit)
     end
 
