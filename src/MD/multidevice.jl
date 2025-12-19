@@ -84,6 +84,7 @@ function Base.close(md::MultiDevice)
 end
 
 include("IDS/adjustment.jl")
+include("IDS/ecu.jl")
 
 
 include("motor_control.jl")

@@ -6,7 +6,7 @@
 Enable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
 function enableECU(md::MultiDevice,req::Dict)
-    for i in eachindex(md.ids)
+    for i in eachindex(md)
         enableECU(md.ids[i],req)
     end; return
 end
@@ -17,7 +17,7 @@ end
 Disable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
 function disableECU(md::MultiDevice,req::Dict)
-    for i in eachindex(md.ids)
+    for i in eachindex(md)
         disableECU(md.ids[i],req)
     end; return
 end
@@ -25,114 +25,83 @@ end
 
 
 """
-    getECUEnabled(device::D,req::Dict)
+    getECUEnabled(md::MultiDevice,req::Dict)
 
-Return if IDS environmental control unit is enabled (duh).
+Return if IDS environmental control unit is enabled (duh) for all devices in multidevice `md`.
 """
-function getECUEnabled(device::D,req::Dict)
-    return request(device,req,:ecu,"getEnabled")[2]
+function getECUEnabled(md::MultiDevice,req::Dict)
+    enabled = true
+
+    for i in eachindex(md)
+        enabled_ = getECUEnabled(md.ids[i],req); enabled *= enabled_
+        if !enabled_; println("ECU not enabled for device $i."); end
+    end
+
+    return enabled
 end
 
 
 
 """
-    getECUConnected(device::D,req::Dict)
+    getECUConnected(md::MultiDevice,req::Dict)
 
-Return if IDS environmental control unit is connected (duh).
+Return if IDS environmental control unit is connected (duh) for all devices in multidevice `md`.
 """
-function getECUConnected(device::D,req::Dict)
-    return request(device,req,:ecu,"getConnected")[2]
+function getECUConnected(md::MultiDevice,req::Dict)
+    connected = true
+
+    for i in eachindex(md)
+        connected_ = getECUConnected(md.ids[i],req); connected *= connected_
+        if !connected_; println("ECU not enabled for device $i."); end
+    end
+
+    return connected
 end
 
 
 
 """
-    getHumidityInPercent(device::D,req::Dict)
+    getHumidityInPercent(md::MultiDevice,req::Dict)
 
-Return ECU measured humidity in percent.
+Return ECU measured humidity in percent of all devices in multidevice `md`.
 """
-function getHumidity(device::D,req::Dict)
-    return request(device,req,:ecu,"getHumidityInPercent")[2]
+function getHumidity(md::MultiDevice,req::Dict)
+    return Dict(i=>getHumidity(md.ids[i],req) for i in eachindex(md))
 end
 
 """
-    getPressure(device::D,req::Dict)
+    getPressure(md::MultiDevice,req::Dict)
 
-Return ECU measured pressure in hPa.
+Return ECU measured pressure in hPa of all devices in multidevice `md`.
 """
-function getPressure(device::D,req::Dict)
-    return request(device,req,:ecu,"getPressureInHPa")[2]
+function getPressure(md::MultiDevice,req::Dict)
+    return Dict(i=>getPressure(md.ids[i],req) for i in eachindex(md))
 end
 
 """
-    getTemperature(device::D,req::Dict)
+    getTemperature(md::MultiDevice,req::Dict)
 
-Return ECU measured temperature in °C.
+Return ECU measured temperature in °C of all devices in multidevice `md`.
 """
-function getTemperature(device::D,req::Dict)
-    return request(device,req,:ecu,"getTemperatureInDegrees")[2]
+function getTemperature(md::MultiDevice,req::Dict)
+    return Dict(i=>getTemperature(md.ids[i],req) for i in eachindex(md))
 end
 
 """
-    getRefractiveIndex(device::D,req::Dict)
+    getRefractiveIndex(md::MultiDevice,req::Dict)
 
-Return ECU calculated refractive index.
+Return ECU calculated refractive index of all devices in multidevice `md`.
 """
-function getRefractiveIndex(device::D,req::Dict)
-    return request(device,req,:ecu,"getRefractiveIndex")[2]
+function getRefractiveIndex(md::MultiDevice,req::Dict)
+    return Dict(i=>getRefractiveIndex(md.ids[i],req) for i in eachindex(md))
 end
 
 """
-    getRefractiveIndexCompensationMode(device::D,req::Dict,axis::Int)
-
-Return IDS refractive index compensation mode (idk either, check IDS manual).
-"""
-function getRefractiveIndexCompensationMode(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecu,"getRefractiveIndexCompensationMode";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecu,"getRefractiveIndexCompensationMode";
-        params=[-1])[2]
-end
-
-"""
-    getRefractiveIndexForCompensation(device::D,req::Dict,axis::Int)
+    getRefractiveIndexForCompensation(md::MultiDevice,req::Dict,axis::Int)
 
 Return IDS refractive index used for compensation (check IDS manual).
 """
-function getRefractiveIndexForCompensation(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecu,"getRefractiveIndexForCompensation";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecu,"getRefractiveIndexForCompensation";
-        params=[-1])[2]
-end
-
-"""
-    setRefractiveIndexCompensationMode(device::D,req::Dict,axis::Int,mode::Int)
-
-Set IDS refractive index compensation mode (idk either, check IDS manual).
-"""
-function setRefractiveIndexCompensationMode(device::D,req::Dict,axis::Int,mode::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-    @assert 0 <= mode <= 2 "Mode needs to be 0, 1 or 2 (see manual)."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecu,"setRefractiveIndexCompensationMode";
-    #     params=[axis-1,mode])[2]
-    return request(device,req,:ecu,"setRefractiveIndexCompensationMode";
-        params=[-1,mode])[2]
+function getRefractiveIndexForCompensation(md::MultiDevice,req::Dict,axis::Int)
+    return Dict(i=>getRefractiveIndexForCompensation(md.ids[i],req,axis)
+        for i in eachindex(md))
 end
