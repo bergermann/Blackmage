@@ -3,7 +3,7 @@ export MultiDevice
 
 struct DiscSettings
     master::Int
-    ess::NTuple{3,Int}
+    ess::NTuple{3,Float64}
     mrss::NTuple{3,Int}
     freq::@NamedTuple{master::Int64,slave::Int64}
     temp::Int
@@ -54,8 +54,10 @@ struct MultiDevice
         new(
             Dict(i=>                   ip_mc[i] for i in eachindex(ip_mc)),
             Dict(i=>                  ip_ids[i] for i in eachindex(ip_ids)),
+
             Dict(i=>connect( ip_mc[i],port_mc)  for i in eachindex(ip_mc)),
             Dict(i=>connect(ip_ids[i],port_ids) for i in eachindex(ip_ids)),
+
             Dict(i=>    DS(; master=masters[i]) for i in eachindex(masters)),
         )
     end
