@@ -64,7 +64,7 @@ end
 
 const MD = MultiDevice
 
-import Base: getindex, eachindex, length, close
+import Base: getindex, eachindex, length, open, close, isopen
 
 Base.getindex(md::MultiDevice,idx) = (mc=md.mc[idx],ids=md.ids[idx])
 Base.eachindex(md::MultiDevice) = eachindex(md.mc)
@@ -76,15 +76,33 @@ function Base.length(md::MultiDevice)
     return length(md.mc)
 end
 
+function Base.open(md::MultiDevice)
+    for i in eachindex(md)
+        try; if !isopen(md.mc[i]); open(md.mc[i]); end
+        catch e; println("Could not open motor port for device $i:\n$e"); end
+        
+        try; if !isopen(md.ids[i]); open(md.ids[i]); end
+        catch e; println("Could not open IDS port for device $i:\n$e"); end
+    end; return    
+end
+
 function Base.close(md::MultiDevice)
     for i in eachindex(md)
-        close(md.mc[i])
-        close(md.ids[i])
+        close(md.mc[i]); close(md.ids[i])
     end; return
 end
 
-include("IDS/adjustment.jl")
-include("IDS/ecu.jl")
+function Base.isopen(md::MultiDevice)
+    open_ = falses(2,length(md))
+
+    idx = 1
+    for i in sort!(keys(eachindex(md)))
+        open_[1,idx] = isopen(md.mc[i]); open_[2,idx] = isopen(md.ids[i])
+    end
+
+    return open_
+end
 
 
+include("IDS/IDS.jl")
 include("motor_control.jl")

@@ -2,152 +2,146 @@
 
 
 """
-    getHumidityM(device::D,req::Dict,axis::Int)
+    getHumidityM(md::MultiDevice,req::Dict,axis::Int)
 
-Return manually set ECU humidity in percent.
+Return manually set ECU humidity in percent for all devices in multidevice `md`.
 """
-function getHumidityM(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecum,"getHumidityInPercent";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecum,"getHumidityInPercent";
-        params=[-1])[2]
+function getHumidityM(md::MultiDevice,req::Dict,axis::Int)
+    return Dict(i=>getHumidityM(md.ids[i],req,axis) for i in eachindex(md))
 end
 
 """
-    setHumidityM(device::D,req::Dict,axis::Int,humidity::Float64)
+    setHumidityM(md::MultiDevice,req::Dict,axis::Int,humidity::AbstractArray{Float64})
 
-Manually set ECU humidity in percent.
+Manually set ECU humidity in percent for all devices in multidevice `md` in ascending order.
 """
-function setHumidityM(device::D,req::Dict,axis::Int,humidity::Float64)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
+function setHumidityM(md::MultiDevice,req::Dict,axis::Int,humidity::AbstractArray{Float64})
+    @assert length(md) == length(humidity) "Length mismatch between device count and humidity."
 
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # request(device,req,:ecum,"setHumidityInPercent";
-    #     params=[axis-1,humidity]); return
-    request(device,req,:ecum,"setHumidityInPercent";
-        params=[-1,humidity]); return
-end
+    idx = 1; for i in sort!(keys(eachindex(md)))
+        setHumidityM(md.ids[i],req,axis,humidity[i]); idx += 1
+    end
 
-
-
-"""
-    getPressureM(device::D,req::Dict,axis::Int)
-
-Return manually set ECU pressure in hPa.
-"""
-function getPressureM(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecum,"getPressureInHPa";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecum,"getPressureInHPa";
-        params=[-1])[2]
+    return
 end
 
 """
-    setPressureM(device::D,req::Dict,axis::Int,pressure::Float64)
+    setHumidityM(md::MultiDevice,req::Dict,axis::Int,humidity::Float64)
 
-Manually set ECU pressure in hPa.
+Manually set ECU humidity in percent for all devices in multidevice `md`.
 """
-function setPressureM(device::D,req::Dict,axis::Int,pressure::Float64)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
+function setHumidityM(md::MultiDevice,req::Dict,axis::Int,humidity::Float64)
+    for i in eachindex(md)
+        setHumidityM(md.ids[i],req,axis,humidity)
+    end; return
+end
 
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # request(device,req,:ecum,"setPressureInHPa";
-    #     params=[axis-1,pressure]); return
-    request(device,req,:ecum,"setPressureInHPa";
-        params=[-1,pressure]); return
+
+"""
+    getPressureM(md::MultiDevice,req::Dict,axis::Int)
+
+Return manually set ECU pressure in hPa for all devices in multidevice `md`.
+"""
+function getPressureM(md::MultiDevice,req::Dict,axis::Int)
+    return Dict(i=>getPressureM(md.ids[i],req,axis) for i in eachindex(md))
+end
+
+"""
+    setPressureM(md::MultiDevice,req::Dict,axis::Int,pressure::AbstractArray{Float64})
+
+Manually set ECU pressure in hPa for all devices in multidevice `md` in ascending order.
+"""
+function setPressureM(md::MultiDevice,req::Dict,axis::Int,pressure::AbstractArray{Float64})
+    @assert length(md) == length(pressure) "Length mismatch between device count and pressure."
+
+    idx = 1; for i in sort!(keys(eachindex(md)))
+        setPressureM(md.ids[i],req,axis,pressure[i]); idx += 1
+    end
+
+    return
+end
+
+"""
+    setPressureM(md::MultiDevice,req::Dict,axis::Int,pressure::Float64)
+
+Manually set ECU pressure in hPa for all devices in multidevice `md`.
+"""
+function setPressureM(md::MultiDevice,req::Dict,axis::Int,pressure::Float64)
+    for i in eachindex(md)
+        setPressure(md.ids[i],req,axis,pressure)
+    end; return
 end
 
 
 
 """
-    getTemperatureM(device::D,req::Dict,axis::Int)
+    getTemperatureM(md::MultiDevice,req::Dict,axis::Int)
 
-Return manually set ECU temperature in °C.
+Return manually set ECU temperature in °C for all devices in multidevice `md`.
 """
-function getTemperatureM(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecum,"getTemperatureInDegrees";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecum,"getTemperatureInDegrees";
-        params=[-1])[2]
+function getTemperatureM(md::MultiDevice,req::Dict,axis::Int)
+    return Dict(i=>getTemperatureM(md.ids[i],req,axis) for i in eachindex(md))
 end
 
 """
-    setTemperatureM(device::D,req::Dict,axis::Int,temp::Float64)
+    setTemperatureM(md::MultiDevice,req::Dict,axis::Int,temp::AbstractArray{Float64})
 
-Manually set ECU temperature in °C.
+Manually set ECU temperature in °C for all devices in multidevice `md` in ascending order.
 """
-function setTemperatureM(device::D,req::Dict,axis::Int,temp::Float64)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
+function setTemperatureM(md::MultiDevice,req::Dict,axis::Int,temp::AbstractArray{Float64})
+    @assert length(md) == length(temp) "Length mismatch between device count and temperature."
 
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # request(device,req,:ecum,"setPressureInHPa";
-    #     params=[axis-1,temp]); return
-    request(device,req,:ecum,"setPressureInHPa";
-        params=[-1,temp]); return
-end
+    idx = 1; for i in sort!(keys(eachindex(md)))
+        setTemperatureM(md.ids[i],req,axis,temp[i]); idx += 1
+    end
 
-
-
-"""
-    getRefractiveIndexM(device::D,req::Dict,axis::Int)
-
-Return manually set ECU refractive index.
-"""
-function getRefractiveIndexM(device::D,req::Dict,axis::Int)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
-
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # return request(device,req,:ecum,"getRefractiveIndex";
-    #     params=[axis-1])[2]
-    return request(device,req,:ecum,"getRefractiveIndex";
-        params=[-1])[2]
+    return
 end
 
 """
-    setRefractiveIndexM(device::D,req::Dict,axis::Int,index::Float64)
+    setTemperatureM(md::MultiDevice,req::Dict,axis::Int,temp::Float64)
 
-Manually set ECU refractive index.
+Manually set ECU temperature in °C for all devices in multidevice `md` in ascending order.
 """
-function setRefractiveIndexM(device::D,req::Dict,axis::Int,index::Float64)
-    # @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
-    @assert axis == -1 "Only axis = -1 is supported in current version, subject to change."
+function setTemperatureM(md::MultiDevice,req::Dict,axis::Int,temp::Float64)
+    for i in eachindex(md)
+        setTemperatureM(md.ids[i],req,axis,temp)
+    end; return
+end
 
-    @warn "This function is subject to change from suppliers side.
-        Check manual if only axis = -1 is still supported."
-    
-    # request(device,req,:ecum,"setRefractiveIndex";
-    #     params=[axis-1,index]); return
-    request(device,req,:ecum,"setRefractiveIndex";
-        params=[-1,index]); return
+
+"""
+    getRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int)
+
+Return manually set ECU refractive index for all devices in multidevice `md`.
+"""
+function getRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int)
+    return Dict(i=>getRefractiveIndexM(md.ids[i],req,axis) for i in eachindex(md))
+end
+
+"""
+    setRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int,index::AbstractArray{Float64})
+
+Manually set ECU refractive index for all devices in multidevice `md` in ascending order.
+"""
+function setRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int,index::AbstractArray{Float64})
+    @assert length(md) == length(index) "Length mismatch between device count and index."
+
+    idx = 1; for i in sort!(keys(eachindex(md)))
+        setRefractiveIndexM(md.ids[i],req,axis,index[i]); idx += 1
+    end
+
+    return
+end
+
+"""
+    setRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int,index::Float64)
+
+Manually set ECU refractive index for all devices in multidevice `md` in ascending order.
+"""
+function setRefractiveIndexM(md::MultiDevice,req::Dict,axis::Int,index::Float64)
+    for i in eachindex(md)
+        setRefractiveIndexM(md.ids[i],req,axis,index)
+    end; return
 end
 
