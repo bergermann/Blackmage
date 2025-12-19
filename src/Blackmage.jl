@@ -16,11 +16,11 @@ export connect, TCPSocket, now, @ip_str
 include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
-include("multidevice.jl")
+include("MD/multidevice.jl")
 
 end
 
 # to fix:
 # exports
-# targetP, targetP_abs doc
+# targetP, targetP_abs, direct target doc
 # add axes(device,axis) functions

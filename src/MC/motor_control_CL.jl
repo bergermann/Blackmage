@@ -481,8 +481,8 @@ function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
     return p0, p1, p2
 end
 
-function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-            master::Int=1,niter::Int=1,nsteps::Union{Int,AbstractArray{Int}}=250,
+function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,niter::Int;
+            master::Int=1,nsteps::Union{Int,AbstractArray{Int}}=250,
             mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
 
     @assert niter > 0 "Iteration number niter must be positive."
