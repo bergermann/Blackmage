@@ -26,24 +26,13 @@ end
 
 Activate flexdrive control module for each device in multidevice `md`.
 """
-function mcEnableFCM(md::MultiDevice;
-        stepsize::Int=100,
-        tol::Int=300,
-        maxdist::Int=5000,
-        freqmaster::Int=50,
-        freqslave::Int=70)
-
-    @assert freqmaster > 0 "Master frequency freq must be positive"
-    @assert freqslave > 0 "Slave frequency freq must be positive"
-    if freqmaster > freqslave; @warn "Master frequency is larger than slave frequency."; end
-    @assert 1 <= stepsize <= 100 "Stepsize must be between 0 and 1."
-    @assert tol > 0 "Error tolerance must be non-negative."
-    @assert maxdist > 0 "Maximum distance must be non-negative."
-
+function mcEnableFCM(md::MultiDevice;)
+    ds = md.settings
+    
     for i in eachindex(md.mc)
-        mcEnableFCM(md.mc[i];
-            stepsize=stepsize,tol=tol,maxdist=maxdist,
-            freqmaster=freqmaster,freqslave=freqslave)
+        mcEnableFCM(ds.mc[i];
+            tol=ds.flextol,maxdist=ds.flexdist,
+            freqmaster=ds.freq.master,freqslave=ds.freq.slave)
     end
 
     return
@@ -76,31 +65,14 @@ end
 Put motors into external drive mode and activate flexdrive control module for all devices in
 multidevice `md`.
 """
-function mcSetupFCM(md::MultiDevice;
-        stepsize::Int=100,
-        tol::Int=300,
-        maxdist::Int=5000,
-        freqmaster::Int=50,
-        freqslave::Int=70,
-        temp::Int=300)
-
-    @assert 1 <= master <= 3 "Master must be 1, 2 or 3."
-    @assert freqslave > 0 "Slave frequency freq must be positive"
-    if freqmaster > freqslave; @warn "Master frequency is larger than slave frequency."; end
-    @assert 1 <= stepsize <= 100 "Stepsize must be between 0 and 1."
-    @assert 4 <= temp <= 300 "Environment temperature [K] must be between 4 and 300."
-    @assert tol > 0 "Error tolerance must be non-negative."
-    @assert maxdist > 0 "Maximum distance must be non-negative."
+function mcSetupFCM(md::MultiDevice;)
+    ds = md.settings
 
     for i in eachindex(md.mc)
         mcSetupFCM(md.mc[i];
-            master=md.master[i],
-            stepsize=stepsize,
-            tol=tol,
-            maxdist=maxdist,
-            freqmaster=freqmaster,
-            freqslave=freqslave,
-            temp=temp)
+            master=ds.master[i],
+            tol=ds.flextol,maxdist=ds.flexdist,
+            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
     end
 
     return
