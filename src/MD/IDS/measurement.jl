@@ -1,108 +1,102 @@
 
 """
-    getMeasurementEnabled(device::D,req::Dict)
+    getMeasurementEnabled(md::MultiDevice,req::Dict)
 
-Return if IDS displacement measurement is enabled.
+Return if IDS displacement measurement is enabled for all devices in multidevice `md`.
 """
-function getMeasurementEnabled(device::D,req::Dict)
-    return request(device,req,:displace,"getMeasurementEnabled")[2]
+function getMeasurementEnabled(md::MultiDevice,req::Dict)
+    enabled = true
+
+    for i in eachindex(md)
+        enabled_ = getMeasurementEnabled(md.ids[i],req); enabled *= enabled_
+        if !enabled_; println("Measurement not enabled for device $i."); end
+    end
+    
+    return enabled
 end
 
 """
-    startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=120)
+    startMeasurement(md::MultiDevice,req::Dict; dt::Real=1.0,timeout::Real=120)
 
-Start IDS displacement measurement. Alignment mode has to be disabled. If measurement still
-hasn't started after `timeout` seconds, check for errors (usually takes < 2 minutes). Checks
-every `dt` seconds.
+Start IDS displacement measurement for all devices in multidevice `md`. Alignment mode has
+to be disabled. If measurement still hasn't started after `timeout` seconds, check for errors
+(usually takes < 2 minutes). Checks every `dt` seconds.
 """
-function startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=300)
-    @assert !getAdjustmentEnabled(device,req) "Alignment is enabled, cannot start measurement."
-    
-    if getMeasurementEnabled(device,req)
-        @info "Measurement already activated."; return
-    end
-
-    request(device,req,:system,"startMeasurement")
-
-    t = 0
-    while !getMeasurementEnabled(device,req)
-        sleep(dt); t += dt
-
-        if t > timeout
-            @warn "Measurement still not activated after $timeout seconds."; break
-        end
+function startMeasurement(md::MultiDevice,req::Dict; dt::Real=1.0,timeout::Real=300)
+    for i in eachindex(md)
+        println("Starting measurement for device $i.")
+        startMeasurement(md.ids[i],req; dt=dt,timeout=timeout)
     end
 
     return
 end
 
 """
-    stopMeasurement(device::D,req::Dict)
+    startMeasurement_(md::MultiDevice,req::Dict)
 
-Stops IDS displacement measurement.
+Starts IDS displacement measurement without validation check.
 """
-function stopMeasurement(device::D,req::Dict)
-    if !getMeasurementEnabled(device,req)
-        @info "Measurement already deactivated."; return
-    end
-    
-    request(device,req,:system,"stopMeasurement"); return
+function startMeasurement_(md::MultiDevice,req::Dict)
+    for i in eachindex(md)
+        println("Starting measurement for device $i.")
+        startMeasurement_(md.ids[i],req)
+    end; return
+end
+
+"""
+    stopMeasurement(md::MultiDevice,req::Dict)
+
+Stops IDS displacement measurement for all devices im multidevice `md`.
+"""
+function stopMeasurement(md::MultiDevice,req::Dict)
+    for i in eachindex(md)
+        println("Stopping measurement for device $i.")
+        stopMeasurement(md.ids[i],req)
+    end; return
 end
 
 
 
 """
-    getAbsolutePositions(device::D,req::Dict)
+    getAbsolutePositions(md::MultiDevice,req::Dict)
 
-Return absolute IDS positions of all axes (duh).
+Return absolute IDS positions of all axes (duh) for all devices in multidevice `md`.
 """
-function getAbsolutePositions(device::D,req::Dict)
-    r = request(device,req,:displace,"getAbsolutePositions")
-
-    return [r[2],r[3],r[4]]
+function getAbsolutePositions(md::MultiDevice,req::Dict)
+    return Dict(i => getAbsolutePositions(md.ids[i],req) for i in eachindex(md))
 end
 
 
 
 """
-    getAxesDisplacement(device::D,req::Dict)
+    getAxesDisplacement(md::MultiDevice,req::Dict)
 
-Get relative IDS positions of all axes.
+Get relative IDS positions of all axes for all devices in multidevice `md`.
 """
-function getAxesDisplacement(device::D,req::Dict)
-    r = request(device,req,:displace,"getAxesDisplacement")
-
-    return [r[2],r[3],r[4]]
+function getAxesDisplacement(md::MultiDevice,req::Dict)
+    return Dict(i => getAxesDisplacement(md.ids[i],req) for i in eachindex(md))
 end
 
 
 """
-    getReferencePositions(device::D,req::Dict)
+    getReferencePositions(md::MultiDevice,req::Dict)
 
-Get IDS reference position of all axes (duh).
+Get IDS reference position of all axes (duh) of all devices in multidevice `md`.
 """
-function getReferencePositions(device::D,req::Dict)
-    r = request(device,req,:displace,"getReferencePositions")
-
-    return [r[2],r[3],r[4]]
+function getReferencePositions(md::MultiDevice,req::Dict)
+    return Dict(i => getReferencePositions(md.ids[i],req) for i in eachindex(md))
 end
 
 
 
 """
-    getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
+    getAxesSignalQuality(md::MultiDevice,req::Dict; threshold::Int=850)
 
-Return IDS signal quality in permille for all axes. Gives warning if values exceed `threshold`.
+Return IDS signal quality in permille for all axes for all devices in multidevice `md`.
 """
-function getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
-    contrast = Vector{Int}(undef,3)
-
-    for axis in 1:3
-        c, offset = getAxisSignalQuality(device,req,axis; threshold=threshold)
-        contrast[axis] = c+offset
-    end
-
-    return contrast
+function getAxesSignalQuality(md::MultiDevice,req::Dict; threshold::Int=850)
+    return Dict(i => getAxesSignalQuality(md.ids[i],req; threshold=threshold)
+        for i in eachindex(md))
 end
 
 

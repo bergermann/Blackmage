@@ -38,6 +38,23 @@ function startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=300)
 end
 
 """
+    startMeasurement_(device::D,req::Dict)
+
+Starts IDS displacement measurement without validation check.
+"""
+function startMeasurement_(device::D,req::Dict)
+    @assert !getAdjustmentEnabled(device,req) "Alignment is enabled, cannot start measurement."
+    
+    if getMeasurementEnabled(device,req)
+        @info "Measurement already activated."; return
+    end
+
+    request(device,req,:system,"startMeasurement")
+
+    return
+end
+
+"""
     stopMeasurement(device::D,req::Dict)
 
 Stops IDS displacement measurement.
@@ -99,6 +116,9 @@ function getAxesDisplacement(device::D,req::Dict)
 
     return [r[2],r[3],r[4]]
 end
+
+const getRelativePosition  = getAxisDisplacement
+const getRelativePositions = getAxesDisplacement
 
 
 
