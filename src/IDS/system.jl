@@ -76,9 +76,9 @@ function getMasterAxis(device::D,req::Dict)
 end
 
 """
-    setMasterAxis(device::TCPSocket,req::Dict)
+    setMasterAxis(device::TCPSocket,req::Dict,axis)
 
-Set current IDS master axis.
+Set current IDS master `axis`.
 """
 function setMasterAxis(device::D,req::Dict,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
