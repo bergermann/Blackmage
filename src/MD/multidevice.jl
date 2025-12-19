@@ -5,7 +5,7 @@ struct DiscSettings
     master::Int
     ess::NTuple{3,Int}
     mrss::NTuple{3,Int}
-    freq::NamedTuple{master::Int64,slave::Int64}
+    freq::@NamedTuple{master::Int64,slave::Int64}
     temp::Int
     flextol::Int
     flexdist::Int
