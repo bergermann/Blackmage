@@ -63,8 +63,9 @@ end
 
 const MD = MultiDevice
 
-import Base.getindex, Base.length
+import Base.getindex, Base.eachindex, Base.length
 Base.getindex(md::MultiDevice,idx) = (mc=md.mc[idx],ids=md.ids[idx])
+Base.eachindex(md::MultiDevice) = eachindex(md.mc)
 
 function Base.length(md::MultiDevice)
     @assert length(md.ip_mc) == length(md.ip_ids) == length(md.mc) == length(md.ids) ==

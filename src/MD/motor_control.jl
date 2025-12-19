@@ -7,7 +7,7 @@
 Stop all motors of all devices in multidevice `md`.
 """
 function mcStopAllMotors(md::MultiDevice)
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         mcStopAllMotors(md.mc[i])
     end
 
@@ -29,7 +29,7 @@ Activate flexdrive control module for each device in multidevice `md`.
 function mcEnableFCM(md::MultiDevice;)
     ds = md.settings
     
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         mcEnableFCM(ds.mc[i];
             tol=ds.flextol,maxdist=ds.flexdist,
             freqmaster=ds.freq.master,freqslave=ds.freq.slave)
@@ -44,7 +44,7 @@ end
 Deactivate flexdrive control modules of all devices in multidevice `md`.
 """
 function mcDisableFCM(md::MultiDevice)
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         println("Disabling flexdrive mode of device $i.")
         mcDisableFCM(md.mc[i])
     end
@@ -68,7 +68,7 @@ multidevice `md`.
 function mcSetupFCM(md::MultiDevice;)
     ds = md.settings
 
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         mcSetupFCM(md.mc[i];
             master=ds.master[i],
             tol=ds.flextol,maxdist=ds.flexdist,
@@ -87,7 +87,7 @@ Stop all motors and flexdrive commands, disable flexdrive module and put motors 
 direct drive mode for all devices in multidevice `md`.
 """
 function mcStopAll(md::MultiDevice)
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         mcStopAll(md.mc[i])
     end
 
@@ -124,7 +124,7 @@ Wait for flexdrive command to reach its target, check every `interval` seconds.
 function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         mcWaitForTarget(md.mc[i]; interval=interval)
     end
 
@@ -141,7 +141,7 @@ target reached states for each axis and FCM internal motor positions in interfer
 function mcStatusFCM(md::MultiDevice)
     status = Dict{Int,Tuple{Bool},Vector{Bool},Vector{Int}}()
 
-    for i in eachindex(md.mc)
+    for i in eachindex(md)
         status[i] = mcStatusFCM(md.mc[i])
     end
     
@@ -159,8 +159,8 @@ standard deviation of the distribution. Enforce delay `dt` between each measurem
 function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
     data = Dict{Int,Tuple{Float64,Float64}}()
 
-    for i in eachindex(mc.ids)
-        data[i] = measurePos(mc.ids[i],n; dt=dt)
+    for i in eachindex(md)
+        data[i] = measurePos(md.ids[i],n; dt=dt)
     end
     
     return data
