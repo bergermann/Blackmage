@@ -1,8 +1,4 @@
 
-export mcEnableFCM, mcDisableFCM, mcSetupFCM, mcReSetupFCM, mcStopAll
-export mcTargetFCM, mcWaitForTarget, mcStatusFCM, mcTargetP
-export autoAlign
-
 
 
 """

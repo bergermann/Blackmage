@@ -1,5 +1,4 @@
 
-export MultiDevice
 
 struct DiscSettings
     master::Int
@@ -65,7 +64,8 @@ end
 
 const MD = MultiDevice
 
-import Base.getindex, Base.eachindex, Base.length
+import Base: getindex, eachindex, length, close
+
 Base.getindex(md::MultiDevice,idx) = (mc=md.mc[idx],ids=md.ids[idx])
 Base.eachindex(md::MultiDevice) = eachindex(md.mc)
 
@@ -76,5 +76,11 @@ function Base.length(md::MultiDevice)
     return length(md.mc)
 end
 
+function Base.close(md::MultiDevice)
+    for i in eachindex(md)
+        close(md.mc[i])
+        close(md.ids[i])
+    end; return
+end
 
 include("motor_control.jl")

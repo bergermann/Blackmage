@@ -1,10 +1,4 @@
 
-export getMeasurementEnabled, startMeasurement, stopMeasurement
-export getAbsolutePosition, getAbsolutePositions
-export getAxisDisplacement, getAxesDisplacement
-export getReferencePosition, getReferencePositions
-export getAxisSignalQuality, getAxesSignalQuality
-
 
 """
     getMeasurementEnabled(device::D,req::Dict)

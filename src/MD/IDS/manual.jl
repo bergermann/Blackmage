@@ -1,9 +1,4 @@
 
-export getHumidityM, setHumidityM
-export getPressureM, setPressureM
-export getTemperatureM, setTemperatureM
-export getRefractiveIndexM, setRefractiveIndexM
-
 
 
 """

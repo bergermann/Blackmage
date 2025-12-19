@@ -1,6 +1,4 @@
 
-export getAlignmentEnabled, startAlignment, stopAlignment, getContrast
-
 
 
 """

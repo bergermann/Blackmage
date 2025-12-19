@@ -1,6 +1,4 @@
 
-export mcVersion, mcMods, mcModuleSlot, mcStages
-export mcGetIP, mcSetIP
 
 
 """

@@ -1,5 +1,4 @@
 
-export mcTarget, mcMoveDirect
 
 function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
         master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,

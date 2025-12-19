@@ -1,8 +1,4 @@
 
-export metric2ids
-export mcVersion
-
-
 
 "One interferometer unit: 32_768 pm"
 global const ids_res = 32.768e-9

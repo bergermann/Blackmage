@@ -1,11 +1,4 @@
 
-export getCurrentMode, getDeviceType
-export getSystemError, resetError
-export getInitMode, setInitMode
-export resetAxis, resetAxes
-export getMasterAxis, setMasterAxis
-export getPassMode, setPassMode
-
 
 function getCurrentMode(device::D,req::Dict)
     return request(device,req,:system,"getCurrentMode")[2]

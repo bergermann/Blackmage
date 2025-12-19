@@ -1,9 +1,4 @@
 
-export enableECU, disableECU
-export getECUEnabled, getECUConnected
-export getHumidity, getPressure, getTemperature, getRefractiveIndex
-
-
 """
     enableECU(device::D,req::Dict)
 

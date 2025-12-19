@@ -1,6 +1,4 @@
 
-export mcMove, mcStop, mcStopAllMotors
-
 
 """
     mcMove(device::TCPSocket,addr::Int,dir::Int,steps::Int;

@@ -1,6 +1,4 @@
 
-export Displacement, req
-
 
 
 struct AttoException <: Exception

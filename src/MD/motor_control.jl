@@ -53,26 +53,19 @@ function mcDisableFCM(md::MultiDevice)
 end
 
 """
-    mcSetupFCM(md::MultiDevice;
-        master::Int=1,
-        stepsize::Int=100,
-        tol::Int=300,
-        maxdist::Int=5000,
-        freqmaster::Int=50,
-        freqslave::Int=70,
-        temp::Int=300)
+    mcSetupFCM(md::MultiDevice)
 
 Put motors into external drive mode and activate flexdrive control module for all devices in
 multidevice `md`.
 """
-function mcSetupFCM(md::MultiDevice;)
+function mcSetupFCM(md::MultiDevice)
     ds = md.settings
 
     for i in eachindex(md)
         mcSetupFCM(md.mc[i];
-            master=ds.master[i],
-            tol=ds.flextol,maxdist=ds.flexdist,
-            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+            master=[i].master,
+            tol=ds[i].flextol,maxdist=ds[i].flexdist,
+            freqmaster=ds[i].freq.master,freqslave=ds[i].freq.slave,temp=ds[i].temp)
     end
 
     return
@@ -148,6 +141,18 @@ function mcStatusFCM(md::MultiDevice)
     return status
 end
 
+"""
+    mcStatusFCM!(md::MultiDevice,status::Dict{Int,Tuple{Bool,Vector{Bool},Vector{Int}}})
+
+Overwrite existing multidevice `md` status dict.
+"""
+function mcStatusFCM!(md::MultiDevice,status::Dict{Int,Tuple{Bool,Vector{Bool},Vector{Int}}})
+    for i in eachindex(md)
+        status[i] = mcStatusFCM(md.mc[i])
+    end
+    
+    return status
+end
 
 
 """
