@@ -311,12 +311,13 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
         
         dir = Int(t > d0)
         
-        if dt > ess
+        if dt >= ess
             nsteps = min(div(dt,ess),maxsteps); rss = 100
         else
             nsteps = 1; rss = div(100*dt,ess)
 
-            if rss < mrss/2; break; else; rss = max(rss,mrss); end
+            # if rss < mrss/2; break; else; rss = max(rss,mrss); end
+            rss = max(rss,mrss)
         end
 
         # println("nsteps: $nsteps, rss: $rss")
