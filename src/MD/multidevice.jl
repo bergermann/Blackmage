@@ -1,6 +1,6 @@
 
 
-struct DiscSettings
+mutable struct DiscSettings
     master::Int
     ess::NTuple{3,Float64}
     mrss::NTuple{3,Int}
@@ -8,6 +8,7 @@ struct DiscSettings
     temp::Int
     flextol::Int
     flexdist::Int
+    df::Float64
 
     function DiscSettings(;
             master=1,                      
@@ -16,22 +17,65 @@ struct DiscSettings
             freq=(master=50,slave=70),
             temp=300,
             flextol=300,
-            flexdist=5000)
+            flexdist=5000,
+            df=1.0)
+
+        @assert 1 <= master <= 3 "Master axis has to be 1, 2 or 3."
+        @assert 
+        @assert 1 <= mrss <= 100 "Relative step size rss needs to between 1 and 100."
+        @assert 0 < freq.master <= 100 "Movement frequency freq must be positive, smaller than 100."
+        @assert 0 < freq.slave  <= 100 "Movement frequency freq must be positive, smaller than 100."
+        @assert freq.master < freq.slave "Master frequency must be smaller than slave frequency."
+        @assert 4 <= temp <= 300 "Environment temperature [K] needs to between 4 and 300."
+        @assert 0 < freq <= 100 "Movement frequency freq must be positive, smaller than 100."
+        @assert 0 < freq <= 100 "Movement frequency freq must be positive, smaller than 100."
+        @assert 0.1 <= df <= 3.0 "Drive factor df needs to be between 0.1 and 3.0."
 
         new(master,ess,mrss,freq,temp,flextol,flexdist)
     end
-end
+end; const DS = DiscSettings
 
-const DS = DiscSettings
+
+
+mutable struct Boundaries; end
+
+
+
+struct SingleDevice
+    ip_mc::IPv4
+    ip_ids::IPv4
+    
+    mc::TCPSocket
+    ids::TCPSocket
+
+    settings::DiscSettings
+
+    bdry::Boundaries
+
+    function SingleDevice(ip_mc,ip_ids,mc,ids,settings)
+        new(ip_mc,ip_ids,mc,ids,settings)
+    end
+
+    function SingleDevice(ip_mc::AbstractArray{IPv4},ip_ids::AbstractArray{IPv4};
+            master::Int=1,port_mc::Int=2000,port_ids::Int=9090)
+
+
+        new(
+            Dict(i=>                   ip_mc[i] for i in eachindex(ip_mc)),
+            Dict(i=>                  ip_ids[i] for i in eachindex(ip_ids)),
+
+            Dict(i=>connect( ip_mc[i],port_mc)  for i in eachindex(ip_mc)),
+            Dict(i=>connect(ip_ids[i],port_ids) for i in eachindex(ip_ids)),
+
+            Dict(i=>    DS(; master=masters[i]) for i in eachindex(masters)),
+        )
+    end
+end; const SD = SingleDevice
+
+
 
 struct MultiDevice
-    ip_mc::Dict{Int,IPv4}
-    ip_ids::Dict{Int,IPv4}
-    
-    mc::Dict{Int,TCPSocket}
-    ids::Dict{Int,TCPSocket}
-
-    settings::Dict{Int,DiscSettings}
+    devices::Dict{Int,SingleDevice}
 
     function MultiDevice(ip_mc,ip_ids,mc,ids,settings)
         @assert length(ip_mc) == length(ip_ids) == length(mc) == length(ids) == length(settings)
