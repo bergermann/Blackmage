@@ -25,8 +25,8 @@ function mcMove(device::TCPSocket,addr::Int,dir::Int,steps::Int;
     @assert dir == 0 || dir == 1 "Direction dir must be 1 or 2."
     @assert 0 < freq <= 100 "Movement frequency freq must be positive, smaller than 100."
     @assert 0 <= steps <= 50000 "Steps must be non-negative, maximum 50_000."
-    @assert 1 <= rss <= 100 "Relative step size rss needs to between 1 and 100."
-    @assert 4 <= temp <= 300 "Environment temperature [K] needs to between 4 and 300."
+    @assert 1 <= rss <= 100 "Relative step size rss needs to be between 1 and 100."
+    @assert 4 <= temp <= 300 "Environment temperature [K] needs to be between 4 and 300."
     @assert 0.1 <= df <= 3.0 "Drive factor df needs to be between 0.1 and 3.0."
 
     steps == 0 && @warn "Unlimited movement started, use stop command to interrupt."
