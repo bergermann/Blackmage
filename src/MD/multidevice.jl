@@ -41,7 +41,7 @@ mutable struct Boundaries; end
 
 
 
-struct SingleDevice
+mutable struct SingleDevice
     mc_ip::IPv4
     mc_port::Int
     mc::TCPSocket
