@@ -9,7 +9,7 @@ function getAlignmentEnabled(md::MultiDevice,req::Dict)
     enabled = true
 
     for i in eachindex(md)
-        enabled_ = getAlignmentEnabled(md.ids[i],req); enabled *= enabled_
+        enabled_ = getAlignmentEnabled(md[i].ids,req); enabled *= enabled_
         if !enabled_; println("Alignment not enabled for device $i."); end
     end
     
@@ -27,7 +27,7 @@ function getContrast(md::MultiDevice,req::Dict; threshold::Int=850)
     contrast = Dict{Int,Vector{Int}}()
 
     for i in eachindex(md)
-        contrast[axis] = getContrast(md.ids[i],req; threshold=threshold)
+        contrast[i] = getContrast(md[i].ids,req; threshold=threshold)
     end
 
     return contrast

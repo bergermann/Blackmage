@@ -40,7 +40,7 @@ end
 """
     startMeasurement_(device::D,req::Dict)
 
-Starts IDS displacement measurement without validation check.
+Start IDS displacement measurement without validation check.
 """
 function startMeasurement_(device::D,req::Dict)
     @assert !getAdjustmentEnabled(device,req) "Alignment is enabled, cannot start measurement."
@@ -57,7 +57,7 @@ end
 """
     stopMeasurement(device::D,req::Dict)
 
-Stops IDS displacement measurement.
+Stop IDS displacement measurement.
 """
 function stopMeasurement(device::D,req::Dict)
     if !getMeasurementEnabled(device,req)

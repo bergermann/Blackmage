@@ -8,7 +8,7 @@ Stop all motors of all devices in multidevice `md`.
 """
 function mcStopAllMotors(md::MultiDevice)
     for i in eachindex(md)
-        mcStopAllMotors(md.mc[i])
+        mcStopAllMotors(md[i].mc)
     end
 
     return
@@ -27,10 +27,10 @@ end
 Activate flexdrive control module for each device in multidevice `md`.
 """
 function mcEnableFCM(md::MultiDevice;)
-    ds = md.settings
-    
     for i in eachindex(md)
-        mcEnableFCM(ds.mc[i];
+        ds = md[i].settings
+
+        mcEnableFCM(md[i].mc;
             tol=ds.flextol,maxdist=ds.flexdist,
             freqmaster=ds.freq.master,freqslave=ds.freq.slave)
     end
@@ -46,7 +46,7 @@ Deactivate flexdrive control modules of all devices in multidevice `md`.
 function mcDisableFCM(md::MultiDevice)
     for i in eachindex(md)
         println("Disabling flexdrive mode of device $i.")
-        mcDisableFCM(md.mc[i])
+        mcDisableFCM(md[i].mc)
     end
 
     return
@@ -59,11 +59,11 @@ Put motors into external drive mode and activate flexdrive control module for al
 multidevice `md`.
 """
 function mcSetupFCM(md::MultiDevice)
-    ds = md.settings
-
     for i in eachindex(md)
-        mcSetupFCM(md.mc[i];
-            master=[i].master,
+        ds = md.settings
+
+        mcSetupFCM(md[i].mc;
+            master=ds[i].master,
             tol=ds[i].flextol,maxdist=ds[i].flexdist,
             freqmaster=ds[i].freq.master,freqslave=ds[i].freq.slave,temp=ds[i].temp)
     end
@@ -81,7 +81,7 @@ direct drive mode for all devices in multidevice `md`.
 """
 function mcStopAll(md::MultiDevice)
     for i in eachindex(md)
-        mcStopAll(md.mc[i])
+        mcStopAll(md[i].mc)
     end
 
     return
@@ -99,8 +99,8 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     idx = 1
-    for i in sort!(collect(keys(md.mc)))
-        mcTargetFCM(md.mc[i],target[idx],unit); idx += 1
+    for i in sort!(collect(keys(md)))
+        mcTargetFCM(md[i].mc,target[idx],unit); idx += 1
     end
 
     return
@@ -118,7 +118,7 @@ function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
     for i in eachindex(md)
-        mcWaitForTarget(md.mc[i]; interval=interval)
+        mcWaitForTarget(md[i].mc; interval=interval)
     end
 
     return
@@ -135,7 +135,7 @@ function mcStatusFCM(md::MultiDevice)
     status = Dict{Int,Tuple{Bool},Vector{Bool},Vector{Int}}()
 
     for i in eachindex(md)
-        status[i] = mcStatusFCM(md.mc[i])
+        status[i] = mcStatusFCM(md[i].mc)
     end
     
     return status
@@ -148,7 +148,7 @@ Overwrite existing multidevice `md` status dict.
 """
 function mcStatusFCM!(md::MultiDevice,status::Dict{Int,Tuple{Bool,Vector{Bool},Vector{Int}}})
     for i in eachindex(md)
-        status[i] = mcStatusFCM(md.mc[i])
+        status[i] = mcStatusFCM(md[i].mc)
     end
     
     return status
@@ -165,7 +165,7 @@ function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
     data = Dict{Int,Tuple{Float64,Float64}}()
 
     for i in eachindex(md)
-        data[i] = measurePos(md.ids[i],n; dt=dt)
+        data[i] = measurePos(md[i].ids,n; dt=dt)
     end
     
     return data

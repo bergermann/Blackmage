@@ -7,7 +7,7 @@ Enable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
 function enableECU(md::MultiDevice,req::Dict)
     for i in eachindex(md)
-        enableECU(md.ids[i],req)
+        enableECU(md[i].ids,req)
     end; return
 end
 
@@ -18,7 +18,7 @@ Disable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
 function disableECU(md::MultiDevice,req::Dict)
     for i in eachindex(md)
-        disableECU(md.ids[i],req)
+        disableECU(md[i].ids,req)
     end; return
 end
 
@@ -33,7 +33,7 @@ function getECUEnabled(md::MultiDevice,req::Dict)
     enabled = true
 
     for i in eachindex(md)
-        enabled_ = getECUEnabled(md.ids[i],req); enabled *= enabled_
+        enabled_ = getECUEnabled(md[i].ids,req); enabled *= enabled_
         if !enabled_; println("ECU not enabled for device $i."); end
     end
 
@@ -51,8 +51,8 @@ function getECUConnected(md::MultiDevice,req::Dict)
     connected = true
 
     for i in eachindex(md)
-        connected_ = getECUConnected(md.ids[i],req); connected *= connected_
-        if !connected_; println("ECU not enabled for device $i."); end
+        connected_ = getECUConnected(md[i].ids,req); connected *= connected_
+        if !connected_; println("ECU not connected for device $i."); end
     end
 
     return connected
@@ -66,7 +66,7 @@ end
 Return ECU measured humidity in percent of all devices in multidevice `md`.
 """
 function getHumidity(md::MultiDevice,req::Dict)
-    return Dict(i=>getHumidity(md.ids[i],req) for i in eachindex(md))
+    return Dict(i=>getHumidity(md[i].ids,req) for i in eachindex(md))
 end
 
 """
@@ -75,7 +75,7 @@ end
 Return ECU measured pressure in hPa of all devices in multidevice `md`.
 """
 function getPressure(md::MultiDevice,req::Dict)
-    return Dict(i=>getPressure(md.ids[i],req) for i in eachindex(md))
+    return Dict(i=>getPressure(md[i].ids,req) for i in eachindex(md))
 end
 
 """
@@ -84,7 +84,7 @@ end
 Return ECU measured temperature in °C of all devices in multidevice `md`.
 """
 function getTemperature(md::MultiDevice,req::Dict)
-    return Dict(i=>getTemperature(md.ids[i],req) for i in eachindex(md))
+    return Dict(i=>getTemperature(md[i].ids,req) for i in eachindex(md))
 end
 
 """
@@ -93,7 +93,7 @@ end
 Return ECU calculated refractive index of all devices in multidevice `md`.
 """
 function getRefractiveIndex(md::MultiDevice,req::Dict)
-    return Dict(i=>getRefractiveIndex(md.ids[i],req) for i in eachindex(md))
+    return Dict(i=>getRefractiveIndex(md[i].ids,req) for i in eachindex(md))
 end
 
 """
@@ -102,6 +102,6 @@ end
 Return IDS refractive index used for compensation (check IDS manual).
 """
 function getRefractiveIndexForCompensation(md::MultiDevice,req::Dict,axis::Int)
-    return Dict(i=>getRefractiveIndexForCompensation(md.ids[i],req,axis)
+    return Dict(i=>getRefractiveIndexForCompensation(md[i].ids,req,axis)
         for i in eachindex(md))
 end

@@ -125,8 +125,40 @@ Base.setindex!(md::MultiDevice,X,inds...) = setindex!(md.devices,X,inds...)
 Base.eachindex(md::MultiDevice) = eachindex(md.devices)
 Base.length(md::MultiDevice) = length(md.devices)
 
-
 function Base.isopen(md::MultiDevice)
+    open_ = true
+
+    for i in eachindex(md)
+        open_ *= (!isnothing(md[i].mc)  && isopen(md[i].mc))
+        open_ *= (!isnothing(md[i].ids) && isopen(md[i].ids))
+    end
+
+    if !open_; display(open_status(md)); end
+
+    return open_
+end
+
+function isopen_mc(md::MultiDevice)
+    open_ = true
+
+    for i in eachindex(md); open_ *= (!isnothing(md[i].mc) && isopen(md[i].mc)); end
+
+    if !open_; display(open_status(md)); end
+
+    return open_
+end
+
+function isopen_ids(md::MultiDevice)
+    open_ = true
+
+    for i in eachindex(md); open_ *= (!isnothing(md[i].ids) && isopen(md[i].ids)); end
+
+    if !open_; display(open_status(md)); end
+
+    return open_
+end
+
+function open_status(md::MultiDevice)
     open_ = Dict{Integer,Tuple{Bool,Bool}}()
 
     for i in eachindex(md)
