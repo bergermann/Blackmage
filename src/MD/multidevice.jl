@@ -22,7 +22,7 @@ mutable struct DiscSettings
 
         @assert 1 <= master <= 3 "Master axis has to be 1, 2 or 3."
         @assert all(@. 0 < ess <= 100e-6) "Estimated step size [m] needs to be between 0 and 100e-6."
-        @assert 1 <= mrss <= 100 "Relative step size rss needs to be between 1 and 100."
+        @assert all(@. 1 <= mrss <= 100) "Relative step size rss needs to be between 1 and 100."
         @assert 0 < freq.master <= 100 "Movement frequency freq.master [Hz] must be positive, smaller than 100."
         @assert 0 < freq.slave  <= 100 "Movement frequency freq.slave [Hz] must be positive, smaller than 100."
         @assert freq.master < freq.slave "Master frequency [Hz] must be smaller than slave frequency."
@@ -80,31 +80,31 @@ struct MultiDevice
         new(devices,settings)
     end
 
-    function MultiDevice(mc_ip::AbstractArray{IPv4},ids_ip::AbstractArray{IPv4};
-            masters::AbstractArray{Int}=ones(Int,length(mc_ip)),
+    function MultiDevice(mc_ips::AbstractArray{IPv4},ids_ips::AbstractArray{IPv4};
+            masters::AbstractArray{Int}=ones(Int,length(mc_ips)),
             mc_port::Int=2000,ids_port::Int=9090)
 
-        @assert length(mc_ip) == length(ids_ip) == length(masters)
+        @assert length(mc_ips) == length(ids_ips) == length(masters)
             "mc, ids addresses and master axes need same lengths."
 
         devices = Dict{Int,SingleDevice}()
 
-        for i in eachindex(mc_ip)
+        for i in eachindex(mc_ips)
             mc = try
-                connect(mc_ip[i],mc_port)
+                connect(mc_ips[i],mc_port)
             catch e
                 @warn "Could not open MC port $i."; display(e); nothing
             end
 
             ids = try
-                connect(ids_ip[i],ids_port)
+                connect(ids_ips[i],ids_port)
             catch e
                 @warn "Could not open IDS port $i."; display(e); nothing
             end
 
             devices[i] = SingleDevice(
-                 mc_ip[i], mc_port, mc,
-                ids_ip[i],ids_port,ids,
+                 mc_ips[i], mc_port, mc,
+                ids_ips[i],ids_port,ids,
                 DiscSettings(),Boundaries()
             )
         end
