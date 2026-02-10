@@ -62,7 +62,7 @@ export mcTarget, mcMoveDirect   # MC FL
 
 
 
-export MultiDevice  # multidevice
+export DiscSettings, Boundaries, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 
 
 
