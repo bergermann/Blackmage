@@ -10,7 +10,7 @@ module Blackmage
 
 export units
 
-using Sockets, Dates, JSON, Statistics, Plots
+using Sockets, Dates, JSON#, Plots #, Statistics
 export connect, TCPSocket, now, @ip_str
 
 export Displacement, req    # IDS

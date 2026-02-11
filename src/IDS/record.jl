@@ -110,14 +110,14 @@ end
 
 
 
-import Plots: plot
+# import Plots: plot
 
 """
-    plot(d::Displacement)
+    plot_displacement(d::Displacement)
 
 Plot displacement, contrast and speed (averaged over 2 consecutive steps).
 """
-function Plots.plot(d::Displacement)
+function plot_displacement(d::Displacement)
     idx = findlast(!iszero,d.dT)
     @assert !isnothing(idx) "Displacement record is empty."
     
