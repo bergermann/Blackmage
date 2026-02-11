@@ -60,12 +60,32 @@ multidevice `md`.
 """
 function mcSetupFCM(md::MultiDevice)
     for i in eachindex(md)
-        ds = md.settings
+        ds = md[i].settings
 
         mcSetupFCM(md[i].mc;
-            master=ds[i].master,
-            tol=ds[i].flextol,maxdist=ds[i].flexdist,
-            freqmaster=ds[i].freq.master,freqslave=ds[i].freq.slave,temp=ds[i].temp)
+            master=ds.master,
+            tol=ds.flextol,maxdist=ds.flexdist,
+            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+    end
+
+    return
+end
+
+"""
+    mcReSetupFCM(md::MultiDevice)
+
+Put motors back into external drive mode while flexdrive module is still active for all
+devices in multidevice `md`. Use e.g. after having used a direct drive command while in
+flexdrive mode, to perform another flexdrive command. See [`mcSetupFCM`](@ref).
+"""
+function mcReSetupFCM(md::MultiDevice)
+    for i in eachindex(md)
+        ds = md[i].settings
+
+        mcReSetupFCM(md[i].mc;
+            master=ds.master,
+            tol=ds.flextol,maxdist=ds.flexdist,
+            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
     end
 
     return

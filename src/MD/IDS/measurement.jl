@@ -100,3 +100,15 @@ function getAxesSignalQuality(md::MultiDevice,req::Dict; threshold::Int=850)
 end
 
 
+
+"""
+    resetAxes(md::MultiDevice,req::Dict)
+
+Re-zero relative values of all IDS axes at their current positions for all devices in
+multidevice `md`.
+"""
+function resetAxes(md::MultiDevice,req::Dict)
+    for i in eachindex(md)
+        resetAxes(md[i].ids,req)
+    end; return
+end
