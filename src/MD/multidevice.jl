@@ -54,7 +54,7 @@ mutable struct SingleDevice
     bdry::Boundaries
 
     function SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry)
-        new(mc_ip,mc_port,ids_ip,ids_port,mc,ids,settings,bdry)
+        new(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry)
     end
 
     function SingleDevice(mc_ip,ids_ip; mc_port=2000,ids_port=9090,disc_settings...)
