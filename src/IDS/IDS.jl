@@ -65,7 +65,7 @@ function request(device::TCPSocket,req::Dict,interface::Symbol,
     req["method"] = I[interface]*method
     req["params"] = params
 
-    send(device,json(req))
+    send(device,JSON.json(req))
     msg = JSON.parse(String(recv(device)))
 
     if haskey(msg,"result")
