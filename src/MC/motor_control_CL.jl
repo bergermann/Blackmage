@@ -282,15 +282,15 @@ end
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false)
 
-Non-flexdriven motor control for sub-step precision corrections after target acquisition.
-
-[NYI]
+Non-flexdriven sub-step precision corrections after target acquisition. Correct single motor
+`addr` of device at `device_mc` with IDS `device_ids`. Uses estimated step size `ess` for
+step prediction with minimum allowed relative step size `mrss`. Perform a maximum of
+`maxsteps` per iteration for a maximum of `maxiter` iterations. If `correctess`, reestimates
+step sizes `ess` after each step.
 """
 function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false)
-        
-    # throw(ErrorException("Not yet implemented."))
 
     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
@@ -305,28 +305,17 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     dt = abs(d0-t)
 
     for i in 1:maxiter
-        # println("Iter: $i")
-        # println("Distance to target:  $(dt/1e12/1e-6) µm")
-        # println("Estimated step size: $(ess/1e12/1e-6) µm")
-        
         dir = Int(t > d0)
         
         if dt >= ess
             nsteps = min(div(dt,ess),maxsteps); rss = 100
         else
-            nsteps = 1; rss = div(100*dt,ess)
-
-            # if rss < mrss/2; break; else; rss = max(rss,mrss); end
-            rss = max(rss,mrss)
+            nsteps = 1; rss = max(div(100*dt,ess),mrss)
         end
-
-        # println("nsteps: $nsteps, rss: $rss")
 
         mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
         d1 = getAxisDisplacement(device_ids,req,addr)
-        
-        # println("Distance to target:  $((d1-t)/1e12/1e-6) µm\n")
 
         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
         dt = abs(d1-t); d0 = d1
@@ -337,6 +326,15 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     return
 end
 
+"""
+    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+        ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
+        maxsteps::Int=10,maxiter::Int=10,
+        correctess::Bool=false,doublepass::Bool=true)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of device at `device_mc` with IDS `device_ids`.
+"""
 function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
         maxsteps::Int=10,maxiter::Int=10,
@@ -359,77 +357,68 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
     return
 end
 
-function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
-        ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false)
+# function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
+#         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
+#         correctess::Bool=false)
         
-    # throw(ErrorException("Not yet implemented."))
-
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
-    @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
-    @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
-    @assert maxsteps > 0 "maxsteps needs to be positive."
-    @assert maxiter > 0 "maxiter needs to be positive."
+#     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+#     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
+#     @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
+#     @assert maxsteps > 0 "maxsteps needs to be positive."
+#     @assert maxiter > 0 "maxiter needs to be positive."
     
-    ess = round(Int,abs(ess)/1e-12)
+#     ess = round(Int,abs(ess)/1e-12)
 
-    d0 = getAbsolutePosition(device_ids,req,addr)
-    t = round(Int,target*units[unit]/1e-12)
-    dt = abs(d0-t)
+#     d0 = getAbsolutePosition(device_ids,req,addr)
+#     t = round(Int,target*units[unit]/1e-12)
+#     dt = abs(d0-t)
 
-    for i in 1:maxiter
-        dir = Int(t > d0)
+#     for i in 1:maxiter
+#         dir = Int(t > d0)
         
-        # println("Iter: $i")
-        # println("Distance to target:  $(dt/1e12/1e-6) µm")
-        # println("Estimated step size: $(ess/1e12/1e-6) µm")
+#         if dt > ess
+#             nsteps = min(div(dt,ess),maxsteps); rss = 100
+#         else
+#             nsteps = 1; rss = div(100*dt,ess)
 
-        if dt > ess
-            nsteps = min(div(dt,ess),maxsteps); rss = 100
-        else
-            nsteps = 1; rss = div(100*dt,ess)
+#             if rss < mrss/2; break; else; rss = max(rss,mrss); end
+#         end
 
-            if rss < mrss/2; break; else; rss = max(rss,mrss); end
-        end
+#         mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
-        # println("nsteps: $nsteps, rss: $rss")
-
-        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
-
-        d1 = getAbsolutePosition(device_ids,req,addr)
+#         d1 = getAbsolutePosition(device_ids,req,addr)
         
-        # println("Distance to target:  $((d1-t)/1e12/1e-6) µm\n")
 
-        if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
-        dt = abs(d1-t); d0 = d1
+#         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
+#         dt = abs(d1-t); d0 = d1
 
-        if 2*dt < ess*mrss/100; break; end
-    end
+#         if 2*dt < ess*mrss/100; break; end
+#     end
 
-    return
-end
+#     return
+# end
 
-function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
+# function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+#         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
+#         maxsteps::Int=10,maxiter::Int=10,
+#         correctess::Bool=false,doublepass::Bool=true)
 
-    for axis in 1:3
-        mcTargetP_abs(device_mc,device_ids,axis,target,unit;
-            ess=ess[axis],mrss=mrss[axis],
-            maxsteps=maxsteps,maxiter=maxiter,
-            correctess=correctess)
-    end
+#     for axis in 1:3
+#         mcTargetP_abs(device_mc,device_ids,axis,target,unit;
+#             ess=ess[axis],mrss=mrss[axis],
+#             maxsteps=maxsteps,maxiter=maxiter,
+#             correctess=correctess)
+#     end
 
-    if doublepass; for axis in 1:3
-        mcTargetP_abs(device_mc,device_ids,axis,target,unit;
-            ess=ess[axis],mrss=mrss[axis],
-            maxsteps=maxsteps,maxiter=maxiter,
-            correctess=correctess)
-    end; end
+#     if doublepass; for axis in 1:3
+#         mcTargetP_abs(device_mc,device_ids,axis,target,unit;
+#             ess=ess[axis],mrss=mrss[axis],
+#             maxsteps=maxsteps,maxiter=maxiter,
+#             correctess=correctess)
+#     end; end
 
-    return
-end
+#     return
+# end
 
 
 

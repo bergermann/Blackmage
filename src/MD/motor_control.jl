@@ -110,7 +110,7 @@ end
 
 
 """
-    mcTargetFCM(md::MultiDevice,target::Real,unit::Symbol)
+    mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 
 Set distance `target` value in metric `unit` from relative zero position for every device
 in multidevice `md`. `target` vector assumes same ordering as multidevice ordering.
@@ -119,13 +119,60 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     idx = 1
-    for i in sort!(collect(keys(md)))
+    for i in sort!(collect(keys(md.devices)))
         mcTargetFCM(md[i].mc,target[idx],unit); idx += 1
     end
 
     return
 end
 
+"""
+    mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+
+Set distance `target` value in metric `unit` from relative zero position for every device
+in multidevice `md`.
+"""
+function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+    @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
+
+    for i in eachindex(md.devices)
+        mcTargetFCM(md[i].mc,target[i],unit)
+    end
+
+    return
+end
+
+"""
+    mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
+        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of all devices in multidevice `md`.
+"""
+function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
+        maxsteps::Int=10,maxiter::Int=10,
+        correctess::Bool=false,doublepass::Bool=true)
+
+    for i in eachindex(md)
+        for axis in 1:3
+            s = md[i].settings
+            mcTargetP(md[i].mc,md[i].ids,axis,target,unit;
+                ess=s.ess[axis],mrss=s.mrss[axis],
+                maxsteps=maxsteps,maxiter=maxiter,
+                correctess=correctess)
+        end
+
+        if doublepass; for axis in 1:3
+            s = md[i].settings
+            mcTargetP(md[i].mc,md[i].ids,axis,target,unit;
+                ess=s.ess[axis],mrss=s.mrss[axis],
+                maxsteps=maxsteps,maxiter=maxiter,
+                correctess=correctess)
+        end; end
+    end
+
+    return
+end
 
 
 
@@ -147,7 +194,7 @@ end
 """
     mcStatusFCM(md::MultiDevice)
 
-Movement state of all flexdrive modules in multidevice `nd`. Returns dict with active states,
+Movement state of all flexdrive modules in multidevice `md`. Returns dict with active states,
 target reached states for each axis and FCM internal motor positions in interferometer units
 (not necessarily equal to IDS position).
 """
