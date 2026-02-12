@@ -13,7 +13,7 @@ mutable struct DiscSettings
     function DiscSettings(;
             master=1,                      
             ess=(15e-6,15e-6,15e-6),
-            mrss=(5,5,5),
+            mrss=(10,10,10),
             freq=(master=50,slave=70),
             temp=300,
             flextol=300,

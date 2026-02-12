@@ -180,5 +180,5 @@ function measurePos(device::TCPSocket,n::Int; dt::Real=0.)
         sleep(dt)   
     end
     
-    return mean(data; dims=2)[:], std(data; dims=2)[:]
+    return sum(data; dims=2)[:]/n
 end
