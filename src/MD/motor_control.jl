@@ -147,28 +147,18 @@ end
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of all devices in multidevice `md`.
+of all devices in multidevice `md`, in ascending order.
 """
 function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
         maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false,doublepass::Bool=true)
 
-    for i in eachindex(md)
-        for axis in 1:3
-            s = md[i].settings
-            mcTargetP(md[i].mc,md[i].ids,axis,target,unit;
-                ess=s.ess[axis],mrss=s.mrss[axis],
-                maxsteps=maxsteps,maxiter=maxiter,
-                correctess=correctess)
-        end
-
-        if doublepass; for axis in 1:3
-            s = md[i].settings
-            mcTargetP(md[i].mc,md[i].ids,axis,target,unit;
-                ess=s.ess[axis],mrss=s.mrss[axis],
-                maxsteps=maxsteps,maxiter=maxiter,
-                correctess=correctess)
-        end; end
+    idx = 1
+    for i in sort!(collect(keys(md.devices)))
+        mcTargetP(md[i].mc,md[i].ids,target[idx],unit;
+            ess=md[i].settings.ess,mrss=md[i].settings.mrss,
+            maxsteps=maxsteps,maxiter=maxiter,
+            correctess=correctess,doublepass=doublepass); idx += 1
     end
 
     return

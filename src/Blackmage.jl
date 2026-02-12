@@ -76,3 +76,4 @@ end
 # to fix:
 # targetP, targetP_abs, direct target doc
 # add axes(device,axis) functions
+# swap addr for axis
