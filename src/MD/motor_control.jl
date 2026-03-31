@@ -72,6 +72,23 @@ function mcSetupFCM(md::MultiDevice)
 end
 
 """
+    mcSetupFCM(sd::SingleDevice)
+
+Put motors into external drive mode and activate flexdrive control module for single device
+`sd`.
+"""
+function mcSetupFCM(sd::SingleDevice)
+    ds = sd.settings
+
+    mcSetupFCM(sd.mc;
+        master=ds.master,
+        tol=ds.flextol,maxdist=ds.flexdist,
+        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+
+    return
+end
+
+"""
     mcReSetupFCM(md::MultiDevice)
 
 Put motors back into external drive mode while flexdrive module is still active for all
@@ -87,6 +104,24 @@ function mcReSetupFCM(md::MultiDevice)
             tol=ds.flextol,maxdist=ds.flexdist,
             freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
     end
+
+    return
+end
+
+"""
+    mcReSetupFCM(sd::SingleDevice)
+
+Put motors back into external drive mode and activate flexdrive control module for single
+device `sd`. Use e.g. after having used a direct drive command while in flexdrive mode, to
+perform another flexdrive command. See [`mcSetupFCM`](@ref).
+"""
+function mcReSetupFCM(sd::SingleDevice)
+    ds = sd.settings
+
+    mcReSetupFCM(sd.mc;
+        master=ds.master,
+        tol=ds.flextol,maxdist=ds.flexdist,
+        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
 
     return
 end
@@ -143,6 +178,20 @@ function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 end
 
 """
+    mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
+
+Set distance `target` value in metric `unit` from relative zero position.
+"""
+function mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
+    mcTargetFCM(sd.mc,target,unit)
+
+    return
+end
+
+
+
+
+"""
     mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
 
@@ -160,6 +209,25 @@ function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
             maxsteps=maxsteps,maxiter=maxiter,
             correctess=correctess,doublepass=doublepass); idx += 1
     end
+
+    return
+end
+
+"""
+    mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
+        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of single device `sd`.
+"""
+function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
+        maxsteps::Int=10,maxiter::Int=10,
+        correctess::Bool=false,doublepass::Bool=true)
+
+    mcTargetP(sd.mc,sd.ids,target,unit;
+        ess=sd.settings.ess,mrss=sd.settings.mrss,
+        maxsteps=maxsteps,maxiter=maxiter,
+        correctess=correctess,doublepass=doublepass)
 
     return
 end
