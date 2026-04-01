@@ -296,3 +296,44 @@ function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
     return data
 end
 
+
+
+"""
+    mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
+        timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
+
+Push all devices in `md` against 
+"""
+function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
+        timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
+
+    @assert pushsteps >= 0 "Amount of repush steps needs to be larger than 0."
+
+    d0 = getPos(md,req)
+    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
+
+    for i in sort!(collect(keys(md.devices));
+            by=x->d0[x][md[x].settings.master],rev=dir==1)
+        
+        mcMove.(md[i].mc,[1,2,3],dir,0)
+
+        ds = md[i].settings
+
+        ss = round(Int,abs(ds.ess[ds.master]*ds.freq.master*stalltol)/1e-12)
+        stalling = false; t0 = now()
+        
+        while !stalling && now()-t0 < timeout
+            stalling = checkStalling(md[i].ids,ds.master,interval,ss)
+        end
+
+        mcStop.(md[i].mc,[1,2,3])
+    end
+
+    if repush; for i in sort!(collect(keys(md.devices));
+            by=x->d0[x][md[x].settings.master],rev=dir==1)
+        
+        mcMove.(md[i].mc,[1,2,3],dir,pushsteps)
+    end; end
+
+    return
+end

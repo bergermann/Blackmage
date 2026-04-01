@@ -80,7 +80,7 @@ function checkStalling(device_ids::TCPSocket,master::Int,interval::Real,ss::Int)
 
     p1 = getAxisDisplacement(device_ids,req,master)
 
-    speed = abs(1000*(p1-p0)/((now()-t0).value))
+    speed = round(Int,abs(1000*(p1-p0)/((now()-t0).value)))
 
     speed < ss && println("stalling. speed: $speed vs. $ss")
 
