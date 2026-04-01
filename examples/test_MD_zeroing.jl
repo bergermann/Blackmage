@@ -19,10 +19,9 @@ ids_ips =   [
 md = MultiDevice(mc_ips,ids_ips)
 
 
-
 getMeasurementEnabled(md,req)
 # startMeasurement(md,req)
-# stopMeasurement(md,req)
+stopMeasurement(md,req)
 
 
 
@@ -68,4 +67,18 @@ resetAxes(md,req)
 end
 
 @save "data/zeroing data.jld2" p
+@load "data/zeroing data.jld2"
+
+for i in axes(p,2)
+    p1 = plot(; layout=(size(p,1),1));
+
+    for j in axes(p,1)
+        plot!(p1[j],p[j,i,:]/1e12/1e-6; seriestype=:histogram)
+    end
+
+    p2 = plot(p[:,i,:]'/1e12/1e-6)
+    
+    display(p1)
+    display(p2)
+end
 
