@@ -463,7 +463,6 @@ function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
             maxsteps=50,maxiter=10)
     end
 
-
     return p0, p1, p2
 end
 
