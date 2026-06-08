@@ -1,9 +1,8 @@
 
 
-function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
-        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
-        stallsteps::Int=10,timeout::Real=Inf)
+function mcTarget_(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
+        master::Int,masterfreq::Int,masteress::Float64,interval::Real,
+        stalltime::Int,stalltol::Real,nstalltol::Int,stallsteps::Int,timeout::Real)
 
     @assert timeout > 0 "Timeout time must be positive."
 
@@ -68,8 +67,6 @@ function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::
         mcMoveDirect(device_mc,device_ids,target,unit)
     end
 
-    mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
-
     return
 end
 
@@ -124,6 +121,38 @@ function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,un
     end
 
     mcStopAllMotors(device_mc)
+
+    return
+end
+
+
+function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+        master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
+        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
+        stallsteps::Int=10,timeout::Real=Inf)
+
+    mcTarget_(device_mc,device_ids,target,unit,
+        master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
+
+    mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
+
+    return
+end
+
+function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
+        xtilt::Real,ytilt::Real,α::Real,r::Real;
+        master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
+        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
+        stallsteps::Int=10,timeout::Real=Inf)
+
+    mcTarget_(device_mc,device_ids,target,unit,
+        master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
+
+    dz = tilt2pos(xtilt,ytilt; α=α, r=r)
+
+    for addr in 1:3
+        mcTargetP(device_mc,device_ids,addr,target,unit; maxsteps::Int=100,maxiter::Int=10)
+    end
 
     return
 end

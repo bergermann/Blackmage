@@ -70,15 +70,21 @@ end
 @load "data/zeroing data.jld2"
 
 for i in axes(p,2)
-    p1 = plot(; layout=(size(p,1),1));
+    p1 = plot(;size=(800,500),layout=(size(p,1),1),legend=false);
 
     for j in axes(p,1)
         plot!(p1[j],p[j,i,:]/1e12/1e-6; seriestype=:histogram)
+        if j == 3; plot!(p1[j],xlabel="Distance to Initial [µm]"); end
+        if j == 1; plot!(p1[j],title="Disc $i"); end
     end
 
-    p2 = plot(p[:,i,:]'/1e12/1e-6)
+    p2 = plot(p[:,i,:]'/1e12/1e-6; size=(800,500),
+        title="Disc $i",xlabel="Iteration",ylabel="Distance to Initial [µm]",
+        label=["M1" "M2" "M3"])
     
     display(p1)
     display(p2)
-end
 
+    savefig(p1,"C:\\Users/domin/OneDrive/Desktop/$(i)_1.svg")
+    savefig(p2,"C:\\Users/domin/OneDrive/Desktop/$(i)_2.svg")
+end

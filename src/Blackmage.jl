@@ -60,6 +60,9 @@ export autoAlign
 
 export mcTarget, mcMoveDirect   # MC FL
 
+export tilt2pos, pos2tilt, kart2cyl, cyl2kart
+
+
 
 
 export DiscSettings, Boundaries, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
