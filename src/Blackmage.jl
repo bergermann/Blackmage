@@ -10,7 +10,7 @@ module Blackmage
 
 export units
 
-using Sockets, Dates, JSON
+using Sockets, Dates, JSON, HDF5
 export connect, TCPSocket, now, @ip_str
 
 export Displacement, req    # IDS
@@ -62,18 +62,17 @@ export mcTarget, mcMoveDirect   # MC FL
 
 export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 
-
-
-
-export DiscSettings, Boundaries, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
+export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
 
+export extend_write_to
 
 
 include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
 include("MD/multidevice.jl")
+include("logging.jl")
 
 end
 

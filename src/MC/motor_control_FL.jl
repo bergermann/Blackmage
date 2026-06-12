@@ -151,7 +151,11 @@ function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::
     dz = tilt2pos(xtilt,ytilt; α=α, r=r)
 
     for addr in 1:3
-        mcTargetP(device_mc,device_ids,addr,target,unit; maxsteps::Int=100,maxiter::Int=10)
+        mcTargetP(device_mc,device_ids,addr,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)
+    end
+
+    for addr in 1:3
+        mcTargetP(device_mc,device_ids,addr,dz[i]*units[unit],:m; maxsteps=10,maxiter=10)
     end
 
     return
