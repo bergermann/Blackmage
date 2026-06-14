@@ -84,5 +84,7 @@ for i in axes(p,2)
     
     display(p1)
     display(p2)
-end
 
+    savefig(p1,"C:\\Users/domin/OneDrive/Desktop/$(i)_1.svg")
+    savefig(p2,"C:\\Users/domin/OneDrive/Desktop/$(i)_2.svg")
+end
