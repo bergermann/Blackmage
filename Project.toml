@@ -1,14 +1,16 @@
 name = "Blackmage"
 uuid = "94fbf62c-7f84-4dac-b8e8-d17b7072c94a"
-authors = ["Dominik Bergermann <dominik.bergermann@rwth-aachen.de>"]
 version = "0.1.0"
+authors = ["Dominik Bergermann <dominik.bergermann@rwth-aachen.de>"]
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
 Dates = "1.11.0"
+JLD2 = "0.6.4"
 JSON = "1.4.0"
 Sockets = "1.11.0"
