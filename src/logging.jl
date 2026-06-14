@@ -57,8 +57,12 @@ function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple
     return
 end
 
-function log_booster_state(md::MultiDevice,filepath::String; timeout::Int=0;
+
+
+function log_file(md::MultiDevice,filepath::String; timeout::Int=0,
         interval::Real=0.1,nreset::Int=5,treset::Real=1)
+
+    ndisk = length(md.devices)
     
     if isfile(filepath)
         println("File already exists. Extend or replace? (e/r)")
@@ -66,6 +70,10 @@ function log_booster_state(md::MultiDevice,filepath::String; timeout::Int=0;
 
         if mode == e
             file = h5open(filepath,"r+")
+
+            @assert haskey(file,"t0") ""
+            @assert haskey(file,"t") ""
+            @assert haskey(file,"pos") ""
         elseif mode == r
             println("Confirm replacing file $filepath. (type confirm)")
             confirm = lowercase(readline())
@@ -75,16 +83,24 @@ function log_booster_state(md::MultiDevice,filepath::String; timeout::Int=0;
             end
 
             rm(filepath); file = h5open(filepath,"cw")
+
+            create_dataset(file,"t0",Int)
+            create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
+            create_dataset(file,"data",Int,dataspace((1+3ndisk,1000),(1+3ndisk,-1));
+                chunk=(1+3*ndisk,1000))
         else
             @warn "Mode not supported. Aborting logging."; return
         end
     else
         file = h5open(filepath,"cw")
+        
+        create_dataset(file,"t0",Int)
+        create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
+        create_dataset(file,"data",Int,dataspace((1+3ndisk,1000),(1+3ndisk,-1));
+            chunk=(1+3*ndisk,1000))
     end
-    
-    
 
-    return
+    return file
 end
 
 
