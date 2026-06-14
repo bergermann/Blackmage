@@ -57,11 +57,35 @@ function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple
     return
 end
 
-function log_booster_state(md::MultiDevice,filepath::String; timeout::Int=0)
+function log_booster_state(md::MultiDevice,filepath::String; timeout::Int=0;
+        interval::Real=0.1,nreset::Int=5,treset::Real=1)
     
+    if isfile(filepath)
+        println("File already exists. Extend or replace? (e/r)")
+        mode = lowercase(readline())
+
+        if mode == e
+            file = h5open(filepath,"r+")
+        elseif mode == r
+            println("Confirm replacing file $filepath. (type confirm)")
+            confirm = lowercase(readline())
+
+            if confirm != "confirm"
+                @warn "Replace confirmation failed. Aborting logging."; return
+            end
+
+            rm(filepath); file = h5open(filepath,"cw")
+        else
+            @warn "Mode not supported. Aborting logging."; return
+        end
+    else
+        file = h5open(filepath,"cw")
+    end
+    
+    
+
+    return
 end
-
-
 
 
 
