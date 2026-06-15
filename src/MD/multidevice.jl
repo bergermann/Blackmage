@@ -150,8 +150,40 @@ mutable struct SingleDevice
 end; const SD = SingleDevice
 
 
+
 "[NYI] Multidevice settings."
 mutable struct MultiDeviceSettings; end
+
+
+
+# """
+#     Logger
+
+# Log file to track interferometer position (relative and absolute), contrast and timestamp.
+# """
+# mutable struct Logger
+#     "HDF5 file. Needs fields `t0::Int`, `t::Vector`, `data::Matrix`.
+#     `data` needs to be of size (9*ndisk,:)"
+#     file::HDF5.File
+
+#     "Control state for measuring/writing loop."
+#     active::Bool
+
+#     @doc """
+#         Logger(file,active)
+#     """
+#     function Logger(file,active)
+#         new(file,active)
+#     end
+
+#     @doc """
+#         Logger(md::MultiDevice,filepath::String)
+#     """
+#     function Logger(ndisk,filepath::String)
+#         new(create_log_file(ndisk,filepath))
+#     end
+# end
+
 
 
 "Collection of disc devices including 3 motors and an interferometer each."
@@ -160,6 +192,8 @@ struct MultiDevice
     devices::Dict{Int,SingleDevice}
     "Multidevice settings."
     settings::MultiDeviceSettings
+    # "Log file."
+    # logger::Logger
 
     @doc """
         MultiDevice(devices,settings)
@@ -308,6 +342,7 @@ end
 
 include("IDS/IDS.jl")
 include("motor_control.jl")
+include("logging.jl")
 
 
 #=

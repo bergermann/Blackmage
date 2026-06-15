@@ -72,7 +72,6 @@ include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
 include("MD/multidevice.jl")
-include("logging.jl")
 
 end
 
