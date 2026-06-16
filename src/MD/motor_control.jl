@@ -280,29 +280,14 @@ function mcStatusFCM!(md::MultiDevice,status::Dict{Int,Tuple{Bool,Vector{Bool},V
 end
 
 
-"""
-    measurePos(md::MultiDevice,n::Int; dt::Real=0.)
-
-Measure IDS positions of each device in multidevice `md` `n` times, return dict of mean and
-standard deviation of the distribution. Enforce delay `dt` between each measurement.
-"""
-function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
-    data = Dict{Int,Tuple{Float64,Float64}}()
-
-    for i in eachindex(md)
-        data[i] = measurePos(md[i].ids,n; dt=dt)
-    end
-    
-    return data
-end
-
-
 
 """
     mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
         timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
 
-Push all devices in `md` against 
+Push all devices in `md` against hardpoint in direction `dir`, starting with the closest.
+Checks for stalling, see [`checkStalling`](@ref). If `repush`, push all devices at once for
+`pushsteps` steps against hardpoint.
 """
 function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
         timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)

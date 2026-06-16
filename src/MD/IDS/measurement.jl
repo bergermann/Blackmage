@@ -112,3 +112,21 @@ function resetAxes(md::MultiDevice,req::Dict)
         resetAxes(md[i].ids,req)
     end; return
 end
+
+
+
+"""
+    measurePos(md::MultiDevice,n::Int; dt::Real=0.)
+
+Measure IDS positions of each device in multidevice `md` `n` times, return dict of mean and
+standard deviation of the distribution. Enforce delay `dt` between each measurement.
+"""
+function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
+    data = Dict{Int,Tuple{Float64,Float64}}()
+
+    for i in eachindex(md)
+        data[i] = measurePos(md[i].ids,n; dt=dt)
+    end
+    
+    return data
+end

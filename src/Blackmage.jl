@@ -73,6 +73,11 @@ include("IDS/IDS.jl")
 include("MC/MC.jl")
 include("MD/multidevice.jl")
 
+
+function test_JuliaPy()
+    println("Hello from Julia."); return
+end
+
 end
 
 # to fix:
