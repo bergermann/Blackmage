@@ -207,8 +207,8 @@ struct MultiDevice
             masters::AbstractArray{Int}=ones(Int,length(mc_ips)),
             mc_port::Int=2000,ids_port::Int=9090)
     """
-    function MultiDevice(mc_ips::AbstractArray{IPv4},ids_ips::AbstractArray{IPv4};
-            masters::AbstractArray{Int}=ones(Int,length(mc_ips)),
+    function MultiDevice(mc_ips::AbstractVector{IPv4},ids_ips::AbstractVector{IPv4};
+            masters::AbstractVector{Int}=ones(Int,length(mc_ips)),
             mc_port::Int=2000,ids_port::Int=9090)
 
         @assert length(mc_ips) == length(ids_ips) == length(masters)
@@ -242,6 +242,9 @@ struct MultiDevice
             MultiDeviceSettings()
         )
     end
+
+    MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
+        MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
 end
 
 const MD = MultiDevice
