@@ -260,12 +260,22 @@ struct MultiDevice
             MultiDeviceSettings(),
         )
     end
+
+    @doc """
+        MultiDevice()
+    """
+    function MultiDevice()
+        new(
+            Dict{Int,SingleDevice}(),
+            Logger(0),
+            MultiDeviceSettings()
+        )
+    end
 end
 
-MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
-    MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
+# MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
+#     MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
 
-MultiDevice(; kwargs...) = MultiDevice(IPv4[],IPv4[]; kwargs...)
 
 const MD = MultiDevice
 
