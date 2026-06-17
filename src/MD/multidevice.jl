@@ -265,6 +265,8 @@ end
 MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
     MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
 
+MultiDevice(; kwargs...) = MultiDevice(IPv4[],IPv4[]; kwargs...)
+
 const MD = MultiDevice
 
 import Base: setproperty!, getindex, eachindex, length, isopen, open, close
