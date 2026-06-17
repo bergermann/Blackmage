@@ -156,33 +156,50 @@ mutable struct MultiDeviceSettings; end
 
 
 
-# """
-#     Logger
+"""
+    Logger
 
-# Log file to track interferometer position (relative and absolute), contrast and timestamp.
-# """
-# mutable struct Logger
-#     "HDF5 file. Needs fields `t0::Int`, `t::Vector`, `data::Matrix`.
-#     `data` needs to be of size (9*ndisk,:)"
-#     file::HDF5.File
+Log file to track interferometer position (relative and absolute), contrast and timestamp.
+"""
+mutable struct Logger
+    "Control state for measuring/writing loop."
+    active::Bool
+    "Absolute position data."
+    apos::Dict{Int,Vector{Int}}
+    "Relative position data."
+    rpos::Dict{Int,Vector{Int}}
+    "Interferometer signal contrast."
+    contrast::Dict{Int,Vector{Int}}
 
-#     "Control state for measuring/writing loop."
-#     active::Bool
+    "JSON dict for IDS requests."
+    req::Dict{String,Union{String,Vector{<:Union{Float64,Int,String}}}}
 
-#     @doc """
-#         Logger(file,active)
-#     """
-#     function Logger(file,active)
-#         new(file,active)
-#     end
+    @doc """
+        Logger(active,apos,rpos,contrast)
+    """
+    function Logger(active,apos,rpos,contrast,req)
+        new(active,apos,rpos,contrast,req)
+    end
 
-#     @doc """
-#         Logger(md::MultiDevice,filepath::String)
-#     """
-#     function Logger(ndisk,filepath::String)
-#         new(create_log_file(ndisk,filepath))
-#     end
-# end
+    @doc """
+        Logger(ndisk)
+    """
+    function Logger(ndisk)
+        new(
+            false,
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(
+                "jsonrpc" => "2.0",
+                "method" => "",
+                "id" => "0",
+                "api" => "2",
+                "params" => Union{Float64,Int,String}[],
+            )
+        )
+    end
+end
 
 
 
@@ -190,16 +207,16 @@ mutable struct MultiDeviceSettings; end
 struct MultiDevice
     "Disc devices with index."
     devices::Dict{Int,SingleDevice}
+    "Position data buffer."
+    logger::Logger
     "Multidevice settings."
     settings::MultiDeviceSettings
-    # "Log file."
-    # logger::Logger
 
     @doc """
-        MultiDevice(devices,settings)
+        MultiDevice(devices,logger,settings)
     """
-    function MultiDevice(devices,settings)
-        new(devices,settings)
+    function MultiDevice(devices,logger,settings)
+        new(devices,logger,settings)
     end
 
     @doc """
@@ -239,13 +256,14 @@ struct MultiDevice
 
         new(
             devices,
-            MultiDeviceSettings()
+            Logger(length(devices)),
+            MultiDeviceSettings(),
         )
     end
-
-    MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
-        MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
 end
+
+MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
+    MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
 
 const MD = MultiDevice
 

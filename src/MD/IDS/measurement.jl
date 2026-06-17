@@ -130,3 +130,15 @@ function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
     
     return data
 end
+
+
+
+function updateLog!(md::MultiDevice)
+    for i in eachindex(md)
+        md.logger.apos = getAbsolutePositions(md[i].ids,md.req)
+        md.logger.rpos = getRelativePositions(md[i].ids,md.req)
+        md.logger.apos = getAxesSignalQuality(md[i].ids,md.req)
+    end
+
+    return
+end
