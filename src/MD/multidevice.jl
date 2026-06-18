@@ -150,22 +150,73 @@ mutable struct SingleDevice
 end; const SD = SingleDevice
 
 
+
 "[NYI] Multidevice settings."
 mutable struct MultiDeviceSettings; end
+
+
+
+"""
+    Logger
+
+Log file to track interferometer position (relative and absolute), contrast and timestamp.
+"""
+mutable struct Logger
+    "Control state for measuring/writing loop."
+    active::Bool
+    "Absolute position data."
+    apos::Dict{Int,Vector{Int}}
+    "Relative position data."
+    rpos::Dict{Int,Vector{Int}}
+    "Interferometer signal contrast."
+    contrast::Dict{Int,Vector{Int}}
+
+    "JSON dict for IDS requests."
+    req::Dict{String,Union{String,Vector{<:Union{Float64,Int,String}}}}
+
+    @doc """
+        Logger(active,apos,rpos,contrast)
+    """
+    function Logger(active,apos,rpos,contrast,req)
+        new(active,apos,rpos,contrast,req)
+    end
+
+    @doc """
+        Logger(ndisk)
+    """
+    function Logger(ndisk)
+        new(
+            false,
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(
+                "jsonrpc" => "2.0",
+                "method" => "",
+                "id" => "0",
+                "api" => "2",
+                "params" => Union{Float64,Int,String}[],
+            )
+        )
+    end
+end
+
 
 
 "Collection of disc devices including 3 motors and an interferometer each."
 struct MultiDevice
     "Disc devices with index."
     devices::Dict{Int,SingleDevice}
+    "Position data buffer."
+    logger::Logger
     "Multidevice settings."
     settings::MultiDeviceSettings
 
     @doc """
-        MultiDevice(devices,settings)
+        MultiDevice(devices,logger,settings)
     """
-    function MultiDevice(devices,settings)
-        new(devices,settings)
+    function MultiDevice(devices,logger,settings)
+        new(devices,logger,settings)
     end
 
     @doc """
@@ -173,8 +224,8 @@ struct MultiDevice
             masters::AbstractArray{Int}=ones(Int,length(mc_ips)),
             mc_port::Int=2000,ids_port::Int=9090)
     """
-    function MultiDevice(mc_ips::AbstractArray{IPv4},ids_ips::AbstractArray{IPv4};
-            masters::AbstractArray{Int}=ones(Int,length(mc_ips)),
+    function MultiDevice(mc_ips::AbstractVector{IPv4},ids_ips::AbstractVector{IPv4};
+            masters::AbstractVector{Int}=ones(Int,length(mc_ips)),
             mc_port::Int=2000,ids_port::Int=9090)
 
         @assert length(mc_ips) == length(ids_ips) == length(masters)
@@ -205,10 +256,26 @@ struct MultiDevice
 
         new(
             devices,
+            Logger(length(devices)),
+            MultiDeviceSettings(),
+        )
+    end
+
+    @doc """
+        MultiDevice()
+    """
+    function MultiDevice()
+        new(
+            Dict{Int,SingleDevice}(),
+            Logger(0),
             MultiDeviceSettings()
         )
     end
 end
+
+# MultiDevice(mc_ips::AbstractVector{String},ids_ips::AbstractVector{String}; kwargs...) =
+#     MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
+
 
 const MD = MultiDevice
 
@@ -308,6 +375,7 @@ end
 
 include("IDS/IDS.jl")
 include("motor_control.jl")
+include("logging.jl")
 
 
 #=

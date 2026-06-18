@@ -104,10 +104,10 @@ include("manual.jl")
 
 include("access.jl")
 
-const req = Dict(
+const req = Dict{String,Union{String,Vector{<:Union{Float64,Int,String}}}}(
     "jsonrpc" => "2.0",
     "method" => "",
     "id" => "0",
     "api" => "2",
-    "params" => [],
+    "params" => Union{Float64,Int,String}[],
 )
