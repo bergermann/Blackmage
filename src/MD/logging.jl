@@ -2,103 +2,103 @@
 
 
 
-function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple,
-        inds::Union{Colon,Integer}...)
+# function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple,
+#         inds::Union{Colon,Integer}...)
 
-    dims = HDF5.get_extent_dims(dset)
+#     dims = HDF5.get_extent_dims(dset)
 
-    @assert length(dims) == length(extension) == length(inds) "Dimension mismatch for
-        dataset or extension size."
+#     @assert length(dims) == length(extension) == length(inds) "Dimension mismatch for
+#         dataset or extension size."
 
-    if all(@. ifelse(inds isa Integer,inds,0) <= dims[1])
-        dset[inds...] = data
-    else
-        @assert all(@. sign(dims[2])*(dims[1]+extension) <= dims[2]) "Maximum dataset
-            size is exceeded."
+#     if all(@. ifelse(inds isa Integer,inds,0) <= dims[1])
+#         dset[inds...] = data
+#     else
+#         @assert all(@. sign(dims[2])*(dims[1]+extension) <= dims[2]) "Maximum dataset
+#             size is exceeded."
 
-        if all(@. ifelse(inds isa Integer,inds,0) <= dims[1]+extension)
-            HDF5.set_extent_dims(ds,dims[1].+extension)
-            dset[inds...] = data
-        else
-            throw(HDF5.API.H5Error("Error extending dataset. Indices are out of extension
-                bounds."))
-        end
-    end
+#         if all(@. ifelse(inds isa Integer,inds,0) <= dims[1]+extension)
+#             HDF5.set_extent_dims(ds,dims[1].+extension)
+#             dset[inds...] = data
+#         else
+#             throw(HDF5.API.H5Error("Error extending dataset. Indices are out of extension
+#                 bounds."))
+#         end
+#     end
 
-    return
-end
+#     return
+# end
 
-function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple,
-        inds::Union{Colon,AbstractRange{<:Integer}}...)
+# function extend_write_to(dset::HDF5.Dataset,data::AbstractArray,extension::Tuple,
+#         inds::Union{Colon,AbstractRange{<:Integer}}...)
 
-    dims = HDF5.get_extent_dims(dset)
+#     dims = HDF5.get_extent_dims(dset)
 
-    @assert length(dims) == length(extension) == length(inds) "Dimension mismatch for
-        dataset or extension size."
+#     @assert length(dims) == length(extension) == length(inds) "Dimension mismatch for
+#         dataset or extension size."
 
-    if all([(inds[i] isa Colon ? 0 : maximum(inds[i])) <= dims[1][i]
-            for i in eachindex(inds)])
+#     if all([(inds[i] isa Colon ? 0 : maximum(inds[i])) <= dims[1][i]
+#             for i in eachindex(inds)])
 
-        dset[inds...] = data
-    else
-        @assert all(@. sign(dims[2])*(dims[1]+extension) <= dims[2]) "Maximum dataset
-            size is exceeded."
+#         dset[inds...] = data
+#     else
+#         @assert all(@. sign(dims[2])*(dims[1]+extension) <= dims[2]) "Maximum dataset
+#             size is exceeded."
 
-        if all([(inds[i] isa Colon ? 0 : maximum(inds[i])) <= dims[1][i]+extension[i]
-                for i in eachindex(inds)])
+#         if all([(inds[i] isa Colon ? 0 : maximum(inds[i])) <= dims[1][i]+extension[i]
+#                 for i in eachindex(inds)])
 
-            HDF5.set_extent_dims(ds,dims[1].+extension)
-            dset[inds...] = data
-        else
-            throw(HDF5.API.H5Error("Error extending dataset. Indices are out of
-                extension bounds."))
-        end
-    end
+#             HDF5.set_extent_dims(ds,dims[1].+extension)
+#             dset[inds...] = data
+#         else
+#             throw(HDF5.API.H5Error("Error extending dataset. Indices are out of
+#                 extension bounds."))
+#         end
+#     end
 
-    return
-end
+#     return
+# end
 
 
 
-function create_log_file(ndisk::Int,filepath::String)
-    if isfile(filepath)
-        println("File already exists. Extend or replace? (e/r)")
-        mode = lowercase(readline())
+# function create_log_file(ndisk::Int,filepath::String)
+#     if isfile(filepath)
+#         println("File already exists. Extend or replace? (e/r)")
+#         mode = lowercase(readline())
 
-        if mode == e
-            file = h5open(filepath,"r+")
+#         if mode == e
+#             file = h5open(filepath,"r+")
 
-            @assert haskey(file,"t0") ""
-            @assert haskey(file,"t") ""
-            @assert haskey(file,"pos") ""
-        elseif mode == r
-            println("Confirm replacing file $filepath. (type confirm)")
-            confirm = lowercase(readline())
+#             @assert haskey(file,"t0") ""
+#             @assert haskey(file,"t") ""
+#             @assert haskey(file,"pos") ""
+#         elseif mode == r
+#             println("Confirm replacing file $filepath. (type confirm)")
+#             confirm = lowercase(readline())
 
-            if confirm != "confirm"
-                @warn "Replace confirmation failed. Aborting logging."; return
-            end
+#             if confirm != "confirm"
+#                 @warn "Replace confirmation failed. Aborting logging."; return
+#             end
 
-            rm(filepath); file = h5open(filepath,"cw")
+#             rm(filepath); file = h5open(filepath,"cw")
 
-            create_dataset(file,"t0",Int)
-            create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
-            create_dataset(file,"data",Int,dataspace((9ndisk,1000),(9ndisk,-1));
-                chunk=(9ndisk,1000))
-        else
-            @warn "Mode not supported. Aborting logging."; return
-        end
-    else
-        file = h5open(filepath,"cw")
+#             create_dataset(file,"t0",Int)
+#             create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
+#             create_dataset(file,"data",Int,dataspace((9ndisk,1000),(9ndisk,-1));
+#                 chunk=(9ndisk,1000))
+#         else
+#             @warn "Mode not supported. Aborting logging."; return
+#         end
+#     else
+#         file = h5open(filepath,"cw")
         
-        create_dataset(file,"t0",Int)
-        create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
-        create_dataset(file,"data",Int,dataspace((9ndisk,1000),(9ndisk,-1));
-            chunk=(9ndisk,1000))
-    end
+#         create_dataset(file,"t0",Int)
+#         create_dataset(file,"t",Int,dataspace((1000,),(-1,)))
+#         create_dataset(file,"data",Int,dataspace((9ndisk,1000),(9ndisk,-1));
+#             chunk=(9ndisk,1000))
+#     end
 
-    return file
-end
+#     return file
+# end
 
 
 
