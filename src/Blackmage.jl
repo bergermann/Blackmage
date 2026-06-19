@@ -87,6 +87,8 @@ function addMockLog_(md::MultiDevice)
     md.logger.apos[1] = [0,0,0]
     md.logger.rpos[1] = [0,0,0]
     md.logger.contrast[1] = [0,0,0]
+
+    return
 end
 
 end
