@@ -79,10 +79,12 @@ function testf1(t::Float64)
     sleep(t); return
 end
 
-function addMockDevice!(md::MultiDevice)
+function addMockLog!(md::MultiDevice)
     @assert isempty(md.devices) "Real devices present in multidevice"
 
-    
+    md.logger.apos[1] = [0,0,0]
+    md.logger.rpos[1] = [0,0,0]
+    md.logger.contrast[1] = [0,0,0]
 end
 
 end

@@ -144,11 +144,9 @@ function updateLog!(md::MultiDevice)
 end
 
 function updateLog_!(md::MultiDevice)
-    for i in eachindex(md)
-        getAbsolutePositions!(md.logger.apos,md[i].ids,md.req)
-        getRelativePositions!(md.logger.rpos,md[i].ids,md.req)
-        getAxesSignalQuality!(md.logger.apos,md[i].ids,md.req)
-    end
+    md.logger.apos[1] += rand(3,0:5)
+    md.logger.rpos[1] += rand(3,0:5)
+    md.logger.constrast[1] += rand(3,0:1)
 
     return
 end
