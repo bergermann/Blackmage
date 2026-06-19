@@ -65,8 +65,10 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
 
+export updateLog!, updateLog_!
+
 export extend_write_to
-export testf1
+export testf1, addMockLog!
 
 
 include("socketing.jl")
