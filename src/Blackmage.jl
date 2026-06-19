@@ -27,10 +27,10 @@ export getTemperatureM, setTemperatureM
 export getRefractiveIndexM, setRefractiveIndexM
 
 export getMeasurementEnabled, startMeasurement, stopMeasurement # measurement
-export getAbsolutePosition, getAbsolutePositions
-export getAxisDisplacement, getAxesDisplacement
+export getAbsolutePosition, getAbsolutePositions, getAbsolutePositions!
+export getAxisDisplacement, getAxesDisplacement, getAxesDisplacement!
 export getReferencePosition, getReferencePositions
-export getAxisSignalQuality, getAxesSignalQuality
+export getAxisSignalQuality, getAxesSignalQuality, getAxesSignalQuality!
 
 export enablePL, disablePL  # pilot
 
@@ -65,7 +65,10 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
 
+export updateLog!, updateLog_!
+
 export extend_write_to
+export testf1, addMockLog!
 
 
 include("socketing.jl")
@@ -74,8 +77,16 @@ include("MC/MC.jl")
 include("MD/multidevice.jl")
 
 
-function test_JuliaPy()
-    println("Hello from Julia."); return
+function testf1(t::Float64)
+    sleep(t); return
+end
+
+function addMockLog!(md::MultiDevice)
+    @assert isempty(md.devices) "Real devices present in multidevice"
+
+    md.logger.apos[1] = [0,0,0]
+    md.logger.rpos[1] = [0,0,0]
+    md.logger.contrast[1] = [0,0,0]
 end
 
 end
