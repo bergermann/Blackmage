@@ -143,7 +143,7 @@ function updateLog!(md::MultiDevice)
     return
 end
 
-function updateLog_!(md::MultiDevice)
+function updateLog_(md::MultiDevice)
     md.logger.apos[1]      += rand(3:5,3)
     md.logger.rpos[1]      += rand(0:5,3)
     md.logger.constrast[1] += rand(0:1,3)

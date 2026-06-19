@@ -65,10 +65,10 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
 
-export updateLog!, updateLog_!
+export updateLog!, updateLog_
 
 export extend_write_to
-export testf1, addMockLog!
+export testf1, addMockLog_
 
 
 include("socketing.jl")
@@ -81,7 +81,7 @@ function testf1(t::Float64)
     sleep(t); return
 end
 
-function addMockLog!(md::MultiDevice)
+function addMockLog_(md::MultiDevice)
     @assert isempty(md.devices) "Real devices present in multidevice"
 
     md.logger.apos[1] = [0,0,0]
