@@ -92,6 +92,17 @@ function getAbsolutePositions(device::D,req::Dict)
     return [r[2],r[3],r[4]]
 end
 
+"""
+    getAbsolutePositions!(a::Vector{Int},device::D,req::Dict)
+
+Write absolute IDS positions directly to vector `a` of length 3, see
+[`getAbsolutePositions`](@ref).
+"""
+function getAbsolutePositions!(a::Vector{Int},device::D,req::Dict)
+    @assert length(a) == 3 "Position vector needs to be length 3."
+
+    return a .= request(device,req,:displace,"getAbsolutePositions")[2:4]
+end
 
 
 """
@@ -119,6 +130,20 @@ end
 
 const getRelativePosition  = getAxisDisplacement
 const getRelativePositions = getAxesDisplacement
+
+"""
+    getAxesDisplacement!(a::Vector{Int},device::D,req::Dict)
+
+Write relative IDS positions directly to vector `a` of length 3, see
+[`getAxesDisplacement`](@ref).
+"""
+function getAxesDisplacement!(a::Vector{Int},device::D,req::Dict)
+    @assert length(a) == 3 "Position vector needs to be length 3."
+
+    return a .= request(device,req,:displace,"getAxesDisplacement")[2:4]
+end
+
+const getRelativePositions! = getAxesDisplacement!
 
 
 
@@ -178,6 +203,23 @@ function getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
     end
 
     return contrast
+end
+
+"""
+    getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict)
+
+Write IDS signal quality directly to vector `a` of length 3, see
+[`getAxesSignalQuality`](@ref).
+"""
+function getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict)
+    @assert length(a) == 3 "Position vector needs to be length 3."
+
+    for axis in 1:3
+        c, offset = getAxisSignalQuality(device,req,axis; threshold=threshold)
+        a[axis] = c+offset
+    end
+
+    return a
 end
 
 

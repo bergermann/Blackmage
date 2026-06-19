@@ -135,9 +135,19 @@ end
 
 function updateLog!(md::MultiDevice)
     for i in eachindex(md)
-        md.logger.apos = getAbsolutePositions(md[i].ids,md.req)
-        md.logger.rpos = getRelativePositions(md[i].ids,md.req)
-        md.logger.apos = getAxesSignalQuality(md[i].ids,md.req)
+        getAbsolutePositions!(md.logger.apos,md[i].ids,md.req)
+        getRelativePositions!(md.logger.rpos,md[i].ids,md.req)
+        getAxesSignalQuality!(md.logger.apos,md[i].ids,md.req)
+    end
+
+    return
+end
+
+function updateLog_!(md::MultiDevice)
+    for i in eachindex(md)
+        getAbsolutePositions!(md.logger.apos,md[i].ids,md.req)
+        getRelativePositions!(md.logger.rpos,md[i].ids,md.req)
+        getAxesSignalQuality!(md.logger.apos,md[i].ids,md.req)
     end
 
     return
