@@ -144,8 +144,8 @@ function updateLog!(md::MultiDevice)
 end
 
 function updateLog_(md::MultiDevice)
-    md.logger.apos[1]      += rand(3:5,3)
-    md.logger.rpos[1]      += rand(0:5,3)
+    md.logger.apos[1]     += rand(3:5,3)
+    md.logger.rpos[1]     += rand(0:5,3)
     md.logger.contrast[1] += rand(0:1,3)
 
     return

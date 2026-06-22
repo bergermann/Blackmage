@@ -262,6 +262,13 @@ struct MultiDevice
     end
 
     @doc """
+        MultiDevice(mc_ips,ids_ips; kwargs...)
+    """
+    function MultiDevice(mc_ips,ids_ips; kwargs...)
+        MultiDevice(IPv4.(mc_ips),IPv4.(ids_ips); kwargs...)
+    end
+
+    @doc """
         MultiDevice()
     """
     function MultiDevice()
