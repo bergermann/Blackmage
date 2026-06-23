@@ -69,3 +69,23 @@ function arecv(socket::TCPSocket,timeout::Real=1)
     refreshBuffer(socket)    
     return async_reader(socket,timeout)
 end
+
+"""
+    Sockets.connect(host,port::Integer,timeout::Real)
+
+Connects TCP socket to `host` at `port`, times out after `timeout` seconds of no response,
+instead of the respective hardware configuration. 
+"""
+function Sockets.connect(host,port::Integer,timeout::Real)
+    socket = TCPSocket(); timer = Timer(_->close(socket),timeout)
+
+    try
+        connect(socket,host,port)
+    catch
+        error("Connection to $host on port $port timed out after $timeout seconds.")
+    finally
+        close(timer)
+    end
+
+    return socket
+end

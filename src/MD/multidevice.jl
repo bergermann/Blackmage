@@ -226,7 +226,7 @@ struct MultiDevice
     """
     function MultiDevice(mc_ips::AbstractVector{IPv4},ids_ips::AbstractVector{IPv4};
             masters::AbstractVector{Int}=ones(Int,length(mc_ips)),
-            mc_port::Int=2000,ids_port::Int=9090)
+            mc_port::Int=2000,ids_port::Int=9090,timeout::Real=10)
 
         @assert length(mc_ips) == length(ids_ips) == length(masters)
             "mc, ids addresses and master axes need same lengths."
@@ -235,13 +235,13 @@ struct MultiDevice
 
         for i in eachindex(mc_ips)
             mc = try
-                connect(mc_ips[i],mc_port)
+                connect(mc_ips[i],mc_port,timeout)
             catch e
                 @warn "Could not open MC port $i."; display(e); nothing
             end
 
             ids = try
-                connect(ids_ips[i],ids_port)
+                connect(ids_ips[i],ids_port,timeout)
             catch e
                 @warn "Could not open IDS port $i."; display(e); nothing
             end
