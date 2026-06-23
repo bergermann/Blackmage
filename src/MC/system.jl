@@ -126,8 +126,7 @@ function mcSetIP(device::TCPSocket;
     if confirm == "yes"
         println("Changing IP")
 
-        @warn "IPS function not yet primed. Not changing IP."
-        # println("Status: ",mcRequest(device,"/IPS $(uppercase(mode)) $ip $subnet $gateway"))
+        println("Status: ",mcRequest(device,"/IPS $(uppercase(mode)) $ip $subnet $gateway"))
     else
         println("IP change aborted.")
     end
