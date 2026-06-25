@@ -164,6 +164,8 @@ Log file to track interferometer position (relative and absolute), contrast and 
 mutable struct Logger
     "Control state for measuring/writing loop."
     active::Bool
+    "Read-write lock."
+    lock::ReentrantLock
     "Absolute position data."
     apos::Dict{Int,Vector{Int}}
     "Relative position data."
@@ -177,8 +179,8 @@ mutable struct Logger
     @doc """
         Logger(active,apos,rpos,contrast)
     """
-    function Logger(active,apos,rpos,contrast,req)
-        new(active,apos,rpos,contrast,req)
+    function Logger(active,lock,apos,rpos,contrast,req)
+        new(active,lock,apos,rpos,contrast,req)
     end
 
     @doc """
@@ -187,6 +189,7 @@ mutable struct Logger
     function Logger(ndisk)
         new(
             false,
+            ReentrantLock(),
             Dict(zeros(Float64,3) for i in 1:ndisk),
             Dict(zeros(Float64,3) for i in 1:ndisk),
             Dict(zeros(Float64,3) for i in 1:ndisk),
