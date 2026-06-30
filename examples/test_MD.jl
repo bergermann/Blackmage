@@ -4,18 +4,18 @@ using Pkg; Pkg.update("Blackmage")
 using Blackmage, JLD2
 
 
-
 mc_ips =    [
+    ip"192.168.2.1",
     ip"192.168.2.2",
-    ip"192.168.2.4",
-    # ip"192.168.2.3",
+    ip"192.168.2.3",
 ]
 
 ids_ips =   [
-    ip"192.168.2.7",
-    ip"192.168.2.5",
-    # ip"192.168.2.6",
+    ip"192.168.3.1",
+    ip"192.168.3.2",
+    ip"192.168.3.3",
 ]
+
 
 md = MultiDevice(mc_ips,ids_ips)
 md[1].settings.ess = (15e-6,15e-6,15e-6); md[1].settings.mrss = (10,10,10)
