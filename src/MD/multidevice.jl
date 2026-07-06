@@ -190,9 +190,9 @@ mutable struct Logger
         new(
             false,
             ReentrantLock(),
-            Dict(zeros(Float64,3) for i in 1:ndisk),
-            Dict(zeros(Float64,3) for i in 1:ndisk),
-            Dict(zeros(Float64,3) for i in 1:ndisk),
+            Dict(i => zeros(Float64,3) for i in 1:ndisk),
+            Dict(i => zeros(Float64,3) for i in 1:ndisk),
+            Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(
                 "jsonrpc" => "2.0",
                 "method" => "",
