@@ -109,5 +109,5 @@ const req = Dict{String,Union{String,Vector{<:Union{Float64,Int,String}}}}(
     "method" => "",
     "id" => "0",
     "api" => "2",
-    "params" => [],
+    "params" => Union{Float64,Int,String}[],
 )
