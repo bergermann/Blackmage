@@ -354,11 +354,11 @@ function open_status(md::MultiDevice)
     return open_
 end
 
-function Base.open(md::MultiDevice)
+function Base.open(md::MultiDevice; timeout=10)
     for i in eachindex(md)
         if isnothing(md[i].mc) || !isopen(md.devices[i].mc)
             md[i].mc = try
-                connect(md[i].mc_ip,md[i].mc_port)
+                connect(md[i].mc_ip,md[i].mc_port,timeout)
             catch e
                 @warn "Could not open MC port $i."; display(e); nothing
             end
@@ -366,7 +366,7 @@ function Base.open(md::MultiDevice)
 
         if isnothing(md[i].ids) || !isopen(md.devices[i].ids)
             md[i].ids = try
-                connect(md[i].ids_ip,md[i].ids_port)
+                connect(md[i].ids_ip,md[i].ids_port,timeout)
             catch e
                 @warn "Could not open IDS port $i."; display(e); nothing
             end
