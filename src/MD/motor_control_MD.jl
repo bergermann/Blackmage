@@ -7,8 +7,8 @@
 Stop all motors of all devices in multidevice `md`.
 """
 function mcStopAllMotors(md::MultiDevice)
-    for i in eachindex(md)
-        mcStopAllMotors(md[i].mc)
+    for device in md
+        mcStopAllMotors(device)
     end
 
     return
@@ -17,22 +17,13 @@ end
 
 
 """
-    mcEnableFCM(md::MultiDevice;
-        stepsize::Int=100,
-        tol::Int=300,
-        maxdist::Int=5000,
-        freqmaster::Int=50,
-        freqslave::Int=70)
+    mcEnableFCM(md::MultiDevice)
 
 Activate flexdrive control module for each device in multidevice `md`.
 """
-function mcEnableFCM(md::MultiDevice;)
-    for i in eachindex(md)
-        ds = md[i].settings
-
-        mcEnableFCM(md[i].mc;
-            tol=ds.flextol,maxdist=ds.flexdist,
-            freqmaster=ds.freq.master,freqslave=ds.freq.slave)
+function mcEnableFCM(md::MultiDevice)
+    for device in md
+        mcEnableFCM(device)
     end
 
     return
@@ -44,9 +35,8 @@ end
 Deactivate flexdrive control modules of all devices in multidevice `md`.
 """
 function mcDisableFCM(md::MultiDevice)
-    for i in eachindex(md)
-        println("Disabling flexdrive mode of device $i.")
-        mcDisableFCM(md[i].mc)
+    for device in md
+        mcDisableFCM(device)
     end
 
     return
@@ -59,31 +49,9 @@ Put motors into external drive mode and activate flexdrive control module for al
 multidevice `md`.
 """
 function mcSetupFCM(md::MultiDevice)
-    for i in eachindex(md)
-        ds = md[i].settings
-
-        mcSetupFCM(md[i].mc;
-            master=ds.master,
-            tol=ds.flextol,maxdist=ds.flexdist,
-            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+    for device in md
+        mcSetupFCM(device)
     end
-
-    return
-end
-
-"""
-    mcSetupFCM(sd::SingleDevice)
-
-Put motors into external drive mode and activate flexdrive control module for single device
-`sd`.
-"""
-function mcSetupFCM(sd::SingleDevice)
-    ds = sd.settings
-
-    mcSetupFCM(sd.mc;
-        master=ds.master,
-        tol=ds.flextol,maxdist=ds.flexdist,
-        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
 
     return
 end
@@ -96,32 +64,9 @@ devices in multidevice `md`. Use e.g. after having used a direct drive command w
 flexdrive mode, to perform another flexdrive command. See [`mcSetupFCM`](@ref).
 """
 function mcReSetupFCM(md::MultiDevice)
-    for i in eachindex(md)
-        ds = md[i].settings
-
-        mcReSetupFCM(md[i].mc;
-            master=ds.master,
-            tol=ds.flextol,maxdist=ds.flexdist,
-            freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+    for device in md
+        mcReSetupFCM(device)
     end
-
-    return
-end
-
-"""
-    mcReSetupFCM(sd::SingleDevice)
-
-Put motors back into external drive mode and activate flexdrive control module for single
-device `sd`. Use e.g. after having used a direct drive command while in flexdrive mode, to
-perform another flexdrive command. See [`mcSetupFCM`](@ref).
-"""
-function mcReSetupFCM(sd::SingleDevice)
-    ds = sd.settings
-
-    mcReSetupFCM(sd.mc;
-        master=ds.master,
-        tol=ds.flextol,maxdist=ds.flexdist,
-        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
 
     return
 end
@@ -135,8 +80,8 @@ Stop all motors and flexdrive commands, disable flexdrive module and put motors 
 direct drive mode for all devices in multidevice `md`.
 """
 function mcStopAll(md::MultiDevice)
-    for i in eachindex(md)
-        mcStopAll(md[i].mc)
+    for device in md
+        mcStopAll(device)
     end
 
     return
@@ -155,7 +100,7 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 
     idx = 1
     for i in sort!(collect(keys(md.devices)))
-        mcTargetFCM(md[i].mc,target[idx],unit); idx += 1
+        mcTargetFCM(md[i],target[idx],unit); idx += 1
     end
 
     return
@@ -171,23 +116,11 @@ function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
 
     for i in eachindex(md.devices)
-        mcTargetFCM(md[i].mc,target[i],unit)
+        mcTargetFCM(md[i],target[i],unit)
     end
 
     return
 end
-
-"""
-    mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
-
-Set distance `target` value in metric `unit` from relative zero position.
-"""
-function mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
-    mcTargetFCM(sd.mc,target,unit)
-
-    return
-end
-
 
 
 
@@ -198,36 +131,34 @@ end
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
 of all devices in multidevice `md`, in ascending order.
 """
-function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
+function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+    mds = md.settings.psettings; idx = 1
 
-    idx = 1
     for i in sort!(collect(keys(md.devices)))
-        mcTargetP(md[i].mc,md[i].ids,target[idx],unit;
+        mcTargetP(md[i],target[idx],unit;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
-            maxsteps=maxsteps,maxiter=maxiter,
-            correctess=correctess,doublepass=doublepass); idx += 1
+            maxsteps=mds.maxsteps,maxiter=mds.maxiter,
+            correctess=mds.correctess,doublepass=mds.doublepass); idx += 1
     end
 
     return
 end
 
-"""
-    mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
-        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
 
-Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of single device `sd`.
-"""
-function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
 
-    mcTargetP(sd.mc,sd.ids,target,unit;
-        ess=sd.settings.ess,mrss=sd.settings.mrss,
-        maxsteps=maxsteps,maxiter=maxiter,
-        correctess=correctess,doublepass=doublepass)
+"""
+    mcTarget()
+
+
+"""
+function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+    
+
+    return
+end
+
+function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+    
 
     return
 end
@@ -322,3 +253,5 @@ function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
 
     return
 end
+
+

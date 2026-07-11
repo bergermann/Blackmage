@@ -1,158 +1,27 @@
 
-"Disc and motor settings."
-mutable struct DiscSettings
-    "Master motor axis, 1, 2 or 3."
-    master::Int
-    "Estimated full step size in m."
-    ess::NTuple{3,Float64}
-    "Minimum allowed relative step size in percent."
-    mrss::NTuple{3,Int}
-    "(master, slave) Maximum step frequencies of master and slave motors in Hz."
-    freq::@NamedTuple{master::Int64,slave::Int64}
-    "Ambient temperature in K."
-    temp::Int
-    "Flexdrive target tolerance in IDS steps."
-    flextol::Int
-    "Maximum slave to master distance in flexdrive mode in IDS steps."
-    flexdist::Int
-    "Drive factor."
-    df::Float64
 
-    "Static angle of master motor to zero axis in degrees."
-    α::Float64
-    "Retroreflector radius from central z axis in m."
-    r::Float64
-
-    @doc """
-        DiscSettings(;
-            master=1,                      
-            ess=(15e-6,15e-6,15e-6),
-            mrss=(10,10,10),
-            freq=(master=50,slave=70),
-            temp=300,
-            flextol=300,
-            flexdist=5000,
-            df=1.0,
-            α=0.0,
-            r=0.15)
-    """
-    function DiscSettings(;
-            master=1,                      
-            ess=(15e-6,15e-6,15e-6),
-            mrss=(10,10,10),
-            freq=(master=50,slave=70),
-            temp=300,
-            flextol=300,
-            flexdist=5000,
-            df=1.0,
-            α=0.0,
-            r=0.15)
-
-        @assert 1 <= master <= 3 "Master axis has to be 1, 2 or 3."
-        @assert all(@. 0 < ess <= 100e-6) "Estimated step size [m] needs to be between 0 and 100e-6."
-        @assert all(@. 1 <= mrss <= 100) "Relative step size rss needs to be between 1 and 100."
-        @assert 0 < freq.master <= 100 "Movement frequency freq.master [Hz] must be positive, smaller than 100."
-        @assert 0 < freq.slave  <= 100 "Movement frequency freq.slave [Hz] must be positive, smaller than 100."
-        @assert freq.master < freq.slave "Master frequency [Hz] must be smaller than slave frequency."
-        @assert 4 <= temp <= 300 "Environment temperature [K] needs to be between 4 and 300."
-        @assert 0 < flextol <= 10_000 "Flexdrive tolerance flextol needs to be between 0 and 10_000."
-        @assert 0 < flexdist <= 50_000 "Maximum flexdrive distance flexdist needs to be between 0 and 50_000."
-        @assert 0.1 <= df <= 3.0 "Drive factor df needs to be between 0.1 and 3.0."
-        @assert 0 <= α <= 360 "Static motor angle α needs to be betwen 0° and 360°."
-        @assert 0 < r "Interferometeer radius r needs to be larger than 0."
-
-        new(master,ess,mrss,freq,temp,flextol,flexdist,df,α,r)
-    end
-end; const DS = DiscSettings
+"Multidevice settings."
+mutable struct MultiDeviceSettings
+    "Wether to do precision adjustment after mcTarget command."
+    doprecision::Bool
+    "Global settings for precision corrections."
+    psettings::@NamedTuple{maxsteps::Int64,maxiter::Int64,correctess::Bool,doublepass::Bool}
 
 
-"[NYI] Boundary information of disc and fixture for collision avoidance."
-mutable struct Boundaries; end
-
-"Disc position and tilt state."
-mutable struct SingleState
-    "Position of disc center point."
-    p0::Float64
-    "Vector of interferometer positions."
-    p3::Vector{Float64}
-    "Disc tilt angle along axis x in degrees."
-    xtilt::Float64
-    "Disc tilt angle along axis y in degrees."
-    ytilt::Float64
-
-    @doc """
-        SingleState()
-    """
-    function SingleState()
-        new(0.,[0.,0.,0.],0.,0.)
-    end
-
-    @doc """
-        SingleState(p0,p3)
-    """
-    function SingleState(p0,p3)
-        new(p0,p3,0.,0.)
-    end
-
-    @doc """
-        SingleState(p0,p3,xtilt,ytilt)
-    """
-    function SingleState(p0,p3,xtilt,ytilt)
-        new(p0,p3,xtilt,ytilt)
-    end
-end
-
-
-"State, settings and network information for single disc and motor set."
-mutable struct SingleDevice
-    "Motor controller IPv4 address."
-    mc_ip::IPv4
-    "Motor controller port."
-    mc_port::Int
-    "Motor controller TCP socket."
-    mc::Union{Nothing,TCPSocket}
-    
-    "IDS IPv4 address."
-    ids_ip::IPv4
-    "IDS port."
-    ids_port::Int
-    "IDS TCP socket."
-    ids::Union{Nothing,TCPSocket}
-
-    "Disc and motor settings."
-    settings::DiscSettings
-    "Collision boundary information."
-    bdry::Boundaries
-
-    "Current disc position state."
-    state::SingleState
-    "Target disc position state."
-    target::SingleState
-
-    @doc """
-        SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target)
-    """
-    function SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target)
-        new(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target)
-    end
-    
-    @doc """
-        SingleDevice(mc_ip,ids_ip; mc_port=2000,ids_port=9090,disc_settings...)
-    """
-    function SingleDevice(mc_ip,ids_ip; mc_port=2000,ids_port=9090,disc_settings...)
+    function MultiDeviceSettings(doprecision,(maxsteps,maxiter,correctess,doublepass))
         new(
-            mc_ip,mc_port,connect(mc_ip,mc_port),
-            ids_ip,ids_port,connect(ids_ip,ids_port),
-            DiscSettings(; disc_settings...),Boundaries(),
-            SingleState(),SingleState()
+            doprecision,
+            (maxsteps,maxiter,correctess,doublepass),
         )
     end
-end; const SD = SingleDevice
 
-
-
-"[NYI] Multidevice settings."
-mutable struct MultiDeviceSettings; end
+    function MultiDeviceSettings()
+        new(
+            false,
+            (maxsteps=10,maxiter=10,correctess=false,doublepass=true),
+        )
+    end
+end
 
 
 
@@ -173,14 +42,17 @@ mutable struct Logger
     "Interferometer signal contrast."
     contrast::Dict{Int,Vector{Int}}
 
+    "Timestamp of last measurement in unix time."
+    timestamp::Float64
+
     "JSON dict for IDS requests."
-    req::Dict{String,Union{String,Vector{<:Union{Float64,Int,String}}}}
+    req::Dict{String,Union{String,Vector}}
 
     @doc """
         Logger(active,apos,rpos,contrast)
     """
-    function Logger(active,lock,apos,rpos,contrast,req)
-        new(active,lock,apos,rpos,contrast,req)
+    function Logger(active,lock,apos,rpos,contrast,timestamp,req)
+        new(active,lock,apos,rpos,contrast,timestamp,req)
     end
 
     @doc """
@@ -193,12 +65,13 @@ mutable struct Logger
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
+            0.,
             Dict(
                 "jsonrpc" => "2.0",
                 "method" => "",
                 "id" => "0",
                 "api" => "2",
-                "params" => Union{Float64,Int,String}[],
+                "params" => [],
             )
         )
     end
@@ -215,11 +88,16 @@ struct MultiDevice
     "Multidevice settings."
     settings::MultiDeviceSettings
 
+    "Flag if device is currently moving."
+    moving::Bool
+    "Flag if device is at target after moving."
+    target::Bool
+
     @doc """
         MultiDevice(devices,logger,settings)
     """
-    function MultiDevice(devices,logger,settings)
-        new(devices,logger,settings)
+    function MultiDevice(devices,logger,settings,moving,target)
+        new(devices,logger,settings,moving,target)
     end
 
     @doc """
@@ -261,6 +139,8 @@ struct MultiDevice
             devices,
             Logger(length(devices)),
             MultiDeviceSettings(),
+            false,
+            true
         )
     end
 
@@ -278,7 +158,9 @@ struct MultiDevice
         new(
             Dict{Int,SingleDevice}(),
             Logger(0),
-            MultiDeviceSettings()
+            MultiDeviceSettings(),
+            false,
+            true
         )
     end
 end
@@ -289,11 +171,13 @@ end
 
 const MD = MultiDevice
 
-import Base: setproperty!, getindex, eachindex, length, isopen, open, close
+import Base: setproperty!, getindex, eachindex, iterate, length, isopen, open, close
 
 Base.getindex(md::MultiDevice,inds...) = getindex(md.devices,inds...)
 Base.setindex!(md::MultiDevice,X,inds...) = setindex!(md.devices,X,inds...)
 Base.eachindex(md::MultiDevice) = eachindex(md.devices)
+Base.iterate(md::MultiDevice) = iterate(md.devices)
+Base.iterate(md::MultiDevice,i::Integer) = iterate(md.devices,i)
 Base.length(md::MultiDevice) = length(md.devices)
 
 function Base.setproperty!(md::MultiDevice,name::Symbol,x)
@@ -382,13 +266,3 @@ function Base.close(md::MultiDevice)
 end
 
 
-
-include("IDS/IDS.jl")
-include("motor_control.jl")
-include("logging.jl")
-
-
-#=
-md functions to add:
-resetAxes
-=#

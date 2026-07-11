@@ -74,22 +74,7 @@ export testf1, addMockLog_
 include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
-include("MD/multidevice.jl")
-
-
-function testf1(t::Float64)
-    sleep(t); return
-end
-
-function addMockLog_(md::MultiDevice)
-    @assert isempty(md.devices) "Real devices present in multidevice"
-
-    md.logger.apos[1] = [0,0,0]
-    md.logger.rpos[1] = [0,0,0]
-    md.logger.contrast[1] = [0,0,0]
-
-    return
-end
+include("MD/MD.jl")
 
 end
 
