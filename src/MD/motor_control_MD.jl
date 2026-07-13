@@ -147,18 +147,73 @@ end
 
 
 """
-    mcTarget()
+    mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 
-
+Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
+position for every device in multidevice `md`. `target` vector assumes same ordering as
+multidevice ordering.
 """
 function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+    @assert length(target) == length(md) "Target vector length mismatches multidevice length."
+
+    for device in md
+        if device.stateFCM == FCM_OFF
+            mcSetupFCM(device)
+        elseif device.stateFCM == FCM_SEMI
+            mcReSetupFCM(device)
+        end
+    end
     
+    idx = 1
+    for i in sort!(collect(keys(md.devices)))
+        mcTargetFCM(md[i],target[idx],unit); idx += 1
+    end
 
     return
 end
 
+"""
+    mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+
+Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
+position for every device in multidevice `md`.
+"""
 function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+    @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
+
+    for device in md
+        if device.stateFCM == FCM_OFF
+            mcSetupFCM(device)
+        elseif device.stateFCM == FCM_SEMI
+            mcReSetupFCM(device)
+        end
+    end
     
+    for i in eachindex(md)
+        mcTargetFCM(md[i],target[i],unit)
+    end
+
+    return
+end
+
+"""
+    mcTarget(md::MultiDevice)
+
+Setup flexdrive modules and use internal distance target value for every device in
+multidevice `md`.
+"""
+function mcTarget(md::MultiDevice)
+    for device in md
+        if device.stateFCM == FCM_OFF
+            mcSetupFCM(device)
+        elseif device.stateFCM == FCM_SEMI
+            mcReSetupFCM(device)
+        end 
+    end
+    
+    for device in md
+        mcTargetFCM(md[i].mc,device.target.p0,:m)
+    end
 
     return
 end
@@ -173,12 +228,14 @@ Wait for flexdrive command to reach its target, check every `interval` seconds.
 function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
-    for i in eachindex(md)
-        mcWaitForTarget(md[i].mc; interval=interval)
+    for device in md
+        mcWaitForTarget(device; interval=interval)
     end
 
     return
 end
+
+
 
 """
     mcStatusFCM(md::MultiDevice)
@@ -191,7 +248,7 @@ function mcStatusFCM(md::MultiDevice)
     status = Dict{Int,Tuple{Bool},Vector{Bool},Vector{Int}}()
 
     for i in eachindex(md)
-        status[i] = mcStatusFCM(md[i].mc)
+        status[i] = mcStatusFCM(md[i])
     end
     
     return status
@@ -204,7 +261,7 @@ Overwrite existing multidevice `md` status dict.
 """
 function mcStatusFCM!(md::MultiDevice,status::Dict{Int,Tuple{Bool,Vector{Bool},Vector{Int}}})
     for i in eachindex(md)
-        status[i] = mcStatusFCM(md[i].mc)
+        status[i] = mcStatusFCM(md[i])
     end
     
     return status

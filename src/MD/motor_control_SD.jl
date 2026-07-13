@@ -125,7 +125,10 @@ of single device `sd`.
 function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
         ess=sd.settings.ess,mrss=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
+        correctess::Bool=false,doublepass::Bool=true,forcewait::Bool=true)
+
+    if forcewait; mcWaitForTarget(sd); sleep(0.1); end
+    if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
 
     mcTargetP(sd.mc,sd.ids,target,unit;
         ess=ess,mrss=mrss,
@@ -135,41 +138,83 @@ function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
     return
 end
 
+mcTargetP(sd::SingleDevice; kwargs...) = mcTargetP(sd,sd.target.p0,:m,kwargs...)
+
+# """
+#     mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
+#         ess=sd.settings.ess,mrss=sd.settings.mrss,
+#         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
+
+# Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+# of single device `sd`.
+# """
+# function mcTargetP(sd::SingleDevice;
+#         ess=sd.settings.ess,mrss=sd.settings.mrss,
+#         maxsteps::Int=10,maxiter::Int=10,
+#         correctess::Bool=false,doublepass::Bool=true)
+
+#     if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
+
+#     mcTargetP(sd.mc,sd.ids,sd.target.p0,:m;
+#         ess=ess,mrss=mrss,
+#         maxsteps=maxsteps,maxiter=maxiter,
+#         correctess=correctess,doublepass=doublepass)
+
+#     return
+# end
+
+
+
 """
-    mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
-        ess=sd.settings.ess,mrss=sd.settings.mrss,
-        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
+    mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
 
-Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of single device `sd`.
+Setup flexdrive module if necessary and set `target` in metric `unit` for
+single device `sd`.
 """
-function mcTargetP(sd::SingleDevice;
-        ess=sd.settings.ess,mrss=sd.settings.mrss,
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
-
-    mcTargetP(sd.mc,sd.ids,sd.target.p0,:m;
-        ess=ess,mrss=mrss,
-        maxsteps=maxsteps,maxiter=maxiter,
-        correctess=correctess,doublepass=doublepass)
-
-    return
-end
-
-
-
-function mcTarget(sd::SingleDevice,target::Real,unit::Symbol; correct::Bool=true)
+function mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
     if sd.stateFCM == FCM_OFF
         mcSetupFCM(sd)
     elseif sd.stateFCM == FCM_SEMI
         mcReSetupFCM(sd)
     end
 
-    mcTargetFCM(sd,target,unit)
-    
-    if correct
-        mcTargetP(sd)
-    end
+    mcTargetFCM(sd.mc,target,unit)
 
     return
+end
+
+"""
+    mcTarget(sd::SingleDevice)
+
+Setup flexdrive module if necessary and use internal distance target value for
+single device `sd`
+"""
+mcTarget(sd::SingleDevice) = mcTarget(sd,sd.target.p0,:m)
+
+
+
+"""
+    mcWaitForTarget(sd::SingleDevice; interval::Real=0.1)
+
+Wait for flexdrive command to reach its target, check every `interval` seconds.
+"""
+function mcWaitForTarget(sd::SingleDevice; interval::Real=0.1)
+    @assert interval >= 0 "Interval needs to be non-negative."
+
+    mcWaitForTarget(sd.mc; interval=interval)
+
+    return
+end
+
+
+
+"""
+    mcStatusFCM(sd::SingleDevice)
+
+Movement state of flexdrive module of single device `sd`. Return active state,
+target reached state for each axis and FCM internal motor positions in interferometer units
+(not necessarily equal to IDS position).
+"""
+function mcStatusFCM(sd::SingleDevice)
+    return mcStatusFCM(sd.mc)
 end
