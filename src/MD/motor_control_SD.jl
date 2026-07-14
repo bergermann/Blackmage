@@ -17,17 +17,21 @@ end
 
 
 """
-    mcEnableFCM(sd::SingleDevice)
+    mcEnableFCM(sd::SingleDevice;
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.maxdist,
+        freqmaster::Int=ds.settings.freq.master,freqslave::Int=ds..settings.freq.slave)
 
-Activate flexdrive control module of single device `sd`.
+Activate flexdrive control module of single device `sd`. Uses internally saved settings
+unless overriden.
 """
-function mcEnableFCM(sd::SingleDevice)
+function mcEnableFCM(sd::SingleDevice;
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.maxdist,
+        freqmaster::Int=ds.freq.master,freqslave::Int=ds.freq.slave)
+
     if sd.stateFCM == FCM_OFF; sd.stateFCM = FCM_SEMI; end
 
-    ds = sd.settings
     mcEnableFCM(sd.mc;
-        tol=ds.flextol,maxdist=ds.flexdist,
-        freqmaster=ds.freq.master,freqslave=ds.freq.slave)
+        tol=tol,maxdist=maxdist,freqmaster=freqmaster,freqslave=freqslave)
 
     return
 end
@@ -45,38 +49,53 @@ function mcDisableFCM(sd::SingleDevice)
 end
 
 """
-    mcSetupFCM(sd::SingleDevice)
+    mcSetupFCM(sd::SingleDevice;
+        master::Int=sd.settings.master,
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave,
+        temp::Int=sd.settings.temp)
 
 Put motors into external drive mode and activate flexdrive control module for single device
-`sd`.
+`sd`. Uses internally saved settings unless overriden.
 """
-function mcSetupFCM(sd::SingleDevice)
-    ds = sd.settings
+function mcSetupFCM(sd::SingleDevice;
+        master::Int=sd.settings.master,
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave,
+        temp::Int=sd.settings.temp)
+
     sd.stateFCM = FCM_ON
 
     mcSetupFCM(sd.mc;
-        master=ds.master,
-        tol=ds.flextol,maxdist=ds.flexdist,
-        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+        master=master,tol=tol,maxdist=maxdist,
+        freqmaster=freqmaster,freqslave=freqslave,temp=temp)
 
     return
 end
 
 """
-    mcReSetupFCM(sd::SingleDevice)
+    mcReSetupFCM(sd::SingleDevice;
+        master::Int=sd.settings.master,
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave,
+        temp::Int=sd.settings.temp)
 
 Put motors back into external drive mode and activate flexdrive control module for single
 device `sd`. Use e.g. after having used a direct drive command while in flexdrive mode, to
-perform another flexdrive command. See [`mcSetupFCM`](@ref).
+perform another flexdrive command. See [`mcSetupFCM`](@ref). Uses internally saved settings
+unless overriden.
 """
-function mcReSetupFCM(sd::SingleDevice)
-    ds = sd.settings
+function mcReSetupFCM(sd::SingleDevice;
+        master::Int=sd.settings.master,
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave,
+        temp::Int=sd.settings.temp)
+
     sd.stateFCM = FCM_ON
 
     mcReSetupFCM(sd.mc;
-        master=ds.master,
-        tol=ds.flextol,maxdist=ds.flexdist,
-        freqmaster=ds.freq.master,freqslave=ds.freq.slave,temp=ds.temp)
+        master=master,tol=tol,maxdist=maxdist,
+        freqmaster=freqmaster,freqslave=freqslave,temp=temp)
 
     return
 end
@@ -102,7 +121,7 @@ end
     mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
 
 Set distance `target` value in metric `unit` from relative zero position for single device
-`sd`.
+`sd`. Moves motors if module and motors are activated. Updates internal target.
 """
 function mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
     update!(sd.target,target*units[unit])
@@ -112,6 +131,14 @@ function mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
     return
 end
 
+"""
+    mcTargetFCM(sd::SingleDevice)
+
+Set distance target to internal value for single device `sd`.
+Moves motors if modules and motors are activated.
+"""
+mcTargetFCM(sd::SingleDevice) = mcTargetFCM(sd,st.target.p0,:m)
+
 
 
 """
@@ -120,7 +147,7 @@ end
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of single device `sd`.
+of single device `sd`. Does NOT update internal target.
 """
 function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
         ess=sd.settings.ess,mrss=sd.settings.mrss,
@@ -138,6 +165,12 @@ function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
     return
 end
 
+"""
+    mcTargetP(sd::SingleDevice; kwargs...)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of single device `sd`. Use internal target value.
+"""
 mcTargetP(sd::SingleDevice; kwargs...) = mcTargetP(sd,sd.target.p0,:m,kwargs...)
 
 # """
@@ -169,7 +202,7 @@ mcTargetP(sd::SingleDevice; kwargs...) = mcTargetP(sd,sd.target.p0,:m,kwargs...)
     mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
 
 Setup flexdrive module if necessary and set `target` in metric `unit` for
-single device `sd`.
+single device `sd`. Updates internal target.
 """
 function mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
     if sd.stateFCM == FCM_OFF
@@ -178,7 +211,7 @@ function mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
         mcReSetupFCM(sd)
     end
 
-    mcTargetFCM(sd.mc,target,unit)
+    mcTargetFCM(sd,target,unit)
 
     return
 end

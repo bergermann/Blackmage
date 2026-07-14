@@ -19,7 +19,8 @@ end
 """
     mcEnableFCM(md::MultiDevice)
 
-Activate flexdrive control module for each device in multidevice `md`.
+Activate flexdrive control module for each device in multidevice `md`. Use internally saved
+settings of each device.
 """
 function mcEnableFCM(md::MultiDevice)
     for device in md
@@ -46,7 +47,7 @@ end
     mcSetupFCM(md::MultiDevice)
 
 Put motors into external drive mode and activate flexdrive control module for all devices in
-multidevice `md`.
+multidevice `md`. Use internally saved settings of each device.
 """
 function mcSetupFCM(md::MultiDevice)
     for device in md
@@ -61,7 +62,8 @@ end
 
 Put motors back into external drive mode while flexdrive module is still active for all
 devices in multidevice `md`. Use e.g. after having used a direct drive command while in
-flexdrive mode, to perform another flexdrive command. See [`mcSetupFCM`](@ref).
+flexdrive mode, to perform another flexdrive command. See [`mcSetupFCM`](@ref). Use
+internally saved settings of each device. Use internally saved settings of each device.
 """
 function mcReSetupFCM(md::MultiDevice)
     for device in md
@@ -94,6 +96,7 @@ end
 
 Set distance `target` value in metric `unit` from relative zero position for every device
 in multidevice `md`. `target` vector assumes same ordering as multidevice ordering.
+Moves motors if modules and motors are activated. Updates internal target.
 """
 function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
@@ -110,7 +113,8 @@ end
     mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
 Set distance `target` value in metric `unit` from relative zero position for every device
-in multidevice `md`.
+in multidevice `md`. Moves motors if modules and motors are activated.
+Updates internal targets.
 """
 function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
@@ -122,23 +126,91 @@ function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
     return
 end
 
+"""
+    mcTargetFCM(md::MultiDevice)
+
+Set distance targets to internal values for every device in
+multidevice `md`. Moves motors if modules and motors are activated.
+"""
+function mcTargetFCM(md::MultiDevice)
+    for device in md
+        mcTargetFCM(device)
+    end
+    
+    return
+end
+
 
 
 """
     mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
-        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,doublepass::Bool=true)
+        maxsteps::Int=md.settings.psettings.maxsteps,
+        maxiter::Int=md.settings.psettings.maxiter,
+        correctess::Bool=md.settings.psettings.correctess,
+        doublepass::Bool=md.settings.psettings.doublepass)
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of all devices in multidevice `md`, in ascending order.
+of all devices in multidevice `md`, in ascending order. Does NOT update internal targets.
 """
-function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
-    mds = md.settings.psettings; idx = 1
+function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
+        maxsteps::Int=md.settings.psettings.maxsteps,
+        maxiter::Int=md.settings.psettings.maxiter,
+        correctess::Bool=md.settings.psettings.correctess,
+        doublepass::Bool=md.settings.psettings.doublepass)
+    
+    idx = 1
 
     for i in sort!(collect(keys(md.devices)))
         mcTargetP(md[i],target[idx],unit;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
-            maxsteps=mds.maxsteps,maxiter=mds.maxiter,
-            correctess=mds.correctess,doublepass=mds.doublepass); idx += 1
+            maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
+            idx += 1
+    end
+
+    return
+end
+
+"""
+    mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
+        maxsteps::Int=md.settings.psettings.maxsteps,
+        maxiter::Int=md.settings.psettings.maxiter,
+        correctess::Bool=md.settings.psettings.correctess,
+        doublepass::Bool=md.settings.psettings.doublepass)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of all devices in multidevice `md`, in ascending order. Does NOT update internal targets.
+"""
+function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
+        maxsteps::Int=md.settings.psettings.maxsteps,
+        maxiter::Int=md.settings.psettings.maxiter,
+        correctess::Bool=md.settings.psettings.correctess,
+        doublepass::Bool=md.settings.psettings.doublepass)
+
+    for i in sort!(collect(keys(md.devices)))
+        mcTargetP(md[i],target[i],unit;
+            ess=md[i].settings.ess,mrss=md[i].settings.mrss,
+            maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
+    end
+
+    return
+end
+
+"""
+    mcTargetP(md::MultiDevice)
+
+Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
+of all devices in multidevice `md`, in ascending order. Does NOT update internal targets.
+"""
+function mcTargetP(md::MultiDevice;
+        maxsteps::Int=md.settings.psettings.maxsteps,
+        maxiter::Int=md.settings.psettings.maxiter,
+        correctess::Bool=md.settings.psettings.correctess,
+        doublepass::Bool=md.settings.psettings.doublepass)
+
+    for i in sort!(collect(keys(md.devices)))
+        mcTargetP(md[i],md[i].target.p0,:p0;
+            ess=md[i].settings.ess,mrss=md[i].settings.mrss,
+            maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
     end
 
     return
@@ -151,7 +223,7 @@ end
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
 position for every device in multidevice `md`. `target` vector assumes same ordering as
-multidevice ordering.
+multidevice ordering. Updates internal targets.
 """
 function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
@@ -176,7 +248,7 @@ end
     mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
-position for every device in multidevice `md`.
+position for every device in multidevice `md`. Updates internal targets.
 """
 function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
@@ -199,8 +271,8 @@ end
 """
     mcTarget(md::MultiDevice)
 
-Setup flexdrive modules and use internal distance target value for every device in
-multidevice `md`.
+Setup flexdrive modules and use internal distance target values for every device in
+multidevice `md`. Moves the motors. Updates internal targets.
 """
 function mcTarget(md::MultiDevice)
     for device in md
