@@ -272,7 +272,7 @@ end
     mcTarget(md::MultiDevice)
 
 Setup flexdrive modules and use internal distance target values for every device in
-multidevice `md`. Moves the motors. Updates internal targets.
+multidevice `md`. Moves the motors.
 """
 function mcTarget(md::MultiDevice)
     for device in md
@@ -284,7 +284,7 @@ function mcTarget(md::MultiDevice)
     end
     
     for device in md
-        mcTargetFCM(md[i].mc,device.target.p0,:m)
+        mcTargetFCM(device)
     end
 
     return

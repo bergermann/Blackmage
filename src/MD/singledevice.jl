@@ -102,12 +102,50 @@ mutable struct SingleState
     end
 end
 
+"""
+    update!(state::SingleState,target::Real)
+
+Update values of `state` to position `target` assuming no tilts.
+"""
 function update!(state::SingleState,target::Real)
     state.p0 = target; state.p3 .= target
     state.xtilt = state.ytilt = 0.
 
     return
 end
+
+"""
+    update!(state::SingleState,target::Union{Vector{<:Real},NTuple{3}};
+        α::Real=0,r::Real=0.15)
+
+Update values of `state` to individual motor positions `target`.
+"""
+function update!(state::SingleState,target::Union{Vector{<:Real},NTuple{3}};
+        α::Real=0,r::Real=0.15)
+
+    @assert length(target) == 3 "Target must contain exactly 3 elements."
+
+    state.p3 .= target
+    state.p0, state.xtilt, state.ytilt = pos2tilt(target; α=α,r=r)
+
+    return
+end
+
+"""
+    update!(state::SingleState,target::Real,xtilt::Real,ytilt::Real)
+
+Update values of `state` with given `xtilt` and `ytilt` and disc center position `target`.
+"""
+function update!(state::SingleState,target::Real,xtilt::Real,ytilt::Real;
+        α::Real=0,r::Real=0.15)
+
+    state.p0 = target; state.xilt = xtilt; state.ytilt=ytilt
+
+    state.p3 .= tilt2pos(xtilt,ytilt; α=α,r=r) .+ dz
+    
+    return
+end
+
 
 
 "State, settings and network information for single disc and motor set."
