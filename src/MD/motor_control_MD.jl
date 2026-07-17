@@ -110,6 +110,15 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 end
 
 """
+    mcTargetFCM(md::MultiDevice,target::Vector{<:Real})
+
+Set distance `target` value in meters from relative zero position for every device
+in multidevice `md`. `target` vector assumes same ordering as multidevice ordering.
+Moves motors if modules and motors are activated. Updates internal target.
+"""
+mcTargetFCM(md::MultiDevice,target::Vector{<:Real}) = mcTargetFCM(md,target,:m)
+
+"""
     mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
 Set distance `target` value in metric `unit` from relative zero position for every device
@@ -125,6 +134,15 @@ function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
     return
 end
+
+"""
+    mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real})
+
+Set distance `target` value in meters from relative zero position for every device
+in multidevice `md`. Moves motors if modules and motors are activated.
+Updates internal targets.
+"""
+mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real}) = mcTargetFCM(md,target,:m)
 
 """
     mcTargetFCM(md::MultiDevice)
@@ -195,6 +213,8 @@ function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
     return
 end
 
+mcTargetP(md::MultiDevice,target::Dict{Int,<:Real}; kwargs...) = mcTargetP(md,target,:m)
+
 """
     mcTargetP(md::MultiDevice)
 
@@ -244,6 +264,8 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     return
 end
 
+mcTarget(md::MultiDevice,target::Vector{<:Real}) = mcTarget(md,target,:m)
+
 """
     mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
@@ -267,6 +289,8 @@ function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
     return
 end
+
+mcTarget(md::MultiDevice,target::Dict{Int,<:Real}) = mcTarget(md,target,:m)
 
 """
     mcTarget(md::MultiDevice)
@@ -353,6 +377,10 @@ function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
         timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
 
     @assert pushsteps >= 0 "Amount of repush steps needs to be larger than 0."
+
+    for device in md
+        if device.stateFCM == FCM_ON; device.stateFCM = FCM_SEMI; end
+    end
 
     d0 = getPos(md,req)
     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))

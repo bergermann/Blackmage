@@ -132,12 +132,20 @@ function mcTargetFCM(sd::SingleDevice,target::Real,unit::Symbol)
 end
 
 """
+    mcTargetFCM(sd::SingleDevice,target::Real)
+
+Set distance `target` value meters from relative zero position for single device `sd`.
+Moves motors if modules and motors are activated.
+"""
+
+mcTargetFCM(sd::SingleDevice,target::Real) = mcTargetFCM(sd,target,:m)
+"""
     mcTargetFCM(sd::SingleDevice)
 
 Set distance target to internal value for single device `sd`.
 Moves motors if modules and motors are activated.
 """
-mcTargetFCM(sd::SingleDevice) = mcTargetFCM(sd,st.target.p0,:m)
+mcTargetFCM(sd::SingleDevice) = mcTargetFCM(sd,sd.target.p0,:m)
 
 
 
@@ -164,6 +172,14 @@ function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
 
     return
 end
+
+"""
+    mcTargetP(sd::SingleDevice,target::Real; kwargs...)
+
+Non-flexdriven sub-step precision corrections after target (in meter) acquisition. Correct all motors
+of single device `sd`.
+"""
+mcTargetP(sd::SingleDevice,target::Real; kwargs...) = mcTargetP(sd,target,:m,kwargs...)
 
 """
     mcTargetP(sd::SingleDevice; kwargs...)
@@ -215,6 +231,14 @@ function mcTarget(sd::SingleDevice,target::Real,unit::Symbol)
 
     return
 end
+
+"""
+    mcTarget(sd::SingleDevice,target::Real)
+
+Setup flexdrive module if necessary and set `target` in meters for
+single device `sd`. Updates internal target.
+"""
+mcTarget(sd::SingleDevice,target::Real) = mcTarget(sd,target,:m)
 
 """
     mcTarget(sd::SingleDevice)
