@@ -1,16 +1,4 @@
 
-    "Minimum allowed relative step size in percent."
-    mrss::NTuple{3,Int}
-    "(master, slave) Maximum step frequencies of master and slave motors in Hz."
-    freq::@NamedTuple{master::Int64,slave::Int64}
-    "Ambient temperature in K."
-    temp::Int
-    "Flexdrive target tolerance in IDS steps."
-    flextol::Int
-    "Maximum slave to master distance in flexdrive mode in IDS steps."
-    flexdist::Int
-    "Drive factor."
-    df::Float64
 
 
 """
