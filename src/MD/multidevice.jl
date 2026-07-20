@@ -177,8 +177,8 @@ import Base: setproperty!, getindex, eachindex, iterate, length, haskey, isopen,
 Base.getindex(md::MultiDevice,inds...) = getindex(md.devices,inds...)
 Base.setindex!(md::MultiDevice,X,inds...) = setindex!(md.devices,X,inds...)
 Base.eachindex(md::MultiDevice) = eachindex(md.devices)
-Base.iterate(md::MultiDevice) = iterate(md.devices)
-Base.iterate(md::MultiDevice,i::Integer) = iterate(md.devices,i)
+Base.iterate(md::MultiDevice) = iterate(values(md.devices))
+Base.iterate(md::MultiDevice,i::Integer) = iterate(values(md.devices),i)
 Base.length(md::MultiDevice) = length(md.devices)
 Base.haskey(md::MultiDevice,key) = haskey(md.devices,key)
 

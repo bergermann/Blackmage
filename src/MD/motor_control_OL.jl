@@ -28,6 +28,8 @@ function mcMove(sd::SingleDevice,addr::Int,dir::Int,steps::Int;
 
     steps == 0 && @warn "Unlimited movement started, use stop command to interrupt."
 
+    if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
+
     println("Status stage $addr: ",
         mcRequest(sd.mc,"MOV $addr $dir $freq $rss $steps $temp $stage $df"))
 
@@ -46,6 +48,8 @@ Single device version of [`mcStop`](@ref).
 function mcStop(sd::SingleDevice,addr::Int)
     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
     
+    if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
+
     println("Status stage $addr: ",mcRequest(sd.mc,"STP $addr"))
 
     return
