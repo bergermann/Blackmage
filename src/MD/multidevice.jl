@@ -131,7 +131,8 @@ struct MultiDevice
                  mc_ips[i], mc_port, mc,
                 ids_ips[i],ids_port,ids,
                 DiscSettings(),Boundaries(),
-                SingleState(),SingleState()
+                SingleState(),SingleState(),
+                FCM_OFF
             )
         end
 
