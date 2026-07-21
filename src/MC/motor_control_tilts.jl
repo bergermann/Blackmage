@@ -55,7 +55,7 @@ function pos2tilt(z::Union{Vector{<:Real},NTuple{3}}; α::Real=0,r::Real=0.15)
     n3 = r^2*(cos(α)*sin(α+2π/3)    - sin(α)*cos(α+2π/3))
     n_ = sqrt(n1^2+n2^2+n3^2)
 
-    return z0, rad2deg(asin(n1/n_)), rad2deg(asin(n1/n_))
+    return z0, rad2deg(asin(n1/n_)), rad2deg(asin(n2/n_))
 end
 
 """

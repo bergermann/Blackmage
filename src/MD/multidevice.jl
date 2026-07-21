@@ -80,7 +80,7 @@ end
 
 
 "Collection of disc devices including 3 motors and an interferometer each."
-struct MultiDevice
+mutable struct MultiDevice
     "Disc devices with index."
     devices::Dict{Int,SingleDevice}
     "Position data buffer."
@@ -130,7 +130,7 @@ struct MultiDevice
             devices[i] = SingleDevice(
                  mc_ips[i], mc_port, mc,
                 ids_ips[i],ids_port,ids,
-                DiscSettings(),Boundaries(),
+                DiscSettings(master=masters[i]),Boundaries(),
                 SingleState(),SingleState(),
                 FCM_OFF
             )
@@ -184,7 +184,7 @@ Base.haskey(md::MultiDevice,key) = haskey(md.devices,key)
 
 function Base.setproperty!(md::MultiDevice,name::Symbol,x)
     if hasfield(MultiDevice,name)
-        setproperty!(md,name,x)
+        setfield!(md,name,x)
     elseif hasfield(DiscSettings,name)
         for i in eachindex(md)
             setproperty!(md.devices[i].settings,name,x)

@@ -139,9 +139,9 @@ Update values of `state` with given `xtilt` and `ytilt` and disc center position
 function update!(state::SingleState,target::Real,xtilt::Real,ytilt::Real;
         α::Real=0,r::Real=0.15)
 
-    state.p0 = target; state.xilt = xtilt; state.ytilt=ytilt
+    state.p0 = target; state.xtilt = xtilt; state.ytilt=ytilt
 
-    state.p3 .= tilt2pos(xtilt,ytilt; α=α,r=r) .+ dz
+    state.p3 .= tilt2pos(xtilt,ytilt; α=α,r=r) .+ target
     
     return
 end

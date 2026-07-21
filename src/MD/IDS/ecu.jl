@@ -88,7 +88,7 @@ function getECUConnected(md::MultiDevice,req::Dict)
     connected = true
 
     for i in eachindex(md)
-        connected_ = getECUConnected(md.ids,req); connected *= connected_
+        connected_ = getECUConnected(md[i],req); connected *= connected_
         if !connected_; println("ECU not connected for device $i."); end
     end
 

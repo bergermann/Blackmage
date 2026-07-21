@@ -18,15 +18,15 @@ end
 
 """
     mcEnableFCM(sd::SingleDevice;
-        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.maxdist,
-        freqmaster::Int=ds.settings.freq.master,freqslave::Int=ds..settings.freq.slave)
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave)
 
 Activate flexdrive control module of single device `sd`. Uses internally saved settings
 unless overriden.
 """
 function mcEnableFCM(sd::SingleDevice;
-        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.maxdist,
-        freqmaster::Int=ds.freq.master,freqslave::Int=ds.freq.slave)
+        tol::Int=sd.settings.flextol,maxdist::Int=sd.settings.flexdist,
+        freqmaster::Int=sd.settings.freq.master,freqslave::Int=sd.settings.freq.slave)
 
     if sd.stateFCM == FCM_OFF; sd.stateFCM = FCM_SEMI; end
 
@@ -179,7 +179,7 @@ end
 Non-flexdriven sub-step precision corrections after target (in meter) acquisition. Correct all motors
 of single device `sd`.
 """
-mcTargetP(sd::SingleDevice,target::Real; kwargs...) = mcTargetP(sd,target,:m,kwargs...)
+mcTargetP(sd::SingleDevice,target::Real; kwargs...) = mcTargetP(sd,target,:m; kwargs...)
 
 """
     mcTargetP(sd::SingleDevice; kwargs...)
@@ -187,7 +187,7 @@ mcTargetP(sd::SingleDevice,target::Real; kwargs...) = mcTargetP(sd,target,:m,kwa
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
 of single device `sd`. Use internal target value.
 """
-mcTargetP(sd::SingleDevice; kwargs...) = mcTargetP(sd,sd.target.p0,:m,kwargs...)
+mcTargetP(sd::SingleDevice; kwargs...) = mcTargetP(sd,sd.target.p0,:m; kwargs...)
 
 # """
 #     mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;

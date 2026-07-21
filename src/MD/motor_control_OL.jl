@@ -56,23 +56,3 @@ function mcStop(sd::SingleDevice,addr::Int)
 end
 
 mcStop(sd::SingleDevice,addr::AbstractVector{<:Int}) = mcStop.(sd,addr)
-
-
-
-"""
-    mcStopAllMotors(sd::SingleDevice)
-
-Single device version of [`mcStopAllMotors`](@ref).
-"""
-function mcStopAllMotors(sd::SingleDevice)
-    for i in 1:3
-        try
-            mcStop(sd.mc,i)
-        catch e
-            println("Error encountered while attempting to stop motor $i:")
-            display(e)
-        end
-    end
-
-    return
-end
