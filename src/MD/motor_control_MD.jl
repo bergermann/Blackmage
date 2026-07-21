@@ -265,6 +265,7 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 end
 
 mcTarget(md::MultiDevice,target::Vector{<:Real}) = mcTarget(md,target,:m)
+mcTarget(md::MultiDevice,target) = mcTarget(md,Float64.(target))
 
 """
     mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
