@@ -179,7 +179,7 @@ end
 Re-zero relative values of all IDS axes at their current positions for single device `sd`.
 """
 function resetAxes(sd::SingleDevice,req::Dict)
-    resetAxes(sd,req); return
+    resetAxes(sd.ids,req); return
 end
 
 """
