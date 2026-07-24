@@ -82,8 +82,8 @@ Stop all motors and flexdrive commands, disable flexdrive module and put motors 
 direct drive mode for all devices in multidevice `md`.
 """
 function mcStopAll(md::MultiDevice)
-    for device in md
-        mcStopAll(device)
+    for i in eachindex(md)
+        mcStopAll_(md[i],i)
     end
 
     return
