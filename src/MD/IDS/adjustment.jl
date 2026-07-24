@@ -1,11 +1,11 @@
 
 
 """
-    getAlignmentEnabled(sd::MultiDevice,req::Dict)
+    getAlignmentEnabled(sd::SingleDevice,req::Dict)
 
 Return if IDS alignment mode is active for single device `sd`.
 """
-function getAlignmentEnabled(sd::MultiDevice,req::Dict)
+function getAlignmentEnabled(sd::SingleDevice,req::Dict)
     return getAlignmentEnabled(sd.ids,req)
 end
 
@@ -28,12 +28,12 @@ end
 
 
 """
-    getContrast(sd::MultiDevice,req::Dict; threshold::Int=850)
+    getContrast(sd::SingleDevice,req::Dict; threshold::Int=850)
 
 Return IDS alignment mode contrast for all axes in permille for single device `sd`.
 Gives warning if `threshold` is exceeded.
 """
-function getContrast(sd::MultiDevice,req::Dict; threshold::Int=850)
+function getContrast(sd::SingleDevice,req::Dict; threshold::Int=850)
     return getContrast(sd.ids,req; threshold=threshold)
 end
 

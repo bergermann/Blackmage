@@ -7,8 +7,8 @@
 Stop all motors of all devices in multidevice `md`.
 """
 function mcStopAllMotors(md::MultiDevice)
-    for device in md
-        mcStopAllMotors(device)
+    for i in eachindex(md)
+        mcStopAllMotors_(md[i],i)
     end
 
     return
