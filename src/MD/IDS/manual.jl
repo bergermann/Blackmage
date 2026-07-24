@@ -19,7 +19,7 @@ Manually set ECU humidity in percent for all devices in multidevice `md` in asce
 function setHumidityM(md::MultiDevice,req::Dict,humidity::AbstractVector{Float64})
     @assert length(md) == length(humidity) "Length mismatch between device count and humidity."
 
-    idx = 1; for i in sort!(keys(eachindex(md))), axis in 1:3
+    idx = 1; for i in sort!(collect(eachindex(md))), axis in 1:3
         setHumidityM(md[i].ids,req,axis,humidity[idx]); idx += 1
     end
 
@@ -43,7 +43,7 @@ end
 Manually set ECU humidity in percent for all devices in multidevice `md`.
 """
 function setHumidityM(md::MultiDevice,req::Dict,humidity::Dict{Int,Vector{Float64}})
-    @assert all(k->haskey(md,k),keys(index)) "Key mismatch between device and pressure."
+    @assert all(k->haskey(md,k),keys(humidity)) "Key mismatch between device and humidity."
 
     for i in eachindex(md), axis in 1:3
         setHumidityM(md[i].ids,req,axis,humidity[i][axis])
@@ -72,7 +72,7 @@ Manually set ECU pressure in hPa for all devices in multidevice `md` in ascendin
 function setPressureM(md::MultiDevice,req::Dict,pressure::AbstractVector{Float64})
     @assert length(md) == length(pressure) "Length mismatch between device count and pressure."
 
-    idx = 1; for i in sort!(keys(eachindex(md))), axis in 1:3
+    idx = 1; for i in sort!(collect(eachindex(md))), axis in 1:3
         setPressureM(md[i].ids,req,axis,pressure[idx]); idx += 1
     end
 
@@ -86,7 +86,7 @@ Manually set ECU pressure in hPa for all devices in multidevice `md`.
 """
 function setPressureM(md::MultiDevice,req::Dict,pressure::Float64)
     for i in eachindex(md), axis in 1:3
-        setPressure(md[i].ids,req,axis,pressure)
+        setPressureM(md[i].ids,req,axis,pressure)
     end; return
 end
 
@@ -96,7 +96,7 @@ end
 Manually set ECU pressure in hPa for all devices in multidevice `md`.
 """
 function setPressureM(md::MultiDevice,req::Dict,pressure::Dict{Int,Vector{Float64}})
-    @assert all(k->haskey(md,k),keys(index)) "Key mismatch between device and pressure."
+    @assert all(k->haskey(md,k),keys(pressure)) "Key mismatch between device and pressure."
 
     for i in eachindex(md), axis in 1:3
         setPressureM(md[i].ids,req,axis,pressure[i][axis])
@@ -125,7 +125,7 @@ Manually set ECU temperature in °C for all devices in multidevice `md` in ascen
 function setTemperatureM(md::MultiDevice,req::Dict,temp::AbstractVector{Float64})
     @assert length(md) == length(temp) "Length mismatch between device count and temperature."
 
-    idx = 1; for i in sort!(keys(eachindex(md))), axis in 1:3
+    idx = 1; for i in sort!(collect(eachindex(md))), axis in 1:3
         setTemperatureM(md[i].ids,req,axis,temp[idx]); idx += 1
     end
 
@@ -149,7 +149,7 @@ end
 Manually set ECU temperature in °C for all devices in multidevice `md`.
 """
 function setTemperatureM(md::MultiDevice,req::Dict,temp::Dict{Int,Vector{Float64}})
-    @assert all(k->haskey(md,k),keys(index)) "Key mismatch between device and temp."
+    @assert all(k->haskey(md,k),keys(temp)) "Key mismatch between device and temp."
     
     for i in eachindex(md), axis in 1:3
         setTemperatureM(md[i].ids,req,axis,temp[i][axis])
@@ -178,7 +178,7 @@ Manually set ECU refractive index for all devices in multidevice `md` in ascendi
 function setRefractiveIndexM(md::MultiDevice,req::Dict,index::AbstractVector{Float64})
     @assert length(md) == length(index) "Length mismatch between device count and index."
 
-    idx = 1; for i in sort!(keys(eachindex(md))), axis in 1:3
+    idx = 1; for i in sort!(collect(eachindex(md))), axis in 1:3
         setRefractiveIndexM(md[i].ids,req,axis,index[idx]); idx += 1
     end
 

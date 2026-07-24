@@ -71,7 +71,7 @@ function request(device::TCPSocket,req::Dict,interface::Symbol,
     if haskey(msg,"result")
         result = msg["result"]
     elseif haskey(msg,"error")
-        print(msg[error])
+        print(msg["error"])
         throw(AttoException(-1))
     else
         display(msg)

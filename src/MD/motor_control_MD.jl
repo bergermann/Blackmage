@@ -213,7 +213,7 @@ function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
     return
 end
 
-mcTargetP(md::MultiDevice,target::Dict{Int,<:Real}; kwargs...) = mcTargetP(md,target,:m)
+mcTargetP(md::MultiDevice,target::Dict{Int,<:Real}; kwargs...) = mcTargetP(md,target,:m; kwargs...)
 
 """
     mcTargetP(md::MultiDevice)
@@ -228,7 +228,7 @@ function mcTargetP(md::MultiDevice;
         doublepass::Bool=md.settings.psettings.doublepass)
 
     for i in sort!(collect(keys(md.devices)))
-        mcTargetP(md[i],md[i].target.p0,:p0;
+        mcTargetP(md[i],md[i].target.p0,:m;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
             maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
     end
@@ -343,7 +343,7 @@ target reached states for each axis and FCM internal motor positions in interfer
 (not necessarily equal to IDS position).
 """
 function mcStatusFCM(md::MultiDevice)
-    status = Dict{Int,Tuple{Bool},Vector{Bool},Vector{Int}}()
+    status = Dict{Int,Tuple{Bool,Vector{Bool},Vector{Int}}}()
 
     for i in eachindex(md)
         status[i] = mcStatusFCM(md[i])

@@ -211,7 +211,7 @@ end
 Write IDS signal quality directly to vector `a` of length 3, see
 [`getAxesSignalQuality`](@ref).
 """
-function getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict)
+function getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict; threshold::Int=850)
     @assert length(a) == 3 "Position vector needs to be length 3."
 
     for axis in 1:3

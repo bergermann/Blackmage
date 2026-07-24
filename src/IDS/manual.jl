@@ -107,9 +107,9 @@ function setTemperatureM(device::D,req::Dict,axis::Int,temp::Float64)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # request(device,req,:ecum,"setPressureInHPa";
+    # request(device,req,:ecum,"setTemperatureInDegrees";
     #     params=[axis-1,temp]); return
-    request(device,req,:ecum,"setPressureInHPa";
+    request(device,req,:ecum,"setTemperatureInDegrees";
         params=[-1,temp]); return
 end
 
