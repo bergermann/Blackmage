@@ -15,7 +15,7 @@ export connect, TCPSocket, now, @ip_str
 
 export Displacement, req    # IDS
 
-export getAlignmentEnabled, startAlignment, stopAlignment, getContrast  # adjustment
+export getAlignmentEnabled, startAlignment, stopAlignment, getContrast, getContrast!  # adjustment
 
 export enableECU, disableECU    # ECU
 export getECUEnabled, getECUConnected

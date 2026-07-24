@@ -187,7 +187,7 @@ function Base.setproperty!(md::MultiDevice,name::Symbol,x)
         setproperty!(md,name,x)
     elseif hasfield(DiscSettings,name)
         for i in eachindex(md)
-            setproperty!(md.devices[i].settings,name,x)
+            setproperty!(md[i].settings,name,x)
         end
     else
         throw(FieldError(MultiDevice,name))
