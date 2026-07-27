@@ -27,10 +27,10 @@ export getTemperatureM, setTemperatureM
 export getRefractiveIndexM, setRefractiveIndexM
 
 export getMeasurementEnabled, startMeasurement, stopMeasurement # measurement
-# export getAbsolutePosition, getAbsolutePositions, getAbsolutePositions!
-# export getAxisDisplacement, getAxesDisplacement, getAxesDisplacement!
-# export getReferencePosition, getReferencePositions
-# export getAxisSignalQuality, getAxesSignalQuality, getAxesSignalQuality!
+export getAbsolutePosition, getAbsolutePositions, getAbsolutePositions!
+export getAxisDisplacement, getAxesDisplacement, getAxesDisplacement!
+export getReferencePosition, getReferencePositions
+export getAxisSignalQuality, getAxesSignalQuality, getAxesSignalQuality!
 
 export enablePL, disablePL  # pilot
 
