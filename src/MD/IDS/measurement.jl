@@ -93,82 +93,225 @@ end
 
 
 """
-    getAbsolutePositions(sd::SingleDevice,req::Dict)
+    getAbsPos(sd::SingleDevice,req::Dict,axis::Int)
 
-Return absolute IDS positions of all axes (duh) for single device `sd`.
+Get absolute IDS position of `axis` for single device `sd`.
 """
-function getAbsolutePositions(sd::SingleDevice,req::Dict)
+function getAbsPos(sd::SingleDevice,req::Dict,axis::Int)
+    return getAbsolutePosition(sd.ids,req,axis)
+end
+
+"""
+    getAbsPos(sd::SingleDevice,req::Dict)
+
+Get absolute IDS positions of all axes for single device `sd`.
+"""
+function getAbsPos(sd::SingleDevice,req::Dict)
     return getAbsolutePositions(sd.ids,req)
 end
 
 """
-    getAbsolutePositions(md::MultiDevice,req::Dict)
+    getAbsPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
 
-Return absolute IDS positions of all axes (duh) for all devices in multidevice `md`.
+Write absolute IDS positions directly to vector `a` of length 3, see
+[`getAbsPos`](@ref).
 """
-function getAbsolutePositions(md::MultiDevice,req::Dict)
-    return Dict(i => getAbsolutePositions(md[i],req) for i in eachindex(md))
+function getAbsPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
+    return getAbsolutePositions!(a,sd.ids,req)
+end
+
+"""
+    getAbsPos(md::MultiDevice,req::Dict)
+
+Get absolute IDS positions of all axes for all devices in multidevice `md`.
+"""
+function getAbsPos(md::MultiDevice,req::Dict)
+    return Dict(i => getAbsPos(md[i],req) for i in eachindex(md))
+end
+
+"""
+    getAbsPos!(md::MultiDevice,req::Dict)
+
+Update internal absolute position log of multidevice `md`.
+"""
+function getAbsPos!(md::MultiDevice,req::Dict)
+    for i in eachindex(md)
+        getAbsPos!(md.logger.apos[i],md[i],req)
+    end
+
+    return
 end
 
 
 
 """
-    getAxesDisplacement(sd::SingleDevice,req::Dict)
+    getRelPos(sd::SingleDevice,req::Dict,axis::Int)
+
+Get relative IDS position of `axis` for single device `sd`.
+"""
+function getRelPos(sd::SingleDevice,req::Dict,axis::Int)
+    return getAxisDisplacement(sd.ids,req,axis)
+end
+
+"""
+    getRelPos(sd::SingleDevice,req::Dict)
 
 Get relative IDS positions of all axes for single device `sd`.
 """
-function getAxesDisplacement(sd::SingleDevice,req::Dict)
+function getRelPos(sd::SingleDevice,req::Dict)
     return getAxesDisplacement(sd.ids,req)
 end
 
 """
-    getAxesDisplacement(md::MultiDevice,req::Dict)
+    getRelPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
+
+Write relative IDS positions directly to vector `a` of length 3, see
+[`getRelPos`](@ref).
+"""
+function getRelPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
+    return getAxesDisplacement!(a,sd.ids,req)
+end
+
+"""
+    getRelPos(md::MultiDevice,req::Dict)
 
 Get relative IDS positions of all axes for all devices in multidevice `md`.
 """
-function getAxesDisplacement(md::MultiDevice,req::Dict)
-    return Dict(i => getAxesDisplacement(md[i],req) for i in eachindex(md))
+function getRelPos(md::MultiDevice,req::Dict)
+    return Dict(i => getRelPos(md[i],req) for i in eachindex(md))
+end
+
+"""
+    getRelPos!(md::MultiDevice,req::Dict)
+
+Update internal relative position log of multidevice `md`.
+"""
+function getRelPos!(md::MultiDevice,req::Dict)
+    for i in eachindex(md)
+        getRelPos!(md.logger.rpos[i],md[i],req)
+    end
+
+    return
 end
 
 
 
 """
-    getReferencePositions(sd::SingleDevice,req::Dict)
+    getRefPos(sd::SingleDevice,req::Dict,axis::Int)
 
-Get IDS reference position of all axes (duh) of single device `sd`.
+Get IDS reference position of `axis` for single device `sd`.
 """
-function getReferencePositions(sd::SingleDevice,req::Dict)
+function getRefPos(sd::SingleDevice,req::Dict,axis::Int)
+    return getReferencePosition(sd.ids,req,axis)
+end
+
+"""
+    getRefPos(sd::SingleDevice,req::Dict)
+
+Get IDS reference positions of all axes for single device `sd`.
+"""
+function getRefPos(sd::SingleDevice,req::Dict)
     return getReferencePositions(sd.ids,req)
 end
 
 """
-    getReferencePositions(md::MultiDevice,req::Dict)
+    getRefPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
 
-Get IDS reference position of all axes (duh) of all devices in multidevice `md`.
+Write IDS reference positions directly to vector `a` of length 3, see
+[`getRefPos`](@ref).
 """
-function getReferencePositions(md::MultiDevice,req::Dict)
-    return Dict(i => getReferencePositions(md[i],req) for i in eachindex(md))
+function getRefPos!(a::Vector{Int},sd::SingleDevice,req::Dict)
+    return getReferencePositions!(a,sd.ids,req)
+end
+
+"""
+    getRefPos(md::MultiDevice,req::Dict)
+
+Get IDS reference positions of all axes for all devices in multidevice `md`.
+"""
+function getRefPos(md::MultiDevice,req::Dict)
+    return Dict(i => getRefPos(md[i],req) for i in eachindex(md))
+end
+
+# """
+#     getRefPos!(md::MultiDevice,req::Dict)
+
+# Update internal reference position log of multidevice `md`.
+# """
+# function getRefPos!(md::MultiDevice,req::Dict)
+#     for i in eachindex(md)
+#         getRefPos!(md.logger.refpos[i],md[i],req)
+#     end
+
+#     return
+# end
+
+
+
+"""
+    getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
+
+    
+"""
+function getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
+    return Dict(i => getAxesSignalQuality(md[i],req; threshold=threshold)
+        for i in eachindex(md))
 end
 
 
 
 """
-    getAxesSignalQuality(sd::SingleDevice,req::Dict; threshold::Int=850)
+    getSignal(sd::SingleDevice,req::Dict,axis::Int; threshold::Int=850)
 
-Return IDS signal quality in permille for all axes for single device `sd`.
+Return IDS signal quality in permille of `axis` for single device `sd`.
+Gives warning if value exceeds `threshold`.
 """
-function getAxesSignalQuality(sd::SingleDevice,req::Dict; threshold::Int=850)
+function getSignal(sd::SingleDevice,req::Dict,axis::Int; threshold::Int=850)
+    return getAxisSignalQuality(sd.ids,req,axis; threshold=threshold)
+end
+
+"""
+    getSignal(sd::SingleDevice,req::Dict; threshold::Int=850)
+
+Return IDS signal quality in permille of all axes for single device `sd`.
+Gives warning if value exceeds `threshold`.
+"""
+function getSignal(sd::SingleDevice,req::Dict; threshold::Int=850)
     return getAxesSignalQuality(sd.ids,req; threshold=threshold)
 end
 
 """
-    getAxesSignalQuality(md::MultiDevice,req::Dict; threshold::Int=850)
+    getSignal!(a::Vector{Int},sd::SingleDevice,req::Dict; threshold::Int=850)
 
-Return IDS signal quality in permille for all axes for all devices in multidevice `md`.
+Write IDS signal quality directly to vector `a` of length 3, see
+[`getSignal`](@ref).
 """
-function getAxesSignalQuality(md::MultiDevice,req::Dict; threshold::Int=850)
-    return Dict(i => getAxesSignalQuality(md[i],req; threshold=threshold)
-        for i in eachindex(md))
+function getSignal!(a::Vector{Int},sd::SingleDevice,req::Dict; threshold::Int=850)
+    return getAxesSignalQuality!(a,sd.ids,req; threshold=threshold)
+end
+
+"""
+    getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
+    
+Return IDS signal quality in permille for all axes for all devices in multidevice `md`.
+Gives warning if value exceeds `threshold`.
+"""
+function getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
+    return Dict(i => getSignal(md[i],req; threshold=threshold) for i in eachindex(md))
+end
+
+"""
+    getSignal!(md::MultiDevice,req::Dict; threshold::Int=850)
+
+Update internal signal quality log of multidevice `md`.Gives warning if value exceeds
+`threshold`.
+"""
+function getSignal!(md::MultiDevice,req::Dict; threshold::Int=850)
+    for i in eachindex(md)
+        getSignal!(md.logger.signal[i],md[i],req; threshold=threshold)
+    end
+
+    return
 end
 
 
@@ -196,30 +339,32 @@ end
 
 
 
-"""
-    measurePos(md::MultiDevice,n::Int; dt::Real=0.)
+# """
+#     measurePos(md::MultiDevice,n::Int; dt::Real=0.)
 
-Measure IDS positions of each device in multidevice `md` `n` times, return dict of mean and
-standard deviation of the distribution. Enforce delay `dt` between each measurement.
-"""
-function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
-    data = Dict{Int,Tuple{Float64,Float64}}()
+# Measure IDS positions of each device in multidevice `md` `n` times, return dict of mean and
+# standard deviation of the distribution. Enforce delay `dt` between each measurement.
+# """
+# function measurePos(md::MultiDevice,n::Int; dt::Real=0.)
+#     data = Dict{Int,Tuple{Float64,Float64}}()
 
-    for i in eachindex(md)
-        data[i] = measurePos(md[i].ids,n; dt=dt)
-    end
+#     for i in eachindex(md)
+#         data[i] = measurePos(md[i].ids,n; dt=dt)
+#     end
     
-    return data
-end
+#     return data
+# end
 
 
 
 function updateLog!(md::MultiDevice)
     for i in eachindex(md)
-        getAbsolutePositions!(md.logger.apos,md[i].ids,md.req)
-        getRelativePositions!(md.logger.rpos,md[i].ids,md.req)
-        getAxesSignalQuality!(md.logger.apos,md[i].ids,md.req)
+        getRelativePositions!(md.logger.rpos,  md[i].ids,md.req)
+        getAbsolutePositions!(md.logger.apos,  md[i].ids,md.req)
+        getAxesSignalQuality!(md.logger.signal,md[i].ids,md.req)
     end
+
+    md.logger.timestamp = datetime2unix(now())
 
     return
 end
@@ -229,5 +374,9 @@ function updateLog_(md::MultiDevice)
     md.logger.rpos[1]     += rand(0:5,3)
     md.logger.contrast[1] += rand(0:1,3)
 
+    md.logger.timestamp += 1.
+
     return
 end
+
+

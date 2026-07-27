@@ -27,10 +27,10 @@ export getTemperatureM, setTemperatureM
 export getRefractiveIndexM, setRefractiveIndexM
 
 export getMeasurementEnabled, startMeasurement, stopMeasurement # measurement
-export getAbsolutePosition, getAbsolutePositions, getAbsolutePositions!
-export getAxisDisplacement, getAxesDisplacement, getAxesDisplacement!
-export getReferencePosition, getReferencePositions
-export getAxisSignalQuality, getAxesSignalQuality, getAxesSignalQuality!
+# export getAbsolutePosition, getAbsolutePositions, getAbsolutePositions!
+# export getAxisDisplacement, getAxesDisplacement, getAxesDisplacement!
+# export getReferencePosition, getReferencePositions
+# export getAxisSignalQuality, getAxesSignalQuality, getAxesSignalQuality!
 
 export enablePL, disablePL  # pilot
 
@@ -64,6 +64,8 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
+export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
+export getSignal, getSignal!
 
 export updateLog!, updateLog_
 

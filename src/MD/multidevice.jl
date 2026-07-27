@@ -28,7 +28,7 @@ end
 """
     Logger
 
-Log file to track interferometer position (relative and absolute), contrast and timestamp.
+Log file to track interferometer position (relative and absolute), signal strength and timestamp.
 """
 mutable struct Logger
     "Control state for measuring/writing loop."
@@ -39,8 +39,8 @@ mutable struct Logger
     apos::Dict{Int,Vector{Int}}
     "Relative position data."
     rpos::Dict{Int,Vector{Int}}
-    "Interferometer signal contrast."
-    contrast::Dict{Int,Vector{Int}}
+    "Interferometer signal strength in permille."
+    signal::Dict{Int,Vector{Int}}
 
     "Timestamp of last measurement in unix time."
     timestamp::Float64
@@ -49,10 +49,10 @@ mutable struct Logger
     req::Dict{String,Union{String,Vector}}
 
     @doc """
-        Logger(active,apos,rpos,contrast)
+        Logger(active,apos,rpos,signal)
     """
-    function Logger(active,lock,apos,rpos,contrast,timestamp,req)
-        new(active,lock,apos,rpos,contrast,timestamp,req)
+    function Logger(active,lock,apos,rpos,signal,timestamp,req)
+        new(active,lock,apos,rpos,signal,timestamp,req)
     end
 
     @doc """
