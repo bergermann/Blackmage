@@ -1,11 +1,11 @@
 
 
 """
-    getAlignmentEnabled(sd::MultiDevice,req::Dict)
+    getAlignmentEnabled(sd::SingleDevice,req::Dict)
 
 Return if IDS alignment mode is active for single device `sd`.
 """
-function getAlignmentEnabled(sd::MultiDevice,req::Dict)
+function getAlignmentEnabled(sd::SingleDevice,req::Dict)
     return getAlignmentEnabled(sd.ids,req)
 end
 
@@ -28,13 +28,23 @@ end
 
 
 """
-    getContrast(sd::MultiDevice,req::Dict; threshold::Int=850)
+    getContrast(sd::SingleDevice,req::Dict; threshold::Int=850)
 
 Return IDS alignment mode contrast for all axes in permille for single device `sd`.
 Gives warning if `threshold` is exceeded.
 """
-function getContrast(sd::MultiDevice,req::Dict; threshold::Int=850)
+function getContrast(sd::SingleDevice,req::Dict; threshold::Int=850)
     return getContrast(sd.ids,req; threshold=threshold)
+end
+
+"""
+    getContrast!(contrast::Vector{Int},sd::SingleDevice,req::Dict; threshold::Int=850)
+
+Update IDS alignment mode `contrast` for all axes in permille for single device `sd`.
+Gives warning if `threshold` is exceeded.
+"""
+function getContrast!(contrast::Vector{Int},sd::SingleDevice,req::Dict; threshold::Int=850)
+    return getContrast!(contrast,sd.ids,req; threshold=threshold)
 end
 
 """
@@ -51,4 +61,21 @@ function getContrast(md::MultiDevice,req::Dict; threshold::Int=850)
     end
 
     return contrast
+end
+
+"""
+    getContrast!(contrast::Dict{Int,Vector{Int}},md::MultiDevice,req::Dict;
+        threshold::Int=850)
+
+Update existing IDS alignment mode `contrast` dict for all axes in permille for all devices
+in multidevice `md`. Gives warning if `threshold` is exceeded.
+"""
+function getContrast!(contrast::Dict{Int,Vector{Int}},md::MultiDevice,req::Dict;
+        threshold::Int=850)
+
+    for i in eachindex(md)
+        getContrast!(contrast[i],md[i],req; threshold=threshold)
+    end
+
+    return
 end

@@ -15,7 +15,7 @@ export connect, TCPSocket, now, @ip_str
 
 export Displacement, req    # IDS
 
-export getAlignmentEnabled, startAlignment, stopAlignment, getContrast  # adjustment
+export getAlignmentEnabled, startAlignment, stopAlignment, getContrast, getContrast!  # adjustment
 
 export enableECU, disableECU    # ECU
 export getECUEnabled, getECUConnected
@@ -64,6 +64,8 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
+export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
+export getSignal, getSignal!
 
 export updateLog!, updateLog_
 

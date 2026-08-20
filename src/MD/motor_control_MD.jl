@@ -7,8 +7,8 @@
 Stop all motors of all devices in multidevice `md`.
 """
 function mcStopAllMotors(md::MultiDevice)
-    for device in md
-        mcStopAllMotors(device)
+    for i in eachindex(md)
+        mcStopAllMotors_(md[i],i)
     end
 
     return
@@ -82,8 +82,8 @@ Stop all motors and flexdrive commands, disable flexdrive module and put motors 
 direct drive mode for all devices in multidevice `md`.
 """
 function mcStopAll(md::MultiDevice)
-    for device in md
-        mcStopAll(device)
+    for i in eachindex(md)
+        mcStopAll_(md[i],i)
     end
 
     return
@@ -265,6 +265,7 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 end
 
 mcTarget(md::MultiDevice,target::Vector{<:Real}) = mcTarget(md,target,:m)
+mcTarget(md::MultiDevice,target::Vector{<:Any}) = mcTarget(md,Float64.(target))
 mcTarget(md::MultiDevice,target) = mcTarget(md,Float64.(target))
 
 """
