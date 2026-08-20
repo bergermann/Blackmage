@@ -92,6 +92,8 @@ struct MultiDevice
     moving::Bool
     "Flag if device is at target after moving."
     target::Bool
+    "Flag if device operation should be interrupted at next opportunity."
+    interrupt::Bool
 
     @doc """
         MultiDevice(devices,logger,settings)
@@ -141,7 +143,8 @@ struct MultiDevice
             Logger(length(devices)),
             MultiDeviceSettings(),
             false,
-            true
+            true,
+            false
         )
     end
 
@@ -161,7 +164,8 @@ struct MultiDevice
             Logger(0),
             MultiDeviceSettings(),
             false,
-            true
+            true,
+            false
         )
     end
 end
