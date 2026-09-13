@@ -239,13 +239,13 @@ end
 
 
 """
-    mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+    mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
 position for every device in multidevice `md`. `target` vector assumes same ordering as
 multidevice ordering. Updates internal targets.
 """
-function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+function mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     for device in md
@@ -264,15 +264,15 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
     return
 end
 
-mcTarget(md::MultiDevice,target::Vector{<:Real}) = mcTarget(md,target,:m)
-mcTarget(md::MultiDevice,target::Vector{<:Any}) = mcTarget(md,Float64.(target))
-mcTarget(md::MultiDevice,target) = mcTarget(md,Float64.(target))
+mcTarget(md::MultiDevice,target::Vector{<:Float64}) = mcTarget(md,target,:m)
+mcTarget(md::MultiDevice,target::AbstractVector{<:Any}) = mcTarget(md,Float64.(target),:m)
 
 """
     mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
-position for every device in multidevice `md`. Updates internal targets.
+position for every device in multidevice `md`. Updates internal targets, sets `md.moving` to
+true (but does not automatically disable it).
 """
 function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
@@ -284,6 +284,8 @@ function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
             mcReSetupFCM(device)
         end
     end
+
+    md.moving = true
     
     for i in eachindex(md)
         mcTargetFCM(md[i],target[i],unit)
@@ -327,8 +329,22 @@ function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
     for device in md
-        mcWaitForTarget(device; interval=interval)
+        target = false
+
+        while !target
+            if md.interrupt; mcStop()
+
+            active, status, _ = mcStatusFCM(device)
+
+            # if !active; throw(InterruptException()); end
+
+            target = all(status)
+
+            sleep(interval)
+        end
     end
+
+    md.moving = false
 
     return
 end
