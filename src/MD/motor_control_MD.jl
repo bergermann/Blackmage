@@ -92,13 +92,13 @@ end
 
 
 """
-    mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+    mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
 
 Set distance `target` value in metric `unit` from relative zero position for every device
 in multidevice `md`. `target` vector assumes same ordering as multidevice ordering.
 Moves motors if modules and motors are activated. Updates internal target.
 """
-function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
+function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     idx = 1
@@ -110,22 +110,13 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol)
 end
 
 """
-    mcTargetFCM(md::MultiDevice,target::Vector{<:Real})
-
-Set distance `target` value in meters from relative zero position for every device
-in multidevice `md`. `target` vector assumes same ordering as multidevice ordering.
-Moves motors if modules and motors are activated. Updates internal target.
-"""
-mcTargetFCM(md::MultiDevice,target::Vector{<:Real}) = mcTargetFCM(md,target,:m)
-
-"""
-    mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+    mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m)
 
 Set distance `target` value in metric `unit` from relative zero position for every device
 in multidevice `md`. Moves motors if modules and motors are activated.
 Updates internal targets.
 """
-function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
 
     for i in eachindex(md.devices)
@@ -134,15 +125,6 @@ function mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
     return
 end
-
-"""
-    mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real})
-
-Set distance `target` value in meters from relative zero position for every device
-in multidevice `md`. Moves motors if modules and motors are activated.
-Updates internal targets.
-"""
-mcTargetFCM(md::MultiDevice,target::Dict{Int,<:Real}) = mcTargetFCM(md,target,:m)
 
 """
     mcTargetFCM(md::MultiDevice)
@@ -161,7 +143,7 @@ end
 
 
 """
-    mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
+    mcTargetP(md::MultiDevice,target::Vector{Float64},unit::Symbol=:m;
         maxsteps::Int=md.settings.psettings.maxsteps,
         maxiter::Int=md.settings.psettings.maxiter,
         correctess::Bool=md.settings.psettings.correctess,
@@ -170,7 +152,7 @@ end
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
 of all devices in multidevice `md`, in ascending order. Does NOT update internal targets.
 """
-function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
+function mcTargetP(md::MultiDevice,target::Vector{Float64},unit::Symbol=:m;
         maxsteps::Int=md.settings.psettings.maxsteps,
         maxiter::Int=md.settings.psettings.maxiter,
         correctess::Bool=md.settings.psettings.correctess,
@@ -189,7 +171,7 @@ function mcTargetP(md::MultiDevice,target::Vector{<:Real},unit::Symbol;
 end
 
 """
-    mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
+    mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m;
         maxsteps::Int=md.settings.psettings.maxsteps,
         maxiter::Int=md.settings.psettings.maxiter,
         correctess::Bool=md.settings.psettings.correctess,
@@ -198,7 +180,7 @@ end
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
 of all devices in multidevice `md`, in ascending order. Does NOT update internal targets.
 """
-function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
+function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m;
         maxsteps::Int=md.settings.psettings.maxsteps,
         maxiter::Int=md.settings.psettings.maxiter,
         correctess::Bool=md.settings.psettings.correctess,
@@ -212,8 +194,6 @@ function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol;
 
     return
 end
-
-mcTargetP(md::MultiDevice,target::Dict{Int,<:Real}; kwargs...) = mcTargetP(md,target,:m)
 
 """
     mcTargetP(md::MultiDevice)
@@ -239,14 +219,14 @@ end
 
 
 """
-    mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
+    mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
 position for every device in multidevice `md`. `target` vector assumes same ordering as
 multidevice ordering. Updates internal targets, sets `md.moving` to true (but does not
 automatically disable it).
 """
-function mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
+function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     for device in md
@@ -267,17 +247,14 @@ function mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
     return
 end
 
-mcTarget(md::MultiDevice,target::Vector{<:Float64}) = mcTarget(md,target,:m)
-mcTarget(md::MultiDevice,target::AbstractVector{<:Any}) = mcTarget(md,Float64.(target),:m)
-
 """
-    mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+    mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m)
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
 position for every device in multidevice `md`. Updates internal targets, sets `md.moving` to
 true (but does not automatically disable it).
 """
-function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
+function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m)
     @assert all(k->haskey(md,k),keys(target)) "Key mismatch between device and target dicts."
 
     for device in md
@@ -296,8 +273,6 @@ function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
 
     return
 end
-
-mcTarget(md::MultiDevice,target::Dict{Int,<:Real}) = mcTarget(md,target,:m)
 
 """
     mcTarget(md::MultiDevice)
