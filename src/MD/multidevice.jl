@@ -89,17 +89,17 @@ struct MultiDevice
     settings::MultiDeviceSettings
 
     "Flag if device is currently moving."
-    moving::Bool
+    moving::Base.RefValue{Bool}
     "Flag if device is at target after moving."
-    target::Bool
+    target::Base.RefValue{Bool}
     "Flag if device operation should be interrupted at next opportunity."
-    interrupt::Bool
+    interrupt::Base.RefValue{Bool}
 
     @doc """
         MultiDevice(devices,logger,settings)
     """
-    function MultiDevice(devices,logger,settings,moving,target)
-        new(devices,logger,settings,moving,target)
+    function MultiDevice(devices,logger,settings,moving,target,interrupt)
+        new(devices,logger,settings,moving,target,interrupt)
     end
 
     @doc """
@@ -134,18 +134,24 @@ struct MultiDevice
                 ids_ips[i],ids_port,ids,
                 DiscSettings(),Boundaries(),
                 SingleState(),SingleState(),
-                FCM_OFF
+                FCM_OFF,Ref(false)
             )
         end
 
-        new(
+        x = new(
             devices,
             Logger(length(devices)),
             MultiDeviceSettings(),
-            false,
-            true,
-            false
+            Ref(false),
+            Ref(true),
+            Ref(false)
         )
+
+        for device in x
+            device.interrupt = x.interrupt
+        end
+
+        return x
     end
 
     @doc """
@@ -163,9 +169,9 @@ struct MultiDevice
             Dict{Int,SingleDevice}(),
             Logger(0),
             MultiDeviceSettings(),
-            false,
-            true,
-            false
+            Ref(false),
+            Ref(true),
+            Ref(false)
         )
     end
 end

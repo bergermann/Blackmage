@@ -223,8 +223,8 @@ end
 Set distance `target` value meters from relative zero position for single device `sd`.
 Moves motors if modules and motors are activated.
 """
-
 mcTargetFCM(sd::SingleDevice,target::Real) = mcTargetFCM(sd,target,:m)
+
 """
     mcTargetFCM(sd::SingleDevice)
 
@@ -248,13 +248,15 @@ function mcTargetP(sd::SingleDevice,target::Real,unit::Symbol;
         maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false,doublepass::Bool=true,forcewait::Bool=true)
 
+    if sd.interrupt[]; return; end
     if forcewait; mcWaitForTarget(sd); sleep(0.1); end
     if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
 
     mcTargetP(sd.mc,sd.ids,target,unit;
         ess=ess,mrss=mrss,
         maxsteps=maxsteps,maxiter=maxiter,
-        correctess=correctess,doublepass=doublepass)
+        correctess=correctess,doublepass=doublepass,
+        interrupt=sd.interrupt)
 
     return
 end
@@ -344,7 +346,19 @@ Wait for flexdrive command to reach its target, check every `interval` seconds.
 function mcWaitForTarget(sd::SingleDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
-    mcWaitForTarget(sd.mc; interval=interval)
+    target = false
+    
+    while !target
+        if sd.interrupt[]; mcStopAllMotors(sd); break; end
+
+        active, status, _ = mcStatusFCM(sd)
+
+        # if !active; throw(InterruptException()); end
+
+        target = all(status)
+
+        sleep(interval)
+    end
 
     return
 end

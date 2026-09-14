@@ -204,16 +204,21 @@ end
 
 
 """
-    mcWaitForTarget(device::TCPSocket; interval::Real=0.1)
+    mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
+        interrupt::Base.RefValue{Bool}=Ref(false))
 
 Wait for flexdrive command to reach its target, check every `interval` seconds.
 """
-function mcWaitForTarget(device::TCPSocket; interval::Real=0.1)
+function mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
+        interrupt::Base.RefValue{Bool}=Ref(false))
+
     @assert interval >= 0 "Interval needs to be non-negative."
 
     target = false
 
     while !target
+        if interrupt[]; mcStopAllMotors(device); break; end
+
         active, status, _ = mcStatusFCM(device)
 
         # if !active; throw(InterruptException()); end
@@ -226,34 +231,34 @@ function mcWaitForTarget(device::TCPSocket; interval::Real=0.1)
     return
 end
 
-"""
-    mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
+# """
+#     mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
 
-Wait for flexdrive command to reach its target, check every `interval` seconds. Write
-position data given by flexdrive module to container `d`.
-"""
-function mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
-    @assert interval >= 0 "Interval needs to be non-negative."
+# Wait for flexdrive command to reach its target, check every `interval` seconds. Write
+# position data given by flexdrive module to container `d`.
+# """
+# function mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
+#     @assert interval >= 0 "Interval needs to be non-negative."
 
-    target = false
+#     target = false
 
-    while !target
-        d.idx = d.idx%d.n+1
+#     while !target
+#         d.idx = d.idx%d.n+1
         
-        active, status, pos = mcStatusFCM(device)
+#         active, status, pos = mcStatusFCM(device)
 
-        # if !active; throw(InterruptException()); end
+#         # if !active; throw(InterruptException()); end
         
-        d.dX[:,d.idx] .= pos
-        d.dT[d.idx] = (now()-d.t0).value
+#         d.dX[:,d.idx] .= pos
+#         d.dT[d.idx] = (now()-d.t0).value
 
-        target = all(status)
+#         target = all(status)
 
-        sleep(interval)
-    end
+#         sleep(interval)
+#     end
 
-    return
-end
+#     return
+# end
 
 const mcWait = mcWaitForTarget
 
@@ -290,13 +295,15 @@ step sizes `ess` after each step.
 """
 function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false)
+        correctess::Bool=false,interrupt::Base.RefValue{Bool}=Ref(false))
 
     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
     @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
     @assert maxsteps > 0 "maxsteps needs to be positive."
     @assert maxiter > 0 "maxiter needs to be positive."
+
+    if interrupt[]; return; end
     
     ess = round(Int,abs(ess)/1e-12)
 
@@ -305,6 +312,8 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     dt = abs(d0-t)
 
     for i in 1:maxiter
+        if interrupt[]; break; end
+
         dir = Int(t > d0)
         
         if dt >= ess

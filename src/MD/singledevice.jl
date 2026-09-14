@@ -176,12 +176,17 @@ mutable struct SingleDevice
 
     "State of FCM device."
     stateFCM::StateFCM
+    "Flag if device operation should be interrupted at next opportunity."
+    interrupt::Base.RefValue{Bool}
 
     @doc """
         SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target)
     """
-    function SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target,stateFCM)
-        new(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target,stateFCM)
+    function SingleDevice(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target,
+            stateFCM,interrupt)
+
+        new(mc_ip,mc_port,mc,ids_ip,ids_port,ids,settings,bdry,state,target,
+            stateFCM,interrupt)
     end
     
     @doc """
@@ -193,7 +198,7 @@ mutable struct SingleDevice
             ids_ip,ids_port,connect(ids_ip,ids_port),
             DiscSettings(; disc_settings...),Boundaries(),
             SingleState(),SingleState(),
-            FCM_OFF
+            FCM_OFF,Ref(false)
         )
     end
 end; const SD = SingleDevice

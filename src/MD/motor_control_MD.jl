@@ -243,7 +243,8 @@ end
 
 Setup flexdrive modules and set distance `target` value in metric `unit` from relative zero
 position for every device in multidevice `md`. `target` vector assumes same ordering as
-multidevice ordering. Updates internal targets.
+multidevice ordering. Updates internal targets, sets `md.moving` to true (but does not
+automatically disable it).
 """
 function mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
@@ -255,6 +256,8 @@ function mcTarget(md::MultiDevice,target::Vector{Float64},unit::Symbol)
             mcReSetupFCM(device)
         end
     end
+    
+    md.moving[] = true
     
     idx = 1
     for i in sort!(collect(keys(md.devices)))
@@ -285,7 +288,7 @@ function mcTarget(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol)
         end
     end
 
-    md.moving = true
+    md.moving[] = true
     
     for i in eachindex(md)
         mcTargetFCM(md[i],target[i],unit)
@@ -300,7 +303,8 @@ mcTarget(md::MultiDevice,target::Dict{Int,<:Real}) = mcTarget(md,target,:m)
     mcTarget(md::MultiDevice)
 
 Setup flexdrive modules and use internal distance target values for every device in
-multidevice `md`. Moves the motors.
+multidevice `md`. Moves the motors, sets `md.moving` to true (but does not automatically
+disable it).
 """
 function mcTarget(md::MultiDevice)
     for device in md
@@ -311,6 +315,8 @@ function mcTarget(md::MultiDevice)
         end 
     end
     
+    md.moving[] = true
+
     for device in md
         mcTargetFCM(device)
     end
@@ -329,22 +335,10 @@ function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
 
     for device in md
-        target = false
-
-        while !target
-            if md.interrupt; mcStop()
-
-            active, status, _ = mcStatusFCM(device)
-
-            # if !active; throw(InterruptException()); end
-
-            target = all(status)
-
-            sleep(interval)
-        end
+        mcWaitForTarget(device; interval=interval)
     end
 
-    md.moving = false
+    md.moving[] = false
 
     return
 end
