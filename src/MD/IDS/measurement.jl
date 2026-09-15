@@ -247,18 +247,7 @@ end
 # end
 
 
-
-"""
-    getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
-
-    
-"""
-function getSignal(md::MultiDevice,req::Dict; threshold::Int=850)
-    return Dict(i => getAxesSignalQuality(md[i],req; threshold=threshold)
-        for i in eachindex(md))
-end
-
-
+#
 
 """
     getSignal(sd::SingleDevice,req::Dict,axis::Int; threshold::Int=850)
