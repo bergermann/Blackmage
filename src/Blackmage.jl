@@ -15,7 +15,7 @@ export connect, TCPSocket, now, @ip_str
 
 export Displacement, req    # IDS
 
-export getAlignmentEnabled, startAlignment, stopAlignment, getContrast  # adjustment
+export getAlignmentEnabled, startAlignment, stopAlignment, getContrast, getContrast!  # adjustment
 
 export enableECU, disableECU    # ECU
 export getECUEnabled, getECUConnected
@@ -64,6 +64,8 @@ export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 
 export DiscSettings, Boundaries, SingleState, SingleDevice, MultiDeviceSettings, MultiDevice  # MD
 export mcZero
+export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
+export getSignal, getSignal!
 
 export updateLog!, updateLog_
 
@@ -74,22 +76,7 @@ export testf1, addMockLog_
 include("socketing.jl")
 include("IDS/IDS.jl")
 include("MC/MC.jl")
-include("MD/multidevice.jl")
-
-
-function testf1(t::Float64)
-    sleep(t); return
-end
-
-function addMockLog_(md::MultiDevice)
-    @assert isempty(md.devices) "Real devices present in multidevice"
-
-    md.logger.apos[1] = [0,0,0]
-    md.logger.rpos[1] = [0,0,0]
-    md.logger.contrast[1] = [0,0,0]
-
-    return
-end
+include("MD/MD.jl")
 
 end
 
@@ -97,3 +84,7 @@ end
 # targetP, targetP_abs, direct target doc
 # add axes(device,axis) functions
 # swap addr for axis
+# add sd variants for manual IDS stuff?
+
+# todo:
+# make mcTargetP(md) write to and use logger data

@@ -92,4 +92,20 @@ function getContrast(device::D,req::Dict; threshold::Int=850)
     return contrast
 end
 
-const getContrastInPermille = getContrast
+"""
+    getContrast!(contrast::Vector{Int},device::D,req::Dict; threshold::Int=850)
+
+Update existing IDS alignment mode `contrast` for all axes in permille. Gives warning if
+`threshold` is exceeded.
+"""
+function getContrast!(contrast::Vector{Int},device::D,req::Dict; threshold::Int=850)
+    for axis in 1:3
+        c, offset, _ = getContrast(device,req,axis; threshold=threshold)
+        contrast[axis] = c+offset
+    end
+
+    return
+end
+
+const getContrastInPermille  = getContrast
+const getContrastInPermille! = getContrast!

@@ -1,5 +1,5 @@
 
-
+# FIX add sd variants?
 
 """
     getHumidityM(md::MultiDevice,req::Dict)

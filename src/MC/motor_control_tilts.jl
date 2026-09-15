@@ -8,7 +8,7 @@ Return necessary motor shifts to achieve kartesian tilts `xtilt` and 'ytilt' (in
 `α` is the structural angle of the respective motor 1 (in degrees). Radius `r` (in m) denotes
 distance of interferometers from central axis.
 """
-function tilt2pos(xtilt::Real,ytilt::Real; α::Real=0, r::Real=0.15)
+function tilt2pos(xtilt::Real,ytilt::Real; α::Real=0,r::Real=0.15)
     !(0 <= α <= 360) && @warn "Angle α not between 0° and 360°, double check!"
 
     α = deg2rad(α)
@@ -44,7 +44,7 @@ Return position of disc center and kartesian tilts (in degrees) for motor positi
 (in m). `α` is the structural angle of the respective motor 1 (in degres). Radius `r`
 (in m) denotes distance of interferometers from central axis.
 """
-function pos2tilt(z::Union{Vector{<:Real},NTuple{3}}; α::Real=0, r::Real=0.15)
+function pos2tilt(z::Union{Vector{<:Real},NTuple{3}}; α::Real=0,r::Real=0.15)
     @assert length(z) == 3 "Exactly three values required in z."
 
     α = deg2rad(α)

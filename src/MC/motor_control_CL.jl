@@ -172,11 +172,11 @@ end
 
 
 """
-    mcTargetFCM(device::TCPSocket,target::Real,unit::Symbol)
+    mcTargetFCM(device::TCPSocket,target::Real,unit::Symbol=:m)
 
 Set distance `target` value in metric `unit` from relative zero position.
 """
-function mcTargetFCM(device::TCPSocket,target::Real,unit::Symbol)
+function mcTargetFCM(device::TCPSocket,target::Real,unit::Symbol=:m)
     target = metric2ids(target,unit)
 
     mcTargetFCM_(device,target)
@@ -204,48 +204,24 @@ end
 
 
 """
-    mcWaitForTarget(device::TCPSocket; interval::Real=0.1)
+    mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
+        interrupt::Base.RefValue{Bool}=Ref(false))
 
 Wait for flexdrive command to reach its target, check every `interval` seconds.
 """
-function mcWaitForTarget(device::TCPSocket; interval::Real=0.1)
+function mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
+        interrupt::Base.RefValue{Bool}=Ref(false))
+
     @assert interval >= 0 "Interval needs to be non-negative."
 
     target = false
 
     while !target
+        if interrupt[]; mcStopAllMotors(device); break; end
+
         active, status, _ = mcStatusFCM(device)
 
         # if !active; throw(InterruptException()); end
-
-        target = all(status)
-
-        sleep(interval)
-    end
-
-    return
-end
-
-"""
-    mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
-
-Wait for flexdrive command to reach its target, check every `interval` seconds. Write
-position data given by flexdrive module to container `d`.
-"""
-function mcWaitForTarget(device::TCPSocket,d::Displacement; interval::Real=0.1)
-    @assert interval >= 0 "Interval needs to be non-negative."
-
-    target = false
-
-    while !target
-        d.idx = d.idx%d.n+1
-        
-        active, status, pos = mcStatusFCM(device)
-
-        # if !active; throw(InterruptException()); end
-        
-        d.dX[:,d.idx] .= pos
-        d.dT[d.idx] = (now()-d.t0).value
 
         target = all(status)
 
@@ -290,7 +266,7 @@ step sizes `ess` after each step.
 """
 function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false)
+        correctess::Bool=false,interrupt::Base.RefValue{Bool}=Ref(false))
 
     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
@@ -305,6 +281,8 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     dt = abs(d0-t)
 
     for i in 1:maxiter
+        if interrupt[]; break; end
+
         dir = Int(t > d0)
         
         if dt >= ess
@@ -330,7 +308,7 @@ end
     mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
         maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
+        correctess::Bool=false,doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false))
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
 of device at `device_mc` with IDS `device_ids`.
@@ -338,9 +316,11 @@ of device at `device_mc` with IDS `device_ids`.
 function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
         maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true)
+        correctess::Bool=false,doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false))
 
     for axis in 1:3
+        if interrupt[]; return; end
+
         mcTargetP(device_mc,device_ids,axis,target,unit;
             ess=ess[axis],mrss=mrss[axis],
             maxsteps=maxsteps,maxiter=maxiter,
@@ -348,6 +328,8 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
     end
 
     if doublepass; for axis in 1:3
+        if interrupt[]; return; end
+
         mcTargetP(device_mc,device_ids,axis,target,unit;
             ess=ess[axis],mrss=mrss[axis],
             maxsteps=maxsteps,maxiter=maxiter,
@@ -356,69 +338,6 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
 
     return
 end
-
-# function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
-#         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
-#         correctess::Bool=false)
-        
-#     @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
-#     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
-#     @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
-#     @assert maxsteps > 0 "maxsteps needs to be positive."
-#     @assert maxiter > 0 "maxiter needs to be positive."
-    
-#     ess = round(Int,abs(ess)/1e-12)
-
-#     d0 = getAbsolutePosition(device_ids,req,addr)
-#     t = round(Int,target*units[unit]/1e-12)
-#     dt = abs(d0-t)
-
-#     for i in 1:maxiter
-#         dir = Int(t > d0)
-        
-#         if dt > ess
-#             nsteps = min(div(dt,ess),maxsteps); rss = 100
-#         else
-#             nsteps = 1; rss = div(100*dt,ess)
-
-#             if rss < mrss/2; break; else; rss = max(rss,mrss); end
-#         end
-
-#         mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
-
-#         d1 = getAbsolutePosition(device_ids,req,addr)
-        
-
-#         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
-#         dt = abs(d1-t); d0 = d1
-
-#         if 2*dt < ess*mrss/100; break; end
-#     end
-
-#     return
-# end
-
-# function mcTargetP_abs(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-#         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
-#         maxsteps::Int=10,maxiter::Int=10,
-#         correctess::Bool=false,doublepass::Bool=true)
-
-#     for axis in 1:3
-#         mcTargetP_abs(device_mc,device_ids,axis,target,unit;
-#             ess=ess[axis],mrss=mrss[axis],
-#             maxsteps=maxsteps,maxiter=maxiter,
-#             correctess=correctess)
-#     end
-
-#     if doublepass; for axis in 1:3
-#         mcTargetP_abs(device_mc,device_ids,axis,target,unit;
-#             ess=ess[axis],mrss=mrss[axis],
-#             maxsteps=maxsteps,maxiter=maxiter,
-#             correctess=correctess)
-#     end; end
-
-#     return
-# end
 
 
 
