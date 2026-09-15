@@ -1,4 +1,3 @@
-
 using Blackmage, JLD2
 
 # use julias help mode to read information of each function
@@ -7,11 +6,12 @@ using Blackmage, JLD2
 #  MC -> motor control
 # IDS -> Interferometric Displacement Sensor
 # IDS web interface can be opened by putting the IP adress into any browser
-device_mc = connect(ip"",0)     # motors
-device_ids = connect(ip"",0)    # interferometers
+device_mc = connect(ip"192.168.2.3",2000)     # motors
+device_ids = connect(ip"192.168.3.4",9090)    # interferometers
 
 # run this to close connection
-close(device_mc); close(device_ids)
+close(device_mc); 
+close(device_ids);
 
 # set all motors to external drive mode
 # maxdist and target tolerance are given in IDS units
@@ -34,7 +34,7 @@ mcStopAll(device_mc)
 mcTargetFCM(device_mc,0,:cm)
 
 # after initialization freely set target positions
-mcTargetFCM(device_mc,1,:cm)
+mcTargetFCM(device_mc,2,:cm)
 
 # block program until target is reached
 mcWaitForTarget(device_mc)
@@ -52,7 +52,7 @@ record!(d,device_ids,10*60)
 d_m = zeros(3,20)               # repeatedly measure position after each step
 d_s = zeros(3,20)               # with uncertainties
 
-for i in 1:10
+for i in 1:2
     println("Iter $i")
 
     mcTargetFCM(device_mc,1,:cm)    
