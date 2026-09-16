@@ -8,7 +8,7 @@ end
 Base.showerror(io::IO,e::AttoException) = 
     print(io,"Device encountered error with code ",e.errorcode,".")
 
-const Req = NamedTuple{lock::ReentrantLock,req::Dict{String,Union{String,Vector}}}
+const Req = @NamedTuple{lock::ReentrantLock,req::Dict{String,Union{String,Vector}}}
 const req::Req = (
     lock=ReentrantLock(),    
     req=Dict{String,Union{String,Vector}}(
