@@ -19,19 +19,19 @@ ids_ips =   [
 md = MultiDevice(mc_ips,ids_ips)
 
 
-getMeasurementEnabled(md,req)
-# startMeasurement(md,req)
-stopMeasurement(md,req)
+getMeasurementEnabled(md)
+# startMeasurement(md)
+stopMeasurement(md)
 
 
 
-getAxesDisplacement(md,req)
-resetAxes(md,req)
+getAxesDisplacement(md)
+resetAxes(md)
 
 mcStopAll(md)
 
 mcZero(md; timeout=10,repush=false,pushsteps=20)
-resetAxes(md,req)
+resetAxes(md)
 
 mcSetupFCM(md)
 mcReSetupFCM(md)
@@ -50,7 +50,7 @@ p = zeros(3,length(x),n)
 mcSetupFCM(md)
 mcTargetFCM(md,x,unit); mcWaitForTarget(md); sleep(1)
 mcZero(md; timeout=10,repush=true,pushsteps=20)
-resetAxes(md,req)
+resetAxes(md)
 
 @time for i in 1:n
     println("Iter $(i)/$n")
@@ -59,7 +59,7 @@ resetAxes(md,req)
     mcTargetFCM(md,x,unit); mcWaitForTarget(md); sleep(1)
     mcZero(md; timeout=10,repush=true,pushsteps=20); sleep(1)
     
-    d = getAxesDisplacement(md,req)
+    d = getAxesDisplacement(md)
     
     for j in eachindex(md)
         p[:,j,i] = d[j]

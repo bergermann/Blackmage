@@ -45,14 +45,11 @@ mutable struct Logger
     "Timestamp of last measurement in unix time."
     timestamp::Float64
 
-    "JSON dict for IDS requests."
-    req::Dict{String,Union{String,Vector}}
-
     @doc """
         Logger(active,apos,rpos,signal)
     """
-    function Logger(active,lock,apos,rpos,signal,timestamp,req)
-        new(active,lock,apos,rpos,signal,timestamp,req)
+    function Logger(active,lock,apos,rpos,signal,timestamp)
+        new(active,lock,apos,rpos,signal,timestamp)
     end
 
     @doc """
@@ -65,14 +62,7 @@ mutable struct Logger
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
-            0.,
-            Dict(
-                "jsonrpc" => "2.0",
-                "method" => "",
-                "id" => "0",
-                "api" => "2",
-                "params" => [],
-            )
+            0.
         )
     end
 end

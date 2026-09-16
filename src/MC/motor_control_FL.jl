@@ -44,7 +44,7 @@ function mcTarget_(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
 
                 mcStopAllMotors(device_mc); sleep(0.1)
 
-                d = getAxisDisplacement(device_ids,req,master)
+                d = getAxisDisplacement(device_ids,master)
                 dt = abs(d-t); dir = Int(t > d)
         
                 if dt < stallsteps*ess; break; end
@@ -71,11 +71,11 @@ function mcTarget_(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
 end
 
 function checkStalling(device_ids::TCPSocket,master::Int,interval::Real,ss::Int)
-    p0 = getAxisDisplacement(device_ids,req,master)
+    p0 = getAxisDisplacement(device_ids,master)
 
     t0 = now(); sleep(interval)
 
-    p1 = getAxisDisplacement(device_ids,req,master)
+    p1 = getAxisDisplacement(device_ids,master)
 
     speed = round(Int,abs(1000*(p1-p0)/((now()-t0).value)))
 
@@ -92,7 +92,7 @@ function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,un
 
     ess = @. abs(ess)/1e-12
     t = round(Int,target*units[unit]/1e-12)
-    dt = getAxesDisplacement(device_ids,req).-t
+    dt = getAxesDisplacement(device_ids).-t
 
     tnr = @. abs(dt) > ess*targettol    # target not reached
 
@@ -111,7 +111,7 @@ function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,un
     while now()-t0 < timeout && any(tnr)
         sleep(interval)
 
-        d = getAxesDisplacement(device_ids,req)
+        d = getAxesDisplacement(device_ids)
 
         for axis in axes
             if ((-1)^dir[axis])*(d[axis]-t) < ess[axis]*targettol
@@ -148,7 +148,7 @@ function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::
     mcTarget_(device_mc,device_ids,target,unit,
         master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
 
-    dz = tilt2pos(xtilt,ytilt; α=α, r=r)
+    dz = tilt2pos(xtilt,ytilt; α=α,r=r)
 
     for addr in 1:3
         mcTargetP(device_mc,device_ids,addr,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)

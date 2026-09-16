@@ -36,7 +36,7 @@ mcStop.(device_mc,[1,2,3])
 
 # initialize IDS measurement, takes a few minutes, can be initialized from IDS web interface
 # cannot be activated when IDS optics alignment mode is active (see web interface)
-startMeasurement(device_ids,Blackmage.req)
+startMeasurement(device_ids)
 
 # create container to write measurement data to, adds a timestamp for
 # time reference of measurements

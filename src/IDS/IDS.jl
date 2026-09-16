@@ -8,37 +8,18 @@ end
 Base.showerror(io::IO,e::AttoException) = 
     print(io,"Device encountered error with code ",e.errorcode,".")
 
+const Req = NamedTuple{lock::ReentrantLock,req::Dict{String,Union{String,Vector}}}
+const req::Req = (
+    lock=ReentrantLock(),    
+    req=Dict{String,Union{String,Vector}}(
+        "jsonrpc" => "2.0",
+        "method" => "",
+        "id" => "0",
+        "api" => "2",
+        "params" => [],
+    )
+)
 
-"""
-    Displacement
-
-Container type for writing measured interferometer position and contrast readout to, with
-timestamp. If container is full, restarts overwriting from beginning.
-
--`Displacement(n::Integer)` Initialize with `n` slots.
-"""
-mutable struct Displacement
-    "Position data in pm."
-    dX::Matrix{Int}
-    "Contrast in permille."
-    dC::Matrix{Int}
-    "Timestamp in ms since t0."
-    dT::Vector{Int}
-    "Current index, next data is written to idx+1."
-    idx::Int
-    "Maximum data point before overwriting old ones."
-    n::Int
-
-    "Reference time for timestamp."
-    t0::DateTime
-
-    "Control state for measuring/writing loop."
-    active::Bool
-
-    function Displacement(n::Integer)
-        new(zeros(Int,3,n),zeros(Int,3,n),zeros(Int,n),0,n,now(),false)
-    end
-end
 
 
 """
@@ -53,29 +34,29 @@ function updateRequestID!(req::Dict)
 end
 
 """
-    request(device::TCPSocket,req::Dict,interface::Symbol,
+    request(device::TCPSocket,interface::Symbol,
         method::String; params::Array=[])
 
 Send JSON formatted command as bytestring to IDS device.
 """
-function request(device::TCPSocket,req::Dict,interface::Symbol,
-        method::String; params::Array=[])
-    
-    updateRequestID!(req)
-    req["method"] = I[interface]*method
-    req["params"] = params
+function request(device::TCPSocket,interface::Symbol,method::String; params::Array=[])
+    lock(req.lock) do
+        updateRequestID!(req.req)
+        req.req["method"] = I[interface]*method
+        req.req["params"] = params
 
-    send(device,JSON.json(req))
-    msg = JSON.parse(String(recv(device)))
+        send(device,JSON.json(req.req))
+        msg = JSON.parse(String(recv(device)))
 
-    if haskey(msg,"result")
-        result = msg["result"]
-    elseif haskey(msg,"error")
-        print(msg[error])
-        throw(AttoException(-1))
-    else
-        display(msg)
-        throw(AttoException(-2))
+        if haskey(msg,"result")
+            result = msg["result"]
+        elseif haskey(msg,"error")
+            print(msg[error])
+            throw(AttoException(-1))
+        else
+            display(msg)
+            throw(AttoException(-2))
+        end
     end
 
     if result[1] != 0
@@ -85,7 +66,6 @@ function request(device::TCPSocket,req::Dict,interface::Symbol,
 
     return result
 end
-
 
 include("record.jl")
 
@@ -104,10 +84,34 @@ include("manual.jl")
 
 include("access.jl")
 
-const req = Dict{String,Union{String,Vector}}(
-    "jsonrpc" => "2.0",
-    "method" => "",
-    "id" => "0",
-    "api" => "2",
-    "params" => [],
-)
+
+# """
+#     Displacement
+
+# Container type for writing measured interferometer position and contrast readout to, with
+# timestamp. If container is full, restarts overwriting from beginning.
+
+# -`Displacement(n::Integer)` Initialize with `n` slots.
+# """
+# mutable struct Displacement
+#     "Position data in pm."
+#     dX::Matrix{Int}
+#     "Contrast in permille."
+#     dC::Matrix{Int}
+#     "Timestamp in ms since t0."
+#     dT::Vector{Int}
+#     "Current index, next data is written to idx+1."
+#     idx::Int
+#     "Maximum data point before overwriting old ones."
+#     n::Int
+
+#     "Reference time for timestamp."
+#     t0::DateTime
+
+#     "Control state for measuring/writing loop."
+#     active::Bool
+
+#     function Displacement(n::Integer)
+#         new(zeros(Int,3,n),zeros(Int,3,n),zeros(Int,n),0,n,now(),false)
+#     end
+# end
