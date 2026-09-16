@@ -141,6 +141,8 @@ function getAxesDisplacement!(a::Vector{Int},device::D)
     return a .= request(device,:displace,"getAxesDisplacement")[2:4]
 end
 
+const getRelativePositions = getAxesDisplacement
+const getRelativePositions! = getRelativePositions!
 
 
 """
