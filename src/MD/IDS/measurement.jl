@@ -349,9 +349,9 @@ end
 function updateLog!(md::MultiDevice)
     lock(md.logger.lock) do
         for i in eachindex(md)
-            getRelativePositions!(md.logger.rpos,  md[i].ids)
-            getAbsolutePositions!(md.logger.apos,  md[i].ids)
-            getAxesSignalQuality!(md.logger.signal,md[i].ids)
+            getAbsPos!(md.logger.apos,  md[i].ids)
+            getRelPos!(md.logger.rpos,  md[i].ids)
+            getSignal!(md.logger.signal,md[i].ids)
         end
 
         md.logger.timestamp = datetime2unix(now())
