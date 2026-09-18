@@ -12,9 +12,17 @@ include("logging.jl")
 function addMockLog_(md::MultiDevice)
     @assert isempty(md.devices) "Real devices present in multidevice"
 
-    md.logger.apos[1] = [0,0,0]
-    md.logger.rpos[1] = [0,0,0]
-    md.logger.contrast[1] = [0,0,0]
+    if length(md) > 0
+        for i in eachindex(md)
+            md.logger.apos[i] = [0,0,0]
+            md.logger.rpos[i] = [0,0,0]
+            md.logger.contrast[i] = [0,0,0]
+        end
+    else
+        md.logger.apos[1] = [0,0,0]
+        md.logger.rpos[1] = [0,0,0]
+        md.logger.contrast[1] = [0,0,0]
+    end
 
     return
 end
