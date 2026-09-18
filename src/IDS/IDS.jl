@@ -39,7 +39,7 @@ end
 Send JSON formatted command as bytestring to IDS device.
 """
 function request(device::TCPSocket,interface::Symbol,method::String; params::Array=[])
-    @lock req begin
+    result = @lock req begin
         updateRequestID!(req[])
         req[]["method"] = I[interface]*method
         req[]["params"] = params
@@ -57,8 +57,7 @@ function request(device::TCPSocket,interface::Symbol,method::String; params::Arr
             throw(AttoException(-2))
         end
 
-        display(msg)
-        display(result)
+        result
     end
 
     if result[1] != 0
