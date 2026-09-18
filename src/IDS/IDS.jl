@@ -58,6 +58,7 @@ function request(device::TCPSocket,interface::Symbol,method::String; params::Arr
         end
 
         display(msg)
+        display(result)
     end
 
     if result[1] != 0
