@@ -19,11 +19,12 @@ function grantAccess(device::D,password::String)
     request(device,:access,"grantAccess"; params=[password]); return
 end
 
+# this should not be named `lock` due to conflict with ReentrantLocks `lock`
 """
-    lock(device::D,password::String)
+    lock_(device::D,password::String)
 
 Lock IDS system with a `password`.
 """
-function lock(device::D,password::String)
+function lock_(device::D,password::String)
     request(device,:access,"lock"; params=[password]); return
 end

@@ -33,8 +33,6 @@ Log file to track interferometer position (relative and absolute), signal streng
 mutable struct Logger
     "Control state for measuring/writing loop."
     active::Bool
-    "Read-write lock."
-    lock::ReentrantLock
     "Absolute position data."
     apos::Dict{Int,Vector{Int}}
     "Relative position data."
@@ -46,10 +44,10 @@ mutable struct Logger
     timestamp::Float64
 
     @doc """
-        Logger(active,apos,rpos,signal)
+        Logger(active,apos,rpos,signal,timestamp)
     """
-    function Logger(active,lock,apos,rpos,signal,timestamp)
-        new(active,lock,apos,rpos,signal,timestamp)
+    function Logger(active,apos,rpos,signal,timestamp)
+        new(active,apos,rpos,signal,timestamp)
     end
 
     @doc """
@@ -58,7 +56,6 @@ mutable struct Logger
     function Logger(ndisk)
         new(
             false,
-            ReentrantLock(),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
             Dict(i => zeros(Float64,3) for i in 1:ndisk),
@@ -73,8 +70,8 @@ end
 struct MultiDevice
     "Disc devices with index."
     devices::Dict{Int,SingleDevice}
-    "Position data buffer."
-    logger::Logger
+    "Lockable Position data buffer."
+    logger::Lockable{Logger,ReentrantLock}
     "Multidevice settings."
     settings::MultiDeviceSettings
 
@@ -86,7 +83,7 @@ struct MultiDevice
     interrupt::Base.RefValue{Bool}
 
     @doc """
-        MultiDevice(devices,logger,settings)
+        MultiDevice(devices,logger,settings,moving,target,interrupt
     """
     function MultiDevice(devices,logger,settings,moving,target,interrupt)
         new(devices,logger,settings,moving,target,interrupt)
@@ -130,7 +127,7 @@ struct MultiDevice
 
         x = new(
             devices,
-            Logger(length(devices)),
+            Lockable(Logger(length(devices))),
             MultiDeviceSettings(),
             Ref(false),
             Ref(true),

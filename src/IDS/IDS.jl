@@ -8,17 +8,16 @@ end
 Base.showerror(io::IO,e::AttoException) = 
     print(io,"Device encountered error with code ",e.errorcode,".")
 
-const Req = @NamedTuple{lock::ReentrantLock,req::Dict{String,Union{String,Vector}}}
-const req::Req = (
-    lock=ReentrantLock(),    
-    req=Dict{String,Union{String,Vector}}(
-        "jsonrpc" => "2.0",
-        "method" => "",
-        "id" => "0",
-        "api" => "2",
-        "params" => [],
-    )
-)
+
+
+const Req = Lockable{Dict{String,Union{String,Vector}}}
+const req::Req = Lockable(Dict{String,Union{String,Vector}}(
+    "jsonrpc" => "2.0",
+    "method" => "",
+    "id" => "0",
+    "api" => "2",
+    "params" => [],
+))
 
 
 
@@ -40,12 +39,12 @@ end
 Send JSON formatted command as bytestring to IDS device.
 """
 function request(device::TCPSocket,interface::Symbol,method::String; params::Array=[])
-    lock(req.lock) do
-        updateRequestID!(req.req)
-        req.req["method"] = I[interface]*method
-        req.req["params"] = params
+    @lock req begin
+        updateRequestID!(req[])
+        req[]["method"] = I[interface]*method
+        req[]["params"] = params
 
-        send(device,JSON.json(req.req))
+        send(device,JSON.json(req[]))
         msg = JSON.parse(String(recv(device)))
 
         if haskey(msg,"result")
@@ -60,7 +59,7 @@ function request(device::TCPSocket,interface::Symbol,method::String; params::Arr
     end
 
     if result[1] != 0
-        showError(device,req,result[1])
+        showError(device,result[1])
         throw(AttoException(result[1]))
     end
 
