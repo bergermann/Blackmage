@@ -2,7 +2,7 @@
 
 
 """
-    mcMove(sd::SingleDevice,addr::Int,dir::Int,steps::Int;
+    mcMove(sd::SingleDevice,axis::Int,dir::Int,steps::Int;
         freq::Int=50,
         rss::Int=100,
         temp::Int=sd.settings.temp,
@@ -11,14 +11,14 @@
 
 Single device version of [`mcMove`](@ref).
 """
-function mcMove(sd::SingleDevice,addr::Int,dir::Int,steps::Int;
+function mcMove(sd::SingleDevice,axis::Int,dir::Int,steps::Int;
         freq::Int=50,
         rss::Int=100,
         temp::Int=sd.settings.temp,
         stage::String="MM1",
         df::Real=1.0)
     
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+    @assert 1 <= axis <= 3 "Motor axis must be 1, 2 or 3."
     @assert dir == 0 || dir == 1 "Direction dir must be 1 or 2."
     @assert 0 < freq <= 100 "Movement frequency freq must be positive, smaller than 100."
     @assert 0 <= steps <= 50000 "Steps must be non-negative, maximum 50_000."
@@ -30,33 +30,33 @@ function mcMove(sd::SingleDevice,addr::Int,dir::Int,steps::Int;
 
     if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
 
-    println("Status stage $addr: ",
-        mcRequest(sd.mc,"MOV $addr $dir $freq $rss $steps $temp $stage $df"))
+    println("Status stage $axis: ",
+        mcRequest(sd.mc,"MOV $axis $dir $freq $rss $steps $temp $stage $df"))
 
     return
 end
 
-mcMove(sd::SingleDevice,addr::AbstractVector{<:Int},dir::Int,steps::Int; kwargs...) =
-    mcMove.(sd,addr,dir,steps; kwargs...)
+mcMove(sd::SingleDevice,axis::AbstractVector{<:Int},dir::Int,steps::Int; kwargs...) =
+    mcMove.(sd,axis,dir,steps; kwargs...)
 
 
 
 """
-    mcStop(sd::SingleDevice,addr::Int)
+    mcStop(sd::SingleDevice,axis::Int)
 
 Single device version of [`mcStop`](@ref).
 """
-function mcStop(sd::SingleDevice,addr::Int)
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+function mcStop(sd::SingleDevice,axis::Int)
+    @assert 1 <= axis <= 3 "Motor axis must be 1, 2 or 3."
     
     if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
 
-    println("Status stage $addr: ",mcRequest(sd.mc,"STP $addr"))
+    println("Status stage $axis: ",mcRequest(sd.mc,"STP $axis"))
 
     return
 end
 
-mcStop(sd::SingleDevice,addr::AbstractVector{<:Int}) = mcStop.(sd,addr)
+mcStop(sd::SingleDevice,axis::AbstractVector{<:Int}) = mcStop.(sd,axis)
 
 
 

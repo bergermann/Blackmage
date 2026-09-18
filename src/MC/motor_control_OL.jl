@@ -1,27 +1,27 @@
 
 
 """
-    mcMove(device::TCPSocket,addr::Int,dir::Int,steps::Int;
+    mcMove(device::TCPSocket,axis::Int,dir::Int,steps::Int;
         freq::Int=50,
         rss::Int=100,
         temp::Int=300,
         stage::String="MM1",
         df::Real=1.0)
 
-Move motor `addr` of `device` in direction `dir` (0 or 1) for `steps`. If step number is set
+Move motor `axis` of `device` in direction `dir` (0 or 1) for `steps`. If step number is set
 to 0, motor moves until it receives a stop signal! `freq` is the step frequency, should not
 be higher than 70. Use relative step size `rss` to reduce step size in percent (to be tested).
 Set operating temperature `temp` in Kelvin. `stage` is the stage type, `df` the drive factor
 (don't change either without Christoph's approval).
 """
-function mcMove(device::TCPSocket,addr::Int,dir::Int,steps::Int;
+function mcMove(device::TCPSocket,axis::Int,dir::Int,steps::Int;
         freq::Int=50,
         rss::Int=100,
         temp::Int=300,
         stage::String="MM1",
         df::Real=1.0)
     
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+    @assert 1 <= axis <= 3 "Motor axis must be 1, 2 or 3."
     @assert dir == 0 || dir == 1 "Direction dir must be 1 or 2."
     @assert 0 < freq <= 100 "Movement frequency freq must be positive, smaller than 100."
     @assert 0 <= steps <= 50000 "Steps must be non-negative, maximum 50_000."
@@ -31,21 +31,21 @@ function mcMove(device::TCPSocket,addr::Int,dir::Int,steps::Int;
 
     steps == 0 && @warn "Unlimited movement started, use stop command to interrupt."
 
-    println("Status stage $addr: ",
-        mcRequest(device,"MOV $addr $dir $freq $rss $steps $temp $stage $df"))
+    println("Status stage $axis: ",
+        mcRequest(device,"MOV $axis $dir $freq $rss $steps $temp $stage $df"))
 
     return
 end
 
 """
-    mcStop(device::TCPSocket,addr::Int)
+    mcStop(device::TCPSocket,axis::Int)
 
-Stop motor `addr` of `device`.
+Stop motor `axis` of `device`.
 """
-function mcStop(device::TCPSocket,addr::Int)
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+function mcStop(device::TCPSocket,axis::Int)
+    @assert 1 <= axis <= 3 "Motor axis must be 1, 2 or 3."
     
-    println("Status stage $addr: ",mcRequest(device,"STP $addr"))
+    println("Status stage $axis: ",mcRequest(device,"STP $axis"))
 
     return
 end

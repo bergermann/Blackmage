@@ -63,13 +63,13 @@ function mcDisableFCM(device::TCPSocket)
 end
 
 """
-    mcMotorToEXT(device::TCPSocket,addr::Int,frequency::Int,temperature::Int)
+    mcMotorToEXT(device::TCPSocket,axis::Int,frequency::Int,temperature::Int)
 
-Set motor at `addr` with maximum movement `frequency` at operating `temperature`.
+Set motor at `axis` with maximum movement `frequency` at operating `temperature`.
 """
-function mcMotorToEXT(device::TCPSocket,addr::Int,frequency::Int,temperature::Int)
-    println("Status stage $addr: ",
-        mcRequest(device,"EXT $addr $temperature MM1 $frequency 1"))
+function mcMotorToEXT(device::TCPSocket,axis::Int,frequency::Int,temperature::Int)
+    println("Status stage $axis: ",
+        mcRequest(device,"EXT $axis $temperature MM1 $frequency 1"))
 
     return
 end
@@ -254,21 +254,21 @@ end
 
 
 """
-    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
+    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false)
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct single motor
-`addr` of device at `device_mc` with IDS `device_ids`. Uses estimated step size `ess` for
+`axis` of device at `device_mc` with IDS `device_ids`. Uses estimated step size `ess` for
 step prediction with minimum allowed relative step size `mrss`. Perform a maximum of
 `maxsteps` per iteration for a maximum of `maxiter` iterations. If `correctess`, reestimates
 step sizes `ess` after each step.
 """
-function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::Real,unit::Symbol;
+function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false,interrupt::Base.RefValue{Bool}=Ref(false))
 
-    @assert 1 <= addr <= 3 "Motor address must be 1, 2 or 3."
+    @assert 1 <= axis <= 3 "Motor axis must be 1, 2 or 3."
     @assert 1 <= mrss <= 100 "Minimum relative stepsize mrss need to be between 10 and 100."
     @assert abs(ess) >= 1e-6 "Estimated full step size ess should be larger than 1 µm."
     @assert maxsteps > 0 "maxsteps needs to be positive."
@@ -276,7 +276,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
     
     ess = round(Int,abs(ess)/1e-12)
 
-    d0 = getAxisDisplacement(device_ids,req,addr)
+    d0 = getAxisDisplacement(device_ids,req,axis)
     t = round(Int,target*units[unit]/1e-12)
     dt = abs(d0-t)
 
@@ -291,9 +291,9 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,addr::Int,target::
             nsteps = 1; rss = max(div(100*dt,ess),mrss)
         end
 
-        mcMove(device_mc,addr,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
+        mcMove(device_mc,axis,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
-        d1 = getAxisDisplacement(device_ids,req,addr)
+        d1 = getAxisDisplacement(device_ids,req,axis)
 
         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
         dt = abs(d1-t); d0 = d1
