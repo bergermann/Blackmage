@@ -56,6 +56,8 @@ function request(device::TCPSocket,interface::Symbol,method::String; params::Arr
             display(msg)
             throw(AttoException(-2))
         end
+
+        display(msg)
     end
 
     if result[1] != 0
