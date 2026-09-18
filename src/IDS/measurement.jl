@@ -1,32 +1,32 @@
 
 
 """
-    getMeasurementEnabled(device::D,req::Dict)
+    getMeasurementEnabled(device::D)
 
 Return if IDS displacement measurement is enabled.
 """
-function getMeasurementEnabled(device::D,req::Dict)
-    return request(device,req,:displace,"getMeasurementEnabled")[2]
+function getMeasurementEnabled(device::D)
+    return request(device,:displace,"getMeasurementEnabled")[2]
 end
 
 """
-    startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=120)
+    startMeasurement(device::D; dt::Real=1.0,timeout::Real=120)
 
 Start IDS displacement measurement. Alignment mode has to be disabled. If measurement still
 hasn't started after `timeout` seconds, check for errors (usually takes < 2 minutes). Checks
 every `dt` seconds.
 """
-function startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=300)
-    @assert !getAdjustmentEnabled(device,req) "Alignment is enabled, cannot start measurement."
+function startMeasurement(device::D; dt::Real=1.0,timeout::Real=300)
+    @assert !getAdjustmentEnabled(device) "Alignment is enabled, cannot start measurement."
     
-    if getMeasurementEnabled(device,req)
+    if getMeasurementEnabled(device)
         @info "Measurement already activated."; return
     end
 
-    request(device,req,:system,"startMeasurement")
+    request(device,:system,"startMeasurement")
 
     t = 0
-    while !getMeasurementEnabled(device,req)
+    while !getMeasurementEnabled(device)
         sleep(dt); t += dt
 
         if t > timeout
@@ -38,157 +38,157 @@ function startMeasurement(device::D,req::Dict; dt::Real=1.0,timeout::Real=300)
 end
 
 """
-    startMeasurement_(device::D,req::Dict)
+    startMeasurement_(device::D)
 
 Start IDS displacement measurement without validation check.
 """
-function startMeasurement_(device::D,req::Dict)
-    @assert !getAdjustmentEnabled(device,req) "Alignment is enabled, cannot start measurement."
+function startMeasurement_(device::D)
+    @assert !getAdjustmentEnabled(device) "Alignment is enabled, cannot start measurement."
     
-    if getMeasurementEnabled(device,req)
+    if getMeasurementEnabled(device)
         @info "Measurement already activated."; return
     end
 
-    request(device,req,:system,"startMeasurement")
+    request(device,:system,"startMeasurement")
 
     return
 end
 
 """
-    stopMeasurement(device::D,req::Dict)
+    stopMeasurement(device::D)
 
 Stop IDS displacement measurement.
 """
-function stopMeasurement(device::D,req::Dict)
-    if !getMeasurementEnabled(device,req)
+function stopMeasurement(device::D)
+    if !getMeasurementEnabled(device)
         @info "Measurement already deactivated."; return
     end
     
-    request(device,req,:system,"stopMeasurement"); return
+    request(device,:system,"stopMeasurement"); return
 end
 
 
 
 """
-    getAbsolutePosition(device::D,req::Dict,axis::Int)
+    getAbsolutePosition(device::D,axis::Int)
 
 Return absolute IDS position of `axis` (duh).
 """
-function getAbsolutePosition(device::D,req::Dict,axis::Int)
+function getAbsolutePosition(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
 
-    return request(device,req,:displace,"getAbsolutePosition";
+    return request(device,:displace,"getAbsolutePosition";
         params=[axis-1])[2]
 end
 
 """
-    getAbsolutePositions(device::D,req::Dict)
+    getAbsolutePositions(device::D)
 
 Return absolute IDS positions of all axes (duh).
 """
-function getAbsolutePositions(device::D,req::Dict)
-    r = request(device,req,:displace,"getAbsolutePositions")
+function getAbsolutePositions(device::D)
+    r = request(device,:displace,"getAbsolutePositions")
 
     return [r[2],r[3],r[4]]
 end
 
 """
-    getAbsolutePositions!(a::Vector{Int},device::D,req::Dict)
+    getAbsolutePositions!(a::Vector{Int},device::D)
 
 Write absolute IDS positions directly to vector `a` of length 3, see
 [`getAbsolutePositions`](@ref).
 """
-function getAbsolutePositions!(a::Vector{Int},device::D,req::Dict)
+function getAbsolutePositions!(a::Vector{Int},device::D)
     @assert length(a) == 3 "Position vector needs to be length 3."
 
-    return a .= request(device,req,:displace,"getAbsolutePositions")[2:4]
+    return a .= request(device,:displace,"getAbsolutePositions")[2:4]
 end
 
 
 
 """
-    getAxisDisplacement(device::D,req::Dict,axis::Int)
+    getAxisDisplacement(device::D,axis::Int)
 
 Get relative IDS position of `axis`.
 """
-function getAxisDisplacement(device::D,req::Dict,axis::Int)
+function getAxisDisplacement(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
 
-    return request(device,req,:displace,"getAxisDisplacement";
+    return request(device,:displace,"getAxisDisplacement";
         params=[axis-1])[2]
 end
 
 """
-    getAxesDisplacement(device::D,req::Dict)
+    getAxesDisplacement(device::D)
 
 Get relative IDS positions of all axes.
 """
-function getAxesDisplacement(device::D,req::Dict)
-    r = request(device,req,:displace,"getAxesDisplacement")
+function getAxesDisplacement(device::D)
+    r = request(device,:displace,"getAxesDisplacement")
 
     return [r[2],r[3],r[4]]
 end
 
 """
-    getAxesDisplacement!(a::Vector{Int},device::D,req::Dict)
+    getAxesDisplacement!(a::Vector{Int},device::D)
 
 Write relative IDS positions directly to vector `a` of length 3, see
 [`getAxesDisplacement`](@ref).
 """
-function getAxesDisplacement!(a::Vector{Int},device::D,req::Dict)
+function getAxesDisplacement!(a::Vector{Int},device::D)
     @assert length(a) == 3 "Position vector needs to be length 3."
 
-    return a .= request(device,req,:displace,"getAxesDisplacement")[2:4]
+    return a .= request(device,:displace,"getAxesDisplacement")[2:4]
 end
 
 
 
 """
-    getReferencePosition(device::D,req::Dict,axis::Int)
+    getReferencePosition(device::D,axis::Int)
 
 Get IDS reference position of `axis` (duh).
 """
-function getReferencePosition(device::D,req::Dict,axis::Int)
+function getReferencePosition(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
 
-    return request(device,req,:displace,"getReferencePosition";
+    return request(device,:displace,"getReferencePosition";
         params=[axis-1])
 end
 
 """
-    getReferencePositions(device::D,req::Dict)
+    getReferencePositions(device::D)
 
 Get IDS reference position of all axes (duh).
 """
-function getReferencePositions(device::D,req::Dict)
-    r = request(device,req,:displace,"getReferencePositions")
+function getReferencePositions(device::D)
+    r = request(device,:displace,"getReferencePositions")
 
     return [r[2],r[3],r[4]]
 end
 
 """
-    getReferencePositions!(a::Vector{Int},device::D,req::Dict)
+    getReferencePositions!(a::Vector{Int},device::D)
 
 Write IDS reference positions directly to vector `a` of length 3, see
 [`getReferencePositions`](@ref).
 """
-function getReferencePositions!(a::Vector{Int},device::D,req::Dict)
+function getReferencePositions!(a::Vector{Int},device::D)
     @assert length(a) == 3 "Position vector needs to be length 3."
 
-    return a .= request(device,req,:displace,"getReferencePositions")[2:4]
+    return a .= request(device,:displace,"getReferencePositions")[2:4]
 end
 
 
 
 """
-    getAxisSignalQuality(device::D,req::Dict,axis::Int; threshold::Int=850)
+    getAxisSignalQuality(device::D,axis::Int; threshold::Int=850)
 
 Return IDS signal quality in permille for `axis`. Gives warning if value exceeds `threshold`.
 """
-function getAxisSignalQuality(device::D,req::Dict,axis::Int; threshold::Int=850)
+function getAxisSignalQuality(device::D,axis::Int; threshold::Int=850)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
 
-    r = request(device,req,:displace,"getAxisSignalQuality"; params=[axis-1])
+    r = request(device,:displace,"getAxisSignalQuality"; params=[axis-1])
 
     if r[2]+r[3] > threshold
         @warn "Contrast threshold is reached for axis $axis with $(r[2]+r[3]) > $threshold."
@@ -198,15 +198,15 @@ function getAxisSignalQuality(device::D,req::Dict,axis::Int; threshold::Int=850)
 end
 
 """
-    getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
+    getAxesSignalQuality(device::D; threshold::Int=850)
 
 Return IDS signal quality in permille for all axes. Gives warning if values exceed `threshold`.
 """
-function getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
+function getAxesSignalQuality(device::D; threshold::Int=850)
     contrast = Vector{Int}(undef,3)
 
     for axis in 1:3
-        c, offset = getAxisSignalQuality(device,req,axis; threshold=threshold)
+        c, offset = getAxisSignalQuality(device,axis; threshold=threshold)
         contrast[axis] = c+offset
     end
 
@@ -214,16 +214,16 @@ function getAxesSignalQuality(device::D,req::Dict; threshold::Int=850)
 end
 
 """
-    getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict)
+    getAxesSignalQuality!(a::Vector{Int},device::D)
 
 Write IDS signal quality directly to vector `a` of length 3, see
 [`getAxesSignalQuality`](@ref).
 """
-function getAxesSignalQuality!(a::Vector{Int},device::D,req::Dict)
+function getAxesSignalQuality!(a::Vector{Int},device::D)
     @assert length(a) == 3 "Signal vector needs to be length 3."
 
     for axis in 1:3
-        c, offset = getAxisSignalQuality(device,req,axis; threshold=threshold)
+        c, offset = getAxisSignalQuality(device,axis; threshold=threshold)
         a[axis] = c+offset
     end
 
@@ -233,21 +233,21 @@ end
 
 
 """
-    getAverageN(device::D,req::Dict)
+    getAverageN(device::D)
 
 I forgot what this function does, look it up in the manual lolololo
 """
-function getAverageN(device::D,req::Dict)
-    return request(device,req,:displace,"getAverageN")[2]
+function getAverageN(device::D)
+    return request(device,:displace,"getAverageN")[2]
 end
 
 """
-    setAverageN(device::D,req::Dict,N::Int)
+    setAverageN(device::D,N::Int)
 
 I forgot what this function does, look it up in the manual lolololo
 """
-function setAverageN(device::D,req::Dict,N::Int)
+function setAverageN(device::D,N::Int)
     @assert 0 <= N <= 24 "N must be between 0 and 24 (inclusive)."
 
-    request(device,req,:displace,"setAverageN"; params=[N]); return
+    request(device,:displace,"setAverageN"; params=[N]); return
 end

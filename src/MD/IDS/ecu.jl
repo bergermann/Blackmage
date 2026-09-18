@@ -2,66 +2,66 @@
 
 
 """
-    enableECU(sd::SingleDevice,req::Dict)
+    enableECU(sd::SingleDevice)
 
 Enable IDS environmental control unit (duh) for single device `sd`.
 """
-function enableECU(sd::SingleDevice,req::Dict)
-    enableECU(sd.ids,req); return
+function enableECU(sd::SingleDevice)
+    enableECU(sd.ids); return
 end
 
 """
-    enableECU(md::MultiDevice,req::Dict)
+    enableECU(md::MultiDevice)
 
 Enable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
-function enableECU(md::MultiDevice,req::Dict)
+function enableECU(md::MultiDevice)
     for device in md
-        enableECU(device,req)
+        enableECU(device)
     end; return
 end
 
 """
-    disableECU(sd::SingleDevice,req::Dict)
+    disableECU(sd::SingleDevice)
 
 Disable IDS environmental control unit (duh) for single device `sd`.
 """
-function disableECU(sd::SingleDevice,req::Dict)
-    disableECU(sd.ids,req); return
+function disableECU(sd::SingleDevice)
+    disableECU(sd.ids); return
 end
 
 """
-    disableECU(md::MultiDevice,req::Dict)
+    disableECU(md::MultiDevice)
 
 Disable IDS environmental control unit (duh) of all devices in multidevice `md`.
 """
-function disableECU(md::MultiDevice,req::Dict)
+function disableECU(md::MultiDevice)
     for device in md
-        disableECU(device,req)
+        disableECU(device)
     end; return
 end
 
 
 
 """
-    getECUEnabled(sd::SingleDevice,req::Dict)
+    getECUEnabled(sd::SingleDevice)
 
 Return if IDS environmental control unit is enabled (duh) for single device `sd`.
 """
-function getECUEnabled(sd::SingleDevice,req::Dict)
-    return getECUEnabled(sd.ids,req)
+function getECUEnabled(sd::SingleDevice)
+    return getECUEnabled(sd.ids)
 end
 
 """
-    getECUEnabled(md::MultiDevice,req::Dict)
+    getECUEnabled(md::MultiDevice)
 
 Return if IDS environmental control unit is enabled (duh) for all devices in multidevice `md`.
 """
-function getECUEnabled(md::MultiDevice,req::Dict)
+function getECUEnabled(md::MultiDevice)
     enabled = true
 
     for i in eachindex(md)
-        enabled_ = getECUEnabled(md[i],req); enabled *= enabled_
+        enabled_ = getECUEnabled(md[i]); enabled *= enabled_
         if !enabled_; println("ECU not enabled for device $i."); end
     end
 
@@ -71,24 +71,24 @@ end
 
 
 """
-    getECUConnected(sd::SingleDevice,req::Dict)
+    getECUConnected(sd::SingleDevice)
 
 Return if IDS environmental control unit is connected (duh) for single device `sd`.
 """
-function getECUConnected(sd::SingleDevice,req::Dict)
-    return getECUConnected(sd.ids,req)
+function getECUConnected(sd::SingleDevice)
+    return getECUConnected(sd.ids)
 end
 
 """
-    getECUConnected(md::MultiDevice,req::Dict)
+    getECUConnected(md::MultiDevice)
 
 Return if IDS environmental control unit is connected (duh) for all devices in multidevice `md`.
 """
-function getECUConnected(md::MultiDevice,req::Dict)
+function getECUConnected(md::MultiDevice)
     connected = true
 
     for i in eachindex(md)
-        connected_ = getECUConnected(md.ids,req); connected *= connected_
+        connected_ = getECUConnected(md.ids); connected *= connected_
         if !connected_; println("ECU not connected for device $i."); end
     end
 
@@ -98,99 +98,99 @@ end
 
 
 """
-    getHumidityInPercent(sd::SingleDevice,req::Dict)
+    getHumidityInPercent(sd::SingleDevice)
 
 Return ECU measured humidity in percent of single device `sd`.
 """
-function getHumidity(sd::SingleDevice,req::Dict)
-    return getHumidity(sd.ids,req)
+function getHumidity(sd::SingleDevice)
+    return getHumidity(sd.ids)
 end
 
 """
-    getHumidityInPercent(md::MultiDevice,req::Dict)
+    getHumidityInPercent(md::MultiDevice)
 
 Return ECU measured humidity in percent of all devices in multidevice `md`.
 """
-function getHumidity(md::MultiDevice,req::Dict)
-    return Dict(i=>getHumidity(md[i],req) for i in eachindex(md))
+function getHumidity(md::MultiDevice)
+    return Dict(i=>getHumidity(md[i]) for i in eachindex(md))
 end
 
 
 
 """
-    getPressure(sd::SingleDevice,req::Dict)
+    getPressure(sd::SingleDevice)
 
 Return ECU measured pressure in hPa of single device `sd`.
 """
-function getPressure(sd::SingleDevice,req::Dict)
-    return getPressure(sd.ids,req)
+function getPressure(sd::SingleDevice)
+    return getPressure(sd.ids)
 end
 
 """
-    getPressure(md::MultiDevice,req::Dict)
+    getPressure(md::MultiDevice)
 
 Return ECU measured pressure in hPa of all devices in multidevice `md`.
 """
-function getPressure(md::MultiDevice,req::Dict)
-    return Dict(i=>getPressure(md[i],req) for i in eachindex(md))
+function getPressure(md::MultiDevice)
+    return Dict(i=>getPressure(md[i]) for i in eachindex(md))
 end
 
 
 
 """
-    getTemperature(sd::SingleDevice,req::Dict)
+    getTemperature(sd::SingleDevice)
 
 Return ECU measured temperature in °C of single device `sd`.
 """
-function getTemperature(sd::SingleDevice,req::Dict)
-    return getTemperature(sd.ids,req)
+function getTemperature(sd::SingleDevice)
+    return getTemperature(sd.ids)
 end
 
 """
-    getTemperature(md::MultiDevice,req::Dict)
+    getTemperature(md::MultiDevice)
 
 Return ECU measured temperature in °C of all devices in multidevice `md`.
 """
-function getTemperature(md::MultiDevice,req::Dict)
-    return Dict(i=>getTemperature(md[i],req) for i in eachindex(md))
+function getTemperature(md::MultiDevice)
+    return Dict(i=>getTemperature(md[i]) for i in eachindex(md))
 end
 
 
 
 """
-    getRefractiveIndex(sd::SingleDevice,req::Dict)
+    getRefractiveIndex(sd::SingleDevice)
 
 Return ECU calculated refractive index of single device `sd`.
 """
-function getRefractiveIndex(sd::SingleDevice,req::Dict)
-    return getRefractiveIndex(sd.ids,req)
+function getRefractiveIndex(sd::SingleDevice)
+    return getRefractiveIndex(sd.ids)
 end
 
 """
-    getRefractiveIndex(md::MultiDevice,req::Dict)
+    getRefractiveIndex(md::MultiDevice)
 
 Return ECU calculated refractive index of all devices in multidevice `md`.
 """
-function getRefractiveIndex(md::MultiDevice,req::Dict)
-    return Dict(i=>getRefractiveIndex(md[i],req) for i in eachindex(md))
+function getRefractiveIndex(md::MultiDevice)
+    return Dict(i=>getRefractiveIndex(md[i]) for i in eachindex(md))
 end
 
 
 
 """
-    getRefractiveIndexForCompensation(sd::SingleDevice,req::Dict,axis::Int)
+    getRefractiveIndexForCompensation(sd::SingleDevice,axis::Int)
 
 Return IDS refractive index used for compensation (check IDS manual).
 """
-function getRefractiveIndexForCompensation(sd::SingleDevice,req::Dict,axis::Int)
-    return getRefractiveIndexForCompensation(sd.ids,req,axis)
+function getRefractiveIndexForCompensation(sd::SingleDevice,axis::Int)
+    return getRefractiveIndexForCompensation(sd.ids,axis)
 end
 
 """
-    getRefractiveIndexForCompensation(md::MultiDevice,req::Dict,axis::Int)
+    getRefractiveIndexForCompensation(md::MultiDevice,axis::Int)
 
 Return IDS refractive index used for compensation (check IDS manual).
 """
-function getRefractiveIndexForCompensation(md::MultiDevice,req::Dict,axis::Int)
-    return Dict(i=>getRefractiveIndexForCompensation(md[i],req,axis) for i in eachindex(md))
+function getRefractiveIndexForCompensation(md::MultiDevice,axis::Int)
+    return Dict(i=>getRefractiveIndexForCompensation(md[i],axis) for i in eachindex(md))
 end

@@ -1,29 +1,29 @@
 
 """
-    getLockStatus(device::D,req::Dict)
+    getLockStatus(device::D)
 
 Get status of IDS system lock (duh).
 """
-function getLockStatus(device::D,req::Dict)
-    r = request(device,req,:access,"getLockStatus")
+function getLockStatus(device::D)
+    r = request(device,:access,"getLockStatus")
 
     return r[2], r[3]
 end
 
 """
-    grantAccess(device::D,req::Dict,password::String)
+    grantAccess(device::D,password::String)
 
 Grant IDS system access on correct `password` entry.
 """
-function grantAccess(device::D,req::Dict,password::String)
-    request(device,req,:access,"grantAccess"; params=[password]); return
+function grantAccess(device::D,password::String)
+    request(device,:access,"grantAccess"; params=[password]); return
 end
 
 """
-    lock(device::D,req::Dict,password::String)
+    lock(device::D,password::String)
 
 Lock IDS system with a `password`.
 """
-function lock(device::D,req::Dict,password::String)
-    request(device,req,:access,"lock"; params=[password]); return
+function lock(device::D,password::String)
+    request(device,:access,"lock"; params=[password]); return
 end

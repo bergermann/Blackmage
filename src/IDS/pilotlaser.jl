@@ -1,37 +1,37 @@
 
 """
-    enablePL(device::D,req::Dict)
+    enablePL(device::D)
 
 Enable IDS pilot laser (duh).
 """
-function enablePL(device::D,req::Dict)
-    request(device,req,:pilot,"enable"); return
+function enablePL(device::D)
+    request(device,:pilot,"enable"); return
 end
 
 """
-    disablePL(device::D,req::Dict)
+    disablePL(device::D)
 
 Disable IDS pilot laser (duh).
 """
-function disablePL(device::D,req::Dict)
-    request(device,req,:pilot,"disable"); return
+function disablePL(device::D)
+    request(device,:pilot,"disable"); return
 end
 
 """
-    getPLEnabled(device::D,req::Dict)
+    getPLEnabled(device::D)
 
 Return if IDS pilot laser is enabled (duh).
 """
-function getPLEnabled(device::D,req::Dict)
-    return request(device,req,:pilot,"getEnabled")[2]
+function getPLEnabled(device::D)
+    return request(device,:pilot,"getEnabled")[2]
 end
 
 """
-    enablePL(device::D,req::Dict,minutes::Real; interval::Real=1)
+    enablePL(device::D,minutes::Real; interval::Real=1)
 
 Enable IDS pilot laser for set amount of `minutes`. Check every `interval` seconds.
 """
-function enablePL(device::D,req::Dict,minutes::Real; interval::Real=1)
+function enablePL(device::D,minutes::Real; interval::Real=1)
     T = minutes*60*1e3
 
     @assert minutes > 0 "Activation time in minutes must be non-negative."
@@ -44,10 +44,10 @@ function enablePL(device::D,req::Dict,minutes::Real; interval::Real=1)
 
     try 
         while t.value < T
-            if getPLEnabled(device,req)
+            if getPLEnabled(device)
                 sleep(interval)
             else
-                enablePL(device,req)
+                enablePL(device)
             end
             t = now()-t0
         end
@@ -59,7 +59,7 @@ function enablePL(device::D,req::Dict,minutes::Real; interval::Real=1)
 
     @info "Deactivating pilot laser."
 
-    disablePL(device,req)
+    disablePL(device)
 
     return
 end

@@ -369,7 +369,7 @@ function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
         if device.stateFCM == FCM_ON; device.stateFCM = FCM_SEMI; end
     end
 
-    d0 = getPos(md,req)
+    d0 = getPos(md)
     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
 
     for i in sort!(collect(keys(md.devices));

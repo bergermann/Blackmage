@@ -276,7 +276,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::
     
     ess = round(Int,abs(ess)/1e-12)
 
-    d0 = getAxisDisplacement(device_ids,req,axis)
+    d0 = getAxisDisplacement(device_ids,addr)
     t = round(Int,target*units[unit]/1e-12)
     dt = abs(d0-t)
 
@@ -293,7 +293,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::
 
         mcMove(device_mc,axis,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
-        d1 = getAxisDisplacement(device_ids,req,axis)
+        d1 = getAxisDisplacement(device_ids,addr)
 
         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
         dt = abs(d1-t); d0 = d1
@@ -351,14 +351,14 @@ function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
     mcTargetFCM(device_mc,target,unit); mcWaitForTarget(device_mc); sleep(1)
     mcTargetP(device_mc,device_ids,target,unit; mrss=mrss,ess=ess,maxiter=10); sleep(1)
 
-    p0 = getAxesDisplacement(device_ids,req); p1 = copy(p0); p2 = copy(p0)
+    p0 = getAxesDisplacement(device_ids); p1 = copy(p0); p2 = copy(p0)
 
     for axis in 1:3
         if axis==master; continue; end
 
         mcMove(device_mc,axis,0,nsteps); sleep(1+nsteps/50)
 
-        p1[axis] = getAxisDisplacement(device_ids,req,axis)
+        p1[axis] = getAxisDisplacement(device_ids,axis)
 
         mcReSetupFCM(device_mc; master=master)    
 
@@ -367,7 +367,7 @@ function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
         
         mcMove(device_mc,axis,1,nsteps); sleep(1+nsteps/50)
 
-        p2[axis] = getAxisDisplacement(device_ids,req,axis)
+        p2[axis] = getAxisDisplacement(device_ids,axis)
         
         mcReSetupFCM(device_mc; master=master)
         
@@ -399,7 +399,7 @@ function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
         autoAlign(device_mc,device_ids,target,unit;
             master=master,nsteps=nsteps_,mrss=mrss,ess=ess)
 
-        resetAxes(device_ids,req)
+        resetAxes(device_ids)
     end
     
     return

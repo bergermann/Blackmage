@@ -103,14 +103,14 @@
 
 
 # """
-#     record_!(d::Displacement,device::TCPSocket,req::Dict,tmax::Real;
+#     record_!(d::Displacement,device::TCPSocket,tmax::Real;
 #         interval::Real=0.1,nreset::Int=5,treset::Real=1)
 
 # Periodically write IDS readout to container `d` for a maximum of `tmax` seconds, every
 # `interval` seconds. Attempt to clear persisting error a maximum of `nreset` times, wait
 # `treset` seconds between each try.
 # """
-# function record_!(d::Displacement,device::TCPSocket,req::Dict,tmax::Real;
+# function record_!(d::Displacement,device::TCPSocket,tmax::Real;
 #         interval::Real=0.1,nreset::Int=5,treset::Real=1)
 
 #     t0 = now()
@@ -131,8 +131,8 @@
 
 #                 d.idx = d.idx%d.n+1
 
-#                 d.dX[:,d.idx] .= getAxesDisplacement(device,req)
-#                 d.dC[:,d.idx] .= getAxesSignalQuality(device,req; threshold=900)
+#                 d.dX[:,d.idx] .= getAxesDisplacement(device)
+#                 d.dC[:,d.idx] .= getAxesSignalQuality(device; threshold=900)
 #                 d.dT[d.idx] = (now()-d.t0).value
 
 #                 if nreset_ > 0
@@ -152,7 +152,7 @@
 
 #                 sleep(treset)
 
-#                 resetError(device,req)
+#                 resetError(device)
 
 #                 nreset_ += 1
 #             end
@@ -181,23 +181,14 @@
 #         interval::Float64=0.1,nreset::Int=5,treset::Real=1)
     
 #     @assert Threads.nthreads() > 1 "For parallel recording, multiple threads are required."
-#     @assert !d.active "Displacement record is already being used."
-
-#     req = Dict(
-#         "jsonrpc" => "2.0",
-#         "method" => "",
-#         "id" => "0",
-#         "api" => "2",
-#         "params" => [],
-#     )
-    
-#     @assert getMeasurementEnabled(device,req) "Measurement not enabled."
+#     @assert !d.active "Displacement record is already being used."    
+#     @assert getMeasurementEnabled(device) "Measurement not enabled."
 
 #     @info "Activating displacement recording."
 
 #     d.active = true
 
-#     Threads.@spawn record_!(d,device,req,tmax; interval=interval,nreset=nreset,treset=treset)
+#     Threads.@spawn record_!(d,device,tmax; interval=interval,nreset=nreset,treset=treset)
 
 #     return
 # end

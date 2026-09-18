@@ -13,7 +13,7 @@ mc_ips =    [
 ids_ips =   [
     ip"192.168.3.1",
     ip"192.168.3.2",
-    ip"192.168.3.3",
+    ip"192.168.3.4",
 ]
 
 
@@ -25,12 +25,12 @@ Blackmage.open_status(md)
 open(md)
 close(md)
 
-getMeasurementEnabled(md,req)
-startMeasurement(md,req)
-stopMeasurement(md,req)
+getMeasurementEnabled(md)
+startMeasurement(md)
+stopMeasurement(md)
 
-getAxesDisplacement(md,req)
-resetAxes(md,req)
+getAxesDisplacement(md)
+resetAxes(md)
 
 mcStopAll(md)
 mcSetupFCM(md)
@@ -47,9 +47,9 @@ mcTargetP(md[2].mc,md[2].ids,0,:mm; ess=(10e-6,20e-6,20e-6),mrss=(5,5,5),maxiter
 # mcTargetP(md[2].mc,md[2].ids,1,0,:mm; ess=20e-6,mrss=15)
 mcMove(md[2].mc,1,1,10)
 
-p0 = getAxesDisplacement(md,req)
+p0 = getAxesDisplacement(md)
 mcMove.(md[2].mc,[1,2,3],1,100)
-p1 = getAxesDisplacement(md,req)
+p1 = getAxesDisplacement(md)
 
 
 
@@ -73,20 +73,20 @@ mcTargetFCM(md,(x1+x2)/2,unit); mcWaitForTarget(md); sleep(1)
     println("Iter $(i)/$n")
 
     mcTargetFCM(md,x1,unit); mcWaitForTarget(md); sleep(1) # reset positions
-    d1 = getAxesDisplacement(md,req)
+    d1 = getAxesDisplacement(md)
     
     mcTargetP(md,x1,unit; maxsteps=20,maxiter=30); sleep(1)
-    d1p = getAxesDisplacement(md,req)
+    d1p = getAxesDisplacement(md)
     
      p1[:,1,i] = d1[1];   p1[:,2,i] = d1[2]; 
     p1p[:,1,i] = d1p[1]; p1p[:,2,i] = d1p[2]; 
 
     mcReSetupFCM(md)
     mcTargetFCM(md,x2,unit); mcWaitForTarget(md); sleep(1) # reset positions
-    d2 = getAxesDisplacement(md,req)
+    d2 = getAxesDisplacement(md)
     
     mcTargetP(md,x2,unit; maxsteps=20,maxiter=30); sleep(1)
-    d2p = getAxesDisplacement(md,req)
+    d2p = getAxesDisplacement(md)
     
      p2[:,1,i] = d2[1];   p2[:,2,i] = d2[2]; 
     p2p[:,1,i] = d2p[1]; p2p[:,2,i] = d2p[2]; 

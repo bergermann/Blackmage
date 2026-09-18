@@ -7,8 +7,8 @@ using Blackmage, JLD2
 #  MC -> motor control
 # IDS -> Interferometric Displacement Sensor
 # IDS web interface can be opened by putting the IP adress into any browser
-device_mc = connect(ip"",0)     # motors
-device_ids = connect(ip"",0)    # interferometers
+device_mc = connect(ip"192.168.2.3",2000)     # motors
+device_ids = connect(ip"192.168.3.4",9090)    # interferometers
 
 # run this to close connection
 close(device_mc); close(device_ids)
@@ -17,7 +17,7 @@ close(device_mc); close(device_ids)
 # run motor 1 for 100 steps
 # direction 0 = towards backplate, 1 = away from backplate (backplate is where cables/lasers are)
 # mcMove(device, motor_id, direction, step number)
-mcMove(device_mc,1,1,100)
+mcMove(device_mc,3,1,100)
 
 # run motor 1 for infinite steps, requires manual stop command
 # step number > 0: movement fixed amount of steps, step number = 0: infinite movement
@@ -36,7 +36,7 @@ mcStop.(device_mc,[1,2,3])
 
 # initialize IDS measurement, takes a few minutes, can be initialized from IDS web interface
 # cannot be activated when IDS optics alignment mode is active (see web interface)
-startMeasurement(device_ids,Blackmage.req)
+startMeasurement(device_ids)
 
 # create container to write measurement data to, adds a timestamp for
 # time reference of measurements
