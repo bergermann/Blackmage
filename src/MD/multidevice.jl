@@ -56,9 +56,9 @@ mutable struct Logger
     function Logger(ndisk)
         new(
             false,
-            Dict(i => zeros(Float64,3) for i in 1:ndisk),
-            Dict(i => zeros(Float64,3) for i in 1:ndisk),
-            Dict(i => zeros(Float64,3) for i in 1:ndisk),
+            Dict(i => zeros(Int,3) for i in 1:ndisk),
+            Dict(i => zeros(Int,3) for i in 1:ndisk),
+            Dict(i => zeros(Int,3) for i in 1:ndisk),
             0.
         )
     end
