@@ -40,6 +40,9 @@ mutable struct Logger
     "Interferometer signal strength in permille."
     signal::Dict{Int,Vector{Int}}
 
+    "Context in which the log was updated."
+    context::LogContext
+
     "Timestamp of last measurement in unix time."
     timestamp::Float64
 

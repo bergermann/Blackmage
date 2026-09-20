@@ -1,5 +1,6 @@
 
-@enum StateFCM FCM_OFF FCM_ON FCM_SEMI
+@enum StateFCM::UInt8 FCM_OFF FCM_ON FCM_SEMI
+@enum LogContext::UInt8 LC_IDLE_INIT LC_IDLE_TARGET LC_MOVING LC_CORRECTING
 
 include("singledevice.jl")
 include("multidevice.jl")
