@@ -344,35 +344,3 @@ end
 #     return data
 # end
 
-
-
-function updateLog!(logger::Lockable{Logger,ReentrantLock})
-    @lock logger begin
-        for i in eachindex(md)
-            getAbsPos!(logger.apos,  md[i].ids)
-            getRelPos!(logger.rpos,  md[i].ids)
-            getSignal!(logger.signal,md[i].ids)
-        end
-
-        logger.timestamp = datetime2unix(now())
-    end
-
-    return
-end
-
-updateLog!(md::MultiDevice) = updateLog!(md.logger)
-
-function updateLog_(logger::Lockable{Logger,ReentrantLock})
-    @lock logger begin
-        logger.apos[1]     += rand(3:5,3)
-        logger.rpos[1]     += rand(0:5,3)
-        logger.contrast[1] += rand(0:1,3)
-
-        logger.timestamp += 1.
-    end
-
-    return
-end
-
-updateLog_(md::MultiDevice) = updateLog_(md.logger)
-

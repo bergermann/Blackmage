@@ -62,10 +62,14 @@ mutable struct Logger
             Dict(i => zeros(Int,3) for i in 1:ndisk),
             Dict(i => zeros(Int,3) for i in 1:ndisk),
             Dict(i => zeros(Int,3) for i in 1:ndisk),
+            LC_IDLE_INIT,
             0.
         )
     end
 end
+
+"Lockable logger alias."
+const LLogger = Lockable{Logger,ReentrantLock}
 
 
 
@@ -74,7 +78,7 @@ struct MultiDevice
     "Disc devices with index."
     devices::Dict{Int,SingleDevice}
     "Lockable Position data buffer."
-    logger::Lockable{Logger,ReentrantLock}
+    logger::LLogger
     "Multidevice settings."
     settings::MultiDeviceSettings
 
