@@ -2,7 +2,7 @@
 
 
 function addMockLog_(logger::LLogger)
-    @log logger begin
+    @lock logger begin
         if length(md) > 0
             for i in eachindex(md)
                 logger[].apos[i] = [0,0,0]
