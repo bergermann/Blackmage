@@ -1,25 +1,25 @@
 
 
 
-function addMockLog_(logger::LLogger)
-    @lock logger begin
+function addMockLog_(md::MultiDevice)
+    @lock md.logger begin
         if length(md) > 0
             for i in eachindex(md)
-                logger[].apos[i] = [0,0,0]
-                logger[].rpos[i] = [0,0,0]
-                logger[].contrast[i] = [0,0,0]
+                md.logger[].apos[i] = [0,0,0]
+                md.logger[].rpos[i] = [0,0,0]
+                md.logger[].contrast[i] = [0,0,0]
             end
         else
-            logger[].apos[1] = [0,0,0]
-            logger[].rpos[1] = [0,0,0]
-            logger[].contrast[1] = [0,0,0]
+            md.logger[].apos[1] = [0,0,0]
+            md.logger[].rpos[1] = [0,0,0]
+            md.logger[].contrast[1] = [0,0,0]
         end
     end
 
     return
 end
 
-addMockLog_(md::MultiDevice) = addMockLog_(md.logger)
+
 
 function updateLog!(logger::LLogger,context::LogContext=logger.context)
     @lock logger begin
