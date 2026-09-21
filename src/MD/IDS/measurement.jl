@@ -26,6 +26,15 @@ function getMeasurementEnabled(md::MultiDevice)
     return enabled
 end
 
+function getMeasurementEnabled_(md::MultiDevice)
+    enabled = true
+
+    for device in md
+        enabled *= getMeasurementEnabled(device)
+    end
+    
+    return enabled
+end
 
 
 """
@@ -47,9 +56,22 @@ to be disabled. If measurement still hasn't started after `timeout` seconds, che
 (usually takes < 2 minutes). Checks every `dt` seconds.
 """
 function startMeasurement(md::MultiDevice; dt::Real=1.0,timeout::Real=300)
-    for i in eachindex(md)
-        println("Starting measurement for device $i.")
-        startMeasurement(md[i]; dt=dt,timeout=timeout)
+    # for i in eachindex(md)
+    #     println("Starting measurement for device $i.")
+    #     startMeasurement(md[i]; dt=dt,timeout=timeout)
+    # end
+
+    startMeasurement_(md)
+
+    t = 0
+    while !getMeasurementEnabled_(md)
+        sleep(dt); t += dt
+
+        if t > timeout
+            for i in eachindex(md); if !getMeasurementEnabled(md[i])
+                @warn "Measurement still not activated for device $i after $timeout seconds."
+            end; break; end
+        end
     end
 
     return
