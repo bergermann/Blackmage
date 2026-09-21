@@ -1,35 +1,57 @@
 
 
 
-function updateLog!(logger::LLogger)
+function addMockLog_(logger::LLogger)
+    @log logger begin
+        if length(md) > 0
+            for i in eachindex(md)
+                logger[].apos[i] = [0,0,0]
+                logger[].rpos[i] = [0,0,0]
+                logger[].contrast[i] = [0,0,0]
+            end
+        else
+            logger[].apos[1] = [0,0,0]
+            logger[].rpos[1] = [0,0,0]
+            logger[].contrast[1] = [0,0,0]
+        end
+    end
+
+    return
+end
+
+addMockLog_(md::MultiDevice) = addMockLog_(md.logger)
+
+function updateLog!(logger::LLogger,context::LogContext=logger.context)
     @lock logger begin
         for i in eachindex(md)
-            getAbsPos!(logger.apos,  md[i].ids)
-            getRelPos!(logger.rpos,  md[i].ids)
-            getSignal!(logger.signal,md[i].ids)
+            getAbsPos!(logger[].apos,  md[i].ids)
+            getRelPos!(logger[].rpos,  md[i].ids)
+            getSignal!(logger[].signal,md[i].ids)
         end
 
-        logger.timestamp = datetime2unix(now())
+        logger[].timestamp = datetime2unix(now())
+        logger[].context = context
     end
 
     return
 end
 
-updateLog!(md::MultiDevice) = updateLog!(md.logger)
+updateLog!(md::MultiDevice,context::LogContext=md.logger.context) = updateLog!(md.logger,context)
 
-function updateLog_(logger::LLogger)
+function updateLog_(logger::LLogger,context::LogContext=logger.context)
     @lock logger begin
-        logger.apos[1]     += rand(3:5,3)
-        logger.rpos[1]     += rand(0:5,3)
-        logger.contrast[1] += rand(0:1,3)
+        logger[].apos[1]     += rand(3:5,3)
+        logger[].rpos[1]     += rand(0:5,3)
+        logger[].contrast[1] += rand(0:1,3)
 
-        logger.timestamp += 1.
+        logger[].timestamp += 1.
+        logger[].context = context
     end
 
     return
 end
 
-updateLog_(md::MultiDevice) = updateLog_(md.logger)
+updateLog_(md::MultiDevice,context::LogContext=md.logger.context) = updateLog_(md.logger,context)
 
 
 
