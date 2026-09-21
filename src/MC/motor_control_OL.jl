@@ -37,6 +37,9 @@ function mcMove(device::TCPSocket,axis::Int,dir::Int,steps::Int;
     return
 end
 
+mcMove(device::TCPSocket,axes::AbstractVector{<:Integer},dir::Int,steps::Int; kwargs...) =
+    mcMove.(device,axes,dir,steps; kwargs...)
+
 """
     mcStop(device::TCPSocket,axis::Int)
 
@@ -49,6 +52,8 @@ function mcStop(device::TCPSocket,axis::Int)
 
     return
 end
+
+mcStop(device::TCPSocket,axes::AbstractVector{<:Integer}) = mcStop.(device,axes)
 
 """
     mcStopAllMotors(device::TCPSocket)

@@ -36,9 +36,15 @@ function mcMove(sd::SingleDevice,axis::Int,dir::Int,steps::Int;
     return
 end
 
-mcMove(sd::SingleDevice,axis::AbstractVector{<:Int},dir::Int,steps::Int; kwargs...) =
-    mcMove.(sd,axis,dir,steps; kwargs...)
+function mcMove(sd::SingleDevice,axes::AbstractVector{<:Integer},dir::Int,steps::Int;
+        kwargs...)
 
+    for axis in axes
+        mcMove(sd,axis,dir,steps; kwargs...)
+    end
+    
+    return
+end
 
 
 """

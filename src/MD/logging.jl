@@ -2,18 +2,12 @@
 
 
 function addMockLog_(md::MultiDevice)
+    @assert length(md) == 0 "Real devices present in multidevices!"
+
     @lock md.logger begin
-        if length(md) > 0
-            for i in eachindex(md)
-                md.logger[].apos[i] = [0,0,0]
-                md.logger[].rpos[i] = [0,0,0]
-                md.logger[].signal[i] = [0,0,0]
-            end
-        else
-            md.logger[].apos[1] = [0,0,0]
-            md.logger[].rpos[1] = [0,0,0]
-            md.logger[].signal[1] = [0,0,0]
-        end
+        md.logger[].apos[1] = [0,0,0]
+        md.logger[].rpos[1] = [0,0,0]
+        md.logger[].signal[1] = [0,0,0]
     end
 
     return
