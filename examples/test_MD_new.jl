@@ -37,13 +37,9 @@ getRelPos(md)
 resetAxes(md)
 
 mcStopAll(md)
-mcSetupFCM(md)
 
 mcTarget(md,[0.0,0.0,0.0],:mm)
 
-mcTarget(md[1],1,:mm)
-mcTargetFCM(md[1],2,:mm)
-
-mcTargetFCM(md[3].mc,1,:mm)
+mcTarget(md[3],1,:mm)
 
 mcMove(md[1],[1,2,3],1,10)
