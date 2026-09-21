@@ -196,7 +196,7 @@ function mcStopAll_(sd::SingleDevice,idx::Int)
     sd.stateFCM = FCM_OFF
     
     mcDisableFCM(sd)
-    mcStopAllMotors_(device,idx)
+    mcStopAllMotors_(sd,idx)
 
     return
 end
