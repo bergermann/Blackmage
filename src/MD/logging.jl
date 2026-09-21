@@ -7,12 +7,12 @@ function addMockLog_(md::MultiDevice)
             for i in eachindex(md)
                 md.logger[].apos[i] = [0,0,0]
                 md.logger[].rpos[i] = [0,0,0]
-                md.logger[].contrast[i] = [0,0,0]
+                md.logger[].signal[i] = [0,0,0]
             end
         else
             md.logger[].apos[1] = [0,0,0]
             md.logger[].rpos[1] = [0,0,0]
-            md.logger[].contrast[1] = [0,0,0]
+            md.logger[].signal[1] = [0,0,0]
         end
     end
 
@@ -42,7 +42,7 @@ function updateLog_(logger::LLogger,context::LogContext=logger.context)
     @lock logger begin
         logger[].apos[1]     += rand(3:5,3)
         logger[].rpos[1]     += rand(0:5,3)
-        logger[].contrast[1] += rand(0:1,3)
+        logger[].signal[1] += rand(0:1,3)
 
         logger[].timestamp += 1.
         logger[].context = context
