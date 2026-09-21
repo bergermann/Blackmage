@@ -21,7 +21,7 @@ end
 
 
 
-function updateLog!(logger::LLogger,context::LogContext=logger.context)
+function updateLog!(logger::LLogger,context::LogContext=logger.value.context)
     @lock logger begin
         for i in eachindex(md)
             getAbsPos!(logger[].apos,  md[i].ids)
@@ -36,9 +36,12 @@ function updateLog!(logger::LLogger,context::LogContext=logger.context)
     return
 end
 
-updateLog!(md::MultiDevice,context::LogContext=md.logger.context) = updateLog!(md.logger,context)
+updateLog!(md::MultiDevice,context::LogContext=md.logger.value.context) =
+    updateLog!(md.logger,context)
 
-function updateLog_(logger::LLogger,context::LogContext=logger.context)
+
+
+function updateLog_(logger::LLogger,context::LogContext=logger.value.context)
     @lock logger begin
         logger[].apos[1]     += rand(3:5,3)
         logger[].rpos[1]     += rand(0:5,3)
@@ -51,7 +54,8 @@ function updateLog_(logger::LLogger,context::LogContext=logger.context)
     return
 end
 
-updateLog_(md::MultiDevice,context::LogContext=md.logger.context) = updateLog_(md.logger,context)
+updateLog_(md::MultiDevice,context::LogContext=md.logger.value.context) =
+    updateLog_(md.logger,context)
 
 
 
