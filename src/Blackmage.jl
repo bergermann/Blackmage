@@ -58,7 +58,7 @@ export mcEnableFCM, mcDisableFCM, mcSetupFCM, mcReSetupFCM, mcStopAll   # MC CL
 export mcTargetFCM, mcWaitForTarget, mcStatusFCM, mcTargetP
 export autoAlign
 
-export mcTarget, mcMoveDirect   # MC FL
+export mcTarget, mcWait, mcMoveDirect   # MC FL
 
 export tilt2pos, pos2tilt, kart2cyl, cyl2kart
 
@@ -92,3 +92,4 @@ end
 # split raw IDS and MC controls into new packages?
 # add tilt corrections to mcTarget(md) (revisit motor_control_FL)
 # add lower threshold to getAxisSignalQuality?
+# streamline exported names
