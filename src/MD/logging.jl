@@ -1,7 +1,7 @@
 
 
 
-function updateLog!(md::MultiDevice,context::LogContext=logger.value.context)
+function updateLog!(md::MultiDevice,context::LogContext=md.logger.value.context)
     @lock md.logger begin
         for i in eachindex(md)
             getAbsPos!(md.logger[].apos,  md[i].ids)
