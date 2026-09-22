@@ -4,9 +4,9 @@
 function updateLog!(md::MultiDevice,context::LogContext=md.logger.value.context)
     @lock md.logger begin
         for i in eachindex(md)
-            getAbsPos!(md.logger[].apos[i],  md[i].ids)
-            getRelPos!(md.logger[].rpos[i],  md[i].ids)
-            getSignal!(md.logger[].signal[i],md[i].ids)
+            getAbsPos!(md.logger[].apos[i],  md[i])
+            getRelPos!(md.logger[].rpos[i],  md[i])
+            getSignal!(md.logger[].signal[i],md[i])
         end
 
         md.logger[].timestamp = datetime2unix(now())
