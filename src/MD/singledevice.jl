@@ -23,6 +23,9 @@ mutable struct DiscSettings
     "Retroreflector radius from central z axis in m."
     r::Float64
 
+    "Speed below which disc is considered stalling during movement in m/s."
+    stallspeed::Float64
+
     @doc """
         DiscSettings(;
             master=1,                      
@@ -34,7 +37,8 @@ mutable struct DiscSettings
             flexdist=5000,
             df=1.0,
             α=0.0,
-            r=0.15)
+            r=0.15,
+            stallspeed=3.75e-5)
     """
     function DiscSettings(;
             master=1,                      
@@ -46,7 +50,8 @@ mutable struct DiscSettings
             flexdist=5000,
             df=1.0,
             α=0.0,
-            r=0.15)
+            r=0.15,
+            stallspeed=3.75e-5)
 
         @assert 1 <= master <= 3 "Master axis has to be 1, 2 or 3."
         @assert all(@. 0 < ess <= 100e-6) "Estimated step size [m] needs to be between 0 and 100e-6."
@@ -60,10 +65,12 @@ mutable struct DiscSettings
         @assert 0.1 <= df <= 3.0 "Drive factor df needs to be between 0.1 and 3.0."
         @assert 0 <= α <= 360 "Static motor angle α needs to be betwen 0° and 360°."
         @assert 0 < r "Interferometeer radius r needs to be larger than 0."
+        @assert 0 <= stallspeed <= 2e-3 "Stallspeed needs to be between 0 and 2e-3 m/s."
 
-        new(master,ess,mrss,freq,temp,flextol,flexdist,df,α,r)
+        new(master,ess,mrss,freq,temp,flextol,flexdist,df,α,r,stallspeed)
     end
 end; const DS = DiscSettings
+
 
 
 "[NYI] Boundary information of disc and fixture for collision avoidance."

@@ -354,50 +354,62 @@ end
 
 
 
+
+
+
+
+
 """
-    mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
-        timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
+    mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,
+        repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
 Push all devices in `md` against hardpoint in direction `dir`, starting with the closest.
 Checks for stalling, see [`checkStalling`](@ref). If `repush`, push all devices at once for
 `pushsteps` steps against hardpoint.
 """
-function mcZero(md::MultiDevice; interval::Real=0.1,stalltol::Real=0.05,
-        timeout::Real=60,dir::Int=0,repush::Bool=false,pushsteps::Int=10)
+function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,
+        repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
     @assert pushsteps >= 0 "Amount of repush steps needs to be larger than 0."
-
-    for device in md
-        if device.stateFCM == FCM_ON; device.stateFCM = FCM_SEMI; end
-    end
 
     d0 = getPos(md)
     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
 
-    for i in sort!(collect(keys(md.devices));
-            by=x->d0[x][md[x].settings.master],rev=dir==1)
-        
-        mcMove.(md[i].mc,[1,2,3],dir,0)
+    for i in sort!(collect(keys(md.devices)); by=x->d0[x][md[x].settings.master],rev=true)
+        mcTarget(md[i],d0[i][md[i].settings.master]-boosterlength)
 
-        ds = md[i].settings
-
-        ss = round(Int,abs(ds.ess[ds.master]*ds.freq.master*stalltol)/1e-12)
         stalling = false; t0 = now()
         
         while !stalling && now()-t0 < timeout
-            stalling = checkStalling(md[i].ids,ds.master,interval,ss)
+            stalling = checkStalling(md[i],interval)
         end
 
-        mcStop.(md[i].mc,[1,2,3])
+        mcStopAllMotors(md[i])
     end
 
-    if repush; for i in sort!(collect(keys(md.devices));
-            by=x->d0[x][md[x].settings.master],rev=dir==1)
-        
-        mcMove.(md[i].mc,[1,2,3],dir,pushsteps)
-    end; end
+    if repush
+        for i in sort!(collect(keys(md.devices)); by=x->d0[x][md[x].settings.master],rev=true)
+            mcMove(md[i],[1,2,3],dir,pushsteps)
+        end
+    end
 
     return
 end
 
+function mcZeroSoft(md::MultiDevice; kwargs...)
+    mcZeroHard(md; kwargs...)
 
+    for axis in 1:3
+        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)
+    end
+
+    for axis in 1:3
+        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=10,maxiter=10)
+    end
+
+    return
+end
+
+function mcTargetPC()
+    
+end

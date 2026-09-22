@@ -310,3 +310,15 @@ target reached state for each axis and FCM internal motor positions in interfero
 function mcStatusFCM(sd::SingleDevice)
     return mcStatusFCM(sd.mc)
 end
+
+
+
+"""
+    checkStalling(sd::SingleDevice,interval::Real,stallspeed::Int=sd.settings.stallspeed)
+
+Measures distance change on master axis of single device `sd` over time `interval`.
+Compares against `stallspeed` threshold. 
+"""
+function checkStalling(sd::SingleDevice,interval::Real,stallspeed::Int=sd.settings.stallspeed)
+    return checkStalling(sd.ids_ip,sd.settings.master,interval,stallspeed)
+end

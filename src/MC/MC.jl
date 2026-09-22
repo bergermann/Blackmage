@@ -51,8 +51,3 @@ include("motor_control_CL.jl")
 include("motor_control_FL.jl")
 include("motor_control_tilts.jl")
 
-const getPos = getAbsolutePositions
-
-const getDis = const getDist = const getDisplacement = getAxesDisplacement
-
-export getPos, getDis, getDist, getDisplacement

@@ -72,3 +72,19 @@ function mcStopAllMotors(device::TCPSocket)
 
     return
 end
+
+
+
+"""
+    checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Int)
+
+Measures distance change on IDS `device` `master` axis over time `interval`.
+Compares against `stallspeed` threshold. 
+"""
+function checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Int)
+    p0 = getAxisDisplacement(device,master)
+    t0 = now(); sleep(interval)
+    p1 = getAxisDisplacement(device,master)
+
+    return round(Int,abs(1000*(p1-p0)/((now()-t0).value))) < stallspeed
+end

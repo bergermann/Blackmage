@@ -1,163 +1,150 @@
 
+# function not used anymore, but ports to sd/md required
 
-function mcTarget_(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
-        master::Int,masterfreq::Int,masteress::Float64,interval::Real,
-        stalltime::Int,stalltol::Real,nstalltol::Int,stallsteps::Int,timeout::Real)
+# function mcTarget_(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
+#         master::Int,masterfreq::Int,masteress::Float64,interval::Real,
+#         stalltime::Int,stalltol::Real,nstalltol::Int,stallsteps::Int,timeout::Real)
 
-    @assert timeout > 0 "Timeout time must be positive."
+#     @assert timeout > 0 "Timeout time must be positive."
 
-    t = round(Int,target*units[unit]/1e-12)
+#     t = round(Int,target*units[unit]/1e-12)
 
-    ess = abs(masteress)/1e-12
-    ss  = round(Int,ess*masterfreq*stalltol)
-    ess = round(Int,ess)
+#     ess = abs(masteress)/1e-12
+#     ss  = round(Int,ess*masterfreq*stalltol)
+#     ess = round(Int,ess)
 
-    println("Stall speed: $ss")
-    println("Est step:    $ess")
+#     println("Stall speed: $ss")
+#     println("Est step:    $ess")
 
-    timeout =   Millisecond(isinf(  timeout) ? typemax(Int) : round(Int,  timeout*1000))
-    stalltime = Millisecond(isinf(stalltime) ? typemax(Int) : round(Int,stalltime*1000))
-    t0 = now()
+#     timeout =   Millisecond(isinf(  timeout) ? typemax(Int) : round(Int,  timeout*1000))
+#     stalltime = Millisecond(isinf(stalltime) ? typemax(Int) : round(Int,stalltime*1000))
+#     t0 = now()
 
-    active = true; stalling = false; nstall = 0; override = false
+#     active = true; stalling = false; nstall = 0; override = false
 
-    mcStopAll(device_mc)
-    mcSetupFCM(device_mc)
-    mcTargetFCM(device_mc,target,unit)
+#     mcStopAll(device_mc)
+#     mcSetupFCM(device_mc)
+#     mcTargetFCM(device_mc,target,unit)
 
-    while active && now()-t0 < timeout
-        if !stalling
-            active, status, _ = mcStatusFCM(device_mc)
+#     while active && now()-t0 < timeout
+#         if !stalling
+#             active, status, _ = mcStatusFCM(device_mc)
 
-            if status[master]; println("target reached"); mcWaitForTarget(device_mc); break; end
+#             if status[master]; println("target reached"); mcWaitForTarget(device_mc); break; end
 
-            stalling = checkStalling(device_ids,master,interval,ss); nstall *= stalling
-        else
-            ts = now()
+#             stalling = checkStalling(device_ids,master,interval,ss); nstall *= stalling
+#         else
+#             ts = now()
 
-            while now()-ts < stalltime && stalling
-                stalling = checkStalling(device_ids,master,interval,ss)
-            end
+#             while now()-ts < stalltime && stalling
+#                 stalling = checkStalling(device_ids,master,interval,ss)
+#             end
 
-            if stalling
-                println("stalled. attempting unstall.")
+#             if stalling
+#                 println("stalled. attempting unstall.")
 
-                mcStopAllMotors(device_mc); sleep(0.1)
+#                 mcStopAllMotors(device_mc); sleep(0.1)
 
-                d = getAxisDisplacement(device_ids,master)
-                dt = abs(d-t); dir = Int(t > d)
+#                 d = getAxisDisplacement(device_ids,master)
+#                 dt = abs(d-t); dir = Int(t > d)
         
-                if dt < stallsteps*ess; break; end
+#                 if dt < stallsteps*ess; break; end
 
-                mcMove.(device_mc,[1,2,3],dir,stallsteps); sleep(0.1+stallsteps/masterfreq)
+#                 mcMove.(device_mc,[1,2,3],dir,stallsteps); sleep(0.1+stallsteps/masterfreq)
                 
-                nstall += 1; if nstall > nstalltol; override = true; break; end
+#                 nstall += 1; if nstall > nstalltol; override = true; break; end
 
-                println("reactivating target command")
+#                 println("reactivating target command")
                 
-                mcReSetupFCM(device_mc)
-                mcTargetFCM(device_mc,target,unit)
-            end
-        end
-    end
+#                 mcReSetupFCM(device_mc)
+#                 mcTargetFCM(device_mc,target,unit)
+#             end
+#         end
+#     end
 
-    if override
-        @warn "Activating override mode."
+#     if override
+#         @warn "Activating override mode."
         
-        mcMoveDirect(device_mc,device_ids,target,unit)
-    end
+#         mcMoveDirect(device_mc,device_ids,target,unit)
+#     end
 
-    return
-end
+#     return
+# end
 
-function checkStalling(device_ids::TCPSocket,master::Int,interval::Real,ss::Int)
-    p0 = getAxisDisplacement(device_ids,master)
+# function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+#         interval::Real=0.1,targettol::Int=10,ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),
+#         timeout::Real=Inf)
 
-    t0 = now(); sleep(interval)
+#     @assert timeout > 0 "Timeout time must be positive."
 
-    p1 = getAxisDisplacement(device_ids,master)
+#     ess = @. abs(ess)/1e-12
+#     t = round(Int,target*units[unit]/1e-12)
+#     dt = getAxesDisplacement(device_ids).-t
 
-    speed = round(Int,abs(1000*(p1-p0)/((now()-t0).value)))
+#     tnr = @. abs(dt) > ess*targettol    # target not reached
 
-    speed < ss && println("stalling. speed: $speed vs. $ss")
+#     if !any(tnr); println("target already reached"); return; end
 
-    return speed < ss
-end
-
-function mcMoveDirect(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        interval::Real=0.1,targettol::Int=10,ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),
-        timeout::Real=Inf)
-
-    @assert timeout > 0 "Timeout time must be positive."
-
-    ess = @. abs(ess)/1e-12
-    t = round(Int,target*units[unit]/1e-12)
-    dt = getAxesDisplacement(device_ids).-t
-
-    tnr = @. abs(dt) > ess*targettol    # target not reached
-
-    if !any(tnr); println("target already reached"); return; end
-
-    dir = @. Int(dt<0)
-    axes = [1,2,3][tnr]
+#     dir = @. Int(dt<0)
+#     axes = [1,2,3][tnr]
     
-    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
-    t0 = now()
+#     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
+#     t0 = now()
 
-    for axis in axes
-        mcMove(device_mc,axis,dir[axis],0)
-    end
+#     for axis in axes
+#         mcMove(device_mc,axis,dir[axis],0)
+#     end
 
-    while now()-t0 < timeout && any(tnr)
-        sleep(interval)
+#     while now()-t0 < timeout && any(tnr)
+#         sleep(interval)
 
-        d = getAxesDisplacement(device_ids)
+#         d = getAxesDisplacement(device_ids)
 
-        for axis in axes
-            if ((-1)^dir[axis])*(d[axis]-t) < ess[axis]*targettol
-                mcStop(device_mc,axis); tnr[axis] = false
-            end
-        end
-    end
+#         for axis in axes
+#             if ((-1)^dir[axis])*(d[axis]-t) < ess[axis]*targettol
+#                 mcStop(device_mc,axis); tnr[axis] = false
+#             end
+#         end
+#     end
 
-    mcStopAllMotors(device_mc)
+#     mcStopAllMotors(device_mc)
 
-    return
-end
+#     return
+# end
 
 
 
-function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
-        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
-        stallsteps::Int=10,timeout::Real=Inf)
+# function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+#         master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
+#         interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
+#         stallsteps::Int=10,timeout::Real=Inf)
 
-    mcTarget_(device_mc,device_ids,target,unit,
-        master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
+#     mcTarget_(device_mc,device_ids,target,unit,
+#         master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
 
-    mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
+#     mcTargetP(device_mc,device_ids,target,unit; maxsteps=min(100,stallsteps))
 
-    return
-end
+#     return
+# end
 
-function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
-        xtilt::Real,ytilt::Real,α::Real,r::Real;
-        master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
-        interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
-        stallsteps::Int=10,timeout::Real=Inf)
+# function mcTarget(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,
+#         xtilt::Real,ytilt::Real,α::Real,r::Real;
+#         master::Int=1,masterfreq::Int=50,masteress::Float64=15e-6,
+#         interval::Real=0.1,stalltime::Int=5,stalltol::Real=0.05,nstalltol::Int=5,
+#         stallsteps::Int=10,timeout::Real=Inf)
 
-    mcTarget_(device_mc,device_ids,target,unit,
-        master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
+#     mcTarget_(device_mc,device_ids,target,unit,
+#         master,masterfreq,masteress,interval,stalltime,stalltol,nstalltol,stallsteps,timeout)
 
-    dz = tilt2pos(xtilt,ytilt; α=α,r=r)
+#     dz = tilt2pos(xtilt,ytilt; α=α,r=r)
 
-    for axis in 1:3
-        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)
-    end
+#     for axis in 1:3
+#         mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)
+#     end
 
-    for axis in 1:3
-        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=10,maxiter=10)
-    end
+#     for axis in 1:3
+#         mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=10,maxiter=10)
+#     end
 
-    return
-end
+#     return
+# end
