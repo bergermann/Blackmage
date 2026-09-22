@@ -229,6 +229,8 @@ automatically disable it).
 function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
+    @info "target1"
+
     for device in md
         if device.stateFCM == FCM_OFF
             mcSetupFCM(device)
@@ -236,6 +238,8 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
             mcReSetupFCM(device)
         end
     end
+
+    @info "target2"
     
     md.moving[] = true
     
@@ -243,6 +247,8 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     for i in sort!(collect(keys(md.devices)))
         mcTargetFCM(md[i],target[idx],unit); idx += 1
     end
+
+    @info "target3"
 
     return
 end
