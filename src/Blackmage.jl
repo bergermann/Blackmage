@@ -93,3 +93,4 @@ end
 # add tilt corrections to mcTarget(md) (revisit motor_control_FL)
 # add lower threshold to getAxisSignalQuality?
 # streamline exported names
+# create individual precision correction function

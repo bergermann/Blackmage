@@ -96,7 +96,7 @@ struct MultiDevice
     interrupt::Base.RefValue{Bool}
 
     @doc """
-        MultiDevice(devices,logger,settings,moving,target,interrupt
+        MultiDevice(devices,logger,settings,moving,target,interrupt)
     """
     function MultiDevice(devices,logger,settings,moving,target,interrupt)
         new(devices,logger,settings,moving,target,interrupt)
