@@ -72,7 +72,7 @@ end
 """
     getAbsolutePosition(device::D,axis::Int)
 
-Return absolute IDS position of `axis` (duh).
+Return absolute IDS position of `axis` (duh) in pm.
 """
 function getAbsolutePosition(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
@@ -84,7 +84,7 @@ end
 """
     getAbsolutePositions(device::D)
 
-Return absolute IDS positions of all axes (duh).
+Return absolute IDS positions of all axes (duh) in pm.
 """
 function getAbsolutePositions(device::D)
     r = request(device,:displace,"getAbsolutePositions")
@@ -95,7 +95,7 @@ end
 """
     getAbsolutePositions!(a::Vector{Int},device::D)
 
-Write absolute IDS positions directly to vector `a` of length 3, see
+Write absolute IDS positions in pm directly to vector `a` of length 3, see
 [`getAbsolutePositions`](@ref).
 """
 function getAbsolutePositions!(a::Vector{Int},device::D)
@@ -109,7 +109,7 @@ end
 """
     getAxisDisplacement(device::D,axis::Int)
 
-Get relative IDS position of `axis`.
+Get relative IDS position of `axis` in pm.
 """
 function getAxisDisplacement(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
@@ -121,7 +121,7 @@ end
 """
     getAxesDisplacement(device::D)
 
-Get relative IDS positions of all axes.
+Get relative IDS positions of all axes in pm.
 """
 function getAxesDisplacement(device::D)
     r = request(device,:displace,"getAxesDisplacement")
@@ -132,7 +132,7 @@ end
 """
     getAxesDisplacement!(a::Vector{Int},device::D)
 
-Write relative IDS positions directly to vector `a` of length 3, see
+Write relative IDS positions in pm directly to vector `a` of length 3, see
 [`getAxesDisplacement`](@ref).
 """
 function getAxesDisplacement!(a::Vector{Int},device::D)
@@ -146,7 +146,7 @@ end
 """
     getReferencePosition(device::D,axis::Int)
 
-Get IDS reference position of `axis` (duh).
+Get IDS reference position of `axis` (duh) in pm.
 """
 function getReferencePosition(device::D,axis::Int)
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
@@ -158,7 +158,7 @@ end
 """
     getReferencePositions(device::D)
 
-Get IDS reference position of all axes (duh).
+Get IDS reference position of all axes (duh) in pm.
 """
 function getReferencePositions(device::D)
     r = request(device,:displace,"getReferencePositions")
@@ -169,7 +169,7 @@ end
 """
     getReferencePositions!(a::Vector{Int},device::D)
 
-Write IDS reference positions directly to vector `a` of length 3, see
+Write IDS reference positions in pm directly to vector `a` of length 3, see
 [`getReferencePositions`](@ref).
 """
 function getReferencePositions!(a::Vector{Int},device::D)
