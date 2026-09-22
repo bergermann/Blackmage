@@ -1,6 +1,43 @@
 
 
 
+function updateLog!(md::MultiDevice,context::LogContext=logger.value.context)
+    @lock md.logger begin
+        for i in eachindex(md)
+            getAbsPos!(md.logger[].apos,  md[i].ids)
+            getRelPos!(md.logger[].rpos,  md[i].ids)
+            getSignal!(md.logger[].signal,md[i].ids)
+        end
+
+        md.logger[].timestamp = datetime2unix(now())
+        md.logger[].context = context
+    end
+
+    return
+end
+
+
+
+
+
+
+
+
+
+
+function updateLog_(md::MultiDevice,context::LogContext=md.logger.value.context) 
+    @lock md.logger begin
+        md.logger[].apos[1]     += rand(3:5,3)
+        md.logger[].rpos[1]     += rand(0:5,3)
+        md.logger[].signal[1] += rand(0:1,3)
+
+        md.logger[].timestamp += 1.
+        md.logger[].context = context
+    end
+
+    return
+end
+
 function addMockLog_(md::MultiDevice)
     @assert length(md) == 0 "Real devices present in multidevices!"
 
@@ -12,44 +49,6 @@ function addMockLog_(md::MultiDevice)
 
     return
 end
-
-
-
-function updateLog!(logger::LLogger,context::LogContext=logger.value.context)
-    @lock logger begin
-        for i in eachindex(md)
-            getAbsPos!(logger[].apos,  md[i].ids)
-            getRelPos!(logger[].rpos,  md[i].ids)
-            getSignal!(logger[].signal,md[i].ids)
-        end
-
-        logger[].timestamp = datetime2unix(now())
-        logger[].context = context
-    end
-
-    return
-end
-
-updateLog!(md::MultiDevice,context::LogContext=md.logger.value.context) =
-    updateLog!(md.logger,context)
-
-
-
-function updateLog_(logger::LLogger,context::LogContext=logger.value.context)
-    @lock logger begin
-        logger[].apos[1]     += rand(3:5,3)
-        logger[].rpos[1]     += rand(0:5,3)
-        logger[].signal[1] += rand(0:1,3)
-
-        logger[].timestamp += 1.
-        logger[].context = context
-    end
-
-    return
-end
-
-updateLog_(md::MultiDevice,context::LogContext=md.logger.value.context) =
-    updateLog_(md.logger,context)
 
 
 

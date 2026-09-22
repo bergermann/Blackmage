@@ -14,19 +14,22 @@ const units = Base.ImmutableDict(
 )
 
 """
-    metric2ids(val::Real,unit::Symbol; offset::Int=4_500_000)
+    metric2ids(val::Real,unit::Symbol=:m; offset::Int=4_500_000)
 
 Convert metric distance to interferometer distance units. `offset` interferometer units 
 are added to avoid negative values. `-offset*ids_res` is the minimum metric distance
 allowed. `offset` is a hard setting on the datalink (ask Christoph if this needs changed).
 """
-function metric2ids(val::Real,unit::Symbol; offset::Int=4_500_000)
+function metric2ids(val::Real,unit::Symbol=:m; offset::Int=4_500_000)
     @assert haskey(units,unit) "$unit not available as unit, pick: m, cm, mm, µm, nm"
     
     return round(Int,val*units[unit]/ids_res+offset)
 end
 
 metric2ids((val,unit)::Tuple{Real,Symbol}) = metric2ids(val,unit)
+
+
+
 
 
 
