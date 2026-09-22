@@ -230,6 +230,7 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     @info "target1"
+    println("test1")
 
     for device in md
         if device.stateFCM == FCM_OFF
