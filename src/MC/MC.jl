@@ -30,9 +30,6 @@ metric2ids((val,unit)::Tuple{Real,Symbol}) = metric2ids(val,unit)
 
 
 
-
-
-
 """
     mcRequest(device::TCPSocket,command::String)
 
