@@ -67,7 +67,7 @@ export mcZero
 export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
 export getSignal, getSignal!
 
-export LogContext, updateLog!
+export updateLog!, LogContext, LC_IDLE_INIT, LC_IDLE_TARGET, LC_MOVING, LC_CORRECTING
 
 
 
