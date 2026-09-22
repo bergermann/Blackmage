@@ -68,6 +68,7 @@ export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
 export getSignal, getSignal!
 
 export updateLog!, updateLog_
+export LogContext
 
 export extend_write_to
 export testf1, addMockLog_
@@ -84,6 +85,12 @@ end
 # targetP, direct target doc
 # add axes(device,axis) functions
 # add sd variants for manual IDS stuff?
+# interrupt race condition?
 
 # todo:
 # make mcTargetP(md) write to and use logger data
+# target settings, target validation
+# add timeout to mcWait(md)
+# proper log writing
+# split raw IDS and MC controls into new packages?
+# add tilt corrections to mcTarget(md) (revisit motor_control_FL)

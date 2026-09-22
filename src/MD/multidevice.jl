@@ -6,12 +6,17 @@ mutable struct MultiDeviceSettings
     doprecision::Bool
     "Global settings for precision corrections."
     psettings::@NamedTuple{maxsteps::Int64,maxiter::Int64,correctess::Bool,doublepass::Bool}
+    "Global settings for target tolerance."
+    tsettings::@NamedTuple{tolerance::Float64}
 
+    function MultiDeviceSettings(doprecision,
+            (maxsteps,maxiter,correctess,doublepass),
+            (tolerance))
 
-    function MultiDeviceSettings(doprecision,(maxsteps,maxiter,correctess,doublepass))
         new(
             doprecision,
             (maxsteps,maxiter,correctess,doublepass),
+            (tolerance,)
         )
     end
 
@@ -19,6 +24,7 @@ mutable struct MultiDeviceSettings
         new(
             false,
             (maxsteps=10,maxiter=10,correctess=false,doublepass=true),
+            (tolerance=20e-6,)
         )
     end
 end

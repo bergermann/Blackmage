@@ -318,6 +318,8 @@ function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
     return
 end
 
+const mcWait = mcWaitForTarget
+
 
 
 """

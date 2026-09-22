@@ -231,7 +231,7 @@ function mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
     return
 end
 
-const mcWait = mcWaitForTarget
+
 
 """
     mcStatusFCM(device::TCPSocket)

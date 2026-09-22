@@ -40,6 +40,7 @@ mcStopAll(md)
 
 mcTarget(md,[0.0,0.0,0.0],:mm)
 
+mcTarget(md,[1.0,1.0,1.0],:mm)
 mcTarget(md[3],1,:mm)
 
 mcMove(md[1],[1,2,3],1,10)
