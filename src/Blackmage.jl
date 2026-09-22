@@ -67,11 +67,8 @@ export mcZero
 export getAbsPos, getAbsPos!, getRelPos, getRelPos!, getRefPos, getRefPos!
 export getSignal, getSignal!
 
-export updateLog!, updateLog_
-export LogContext
+export LogContext, updateLog!
 
-export extend_write_to
-export testf1, addMockLog_
 
 
 include("socketing.jl")
