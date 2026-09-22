@@ -91,3 +91,4 @@ end
 # proper log writing
 # split raw IDS and MC controls into new packages?
 # add tilt corrections to mcTarget(md) (revisit motor_control_FL)
+# add lower threshold to getAxisSignalQuality?

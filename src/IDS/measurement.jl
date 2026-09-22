@@ -214,12 +214,12 @@ function getAxesSignalQuality(device::D; threshold::Int=850)
 end
 
 """
-    getAxesSignalQuality!(a::Vector{Int},device::D)
+    getAxesSignalQuality!(a::Vector{Int},device::D; threshold::Int=850)
 
 Write IDS signal quality directly to vector `a` of length 3, see
-[`getAxesSignalQuality`](@ref).
+[`getAxesSignalQuality`](@ref). Gives warning if values exceed `threshold`.
 """
-function getAxesSignalQuality!(a::Vector{Int},device::D)
+function getAxesSignalQuality!(a::Vector{Int},device::D; threshold::Int=850)
     @assert length(a) == 3 "Signal vector needs to be length 3."
 
     for axis in 1:3

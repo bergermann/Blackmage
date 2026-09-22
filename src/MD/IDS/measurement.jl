@@ -296,7 +296,7 @@ end
     getSignal!(a::Vector{Int},sd::SingleDevice; threshold::Int=850)
 
 Write IDS signal quality in permille directly to vector `a` of length 3, see
-[`getSignal`](@ref).
+[`getSignal`](@ref). Gives warning if value exceeds `threshold`.
 """
 function getSignal!(a::Vector{Int},sd::SingleDevice; threshold::Int=850)
     return getAxesSignalQuality!(a,sd.ids; threshold=threshold)
