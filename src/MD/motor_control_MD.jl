@@ -366,7 +366,7 @@ end
 Push all devices in `md` against hardpoint in direction `dir`, starting with the closest.
 Checks for stalling, see [`checkStalling`](@ref). If `repush`, push all devices at once for
 `pushsteps` steps against hardpoint. If `aligned`, use motor aligned movement to push, else
-drive all motors independently.
+drive all motors independently. Does not reset axes.
 """
 function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligned::Bool=true,
         dir::Int=0,repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
@@ -386,7 +386,7 @@ function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligne
         if md.interrupt[]; return; end
 
         if aligned
-            mcTarget(md[i],d0[i][md[i].settings.master]-((-1)^rev)*boosterlength)
+            mcTarget(md[i],d0[i][md[i].settings.master]-boosterlength*((-1)^rev))
         else
             mcMove(md[i],[1,2,3],0,0)
         end
@@ -432,12 +432,12 @@ function mcZeroSoft(md::MultiDevice; doublepass::Bool=true,offset::Matrix{<:Real
     d = getRelPos(md)
 
     for i in reverse(devices); for axis in 1:3
-        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i],:m;
+        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i]*((-1)^rev),:m;
             maxsteps=10,maxiter=20,forcewait=false)
     end; end
 
     if doublepass; for i in reverse(devices); for axis in 1:3
-        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i],:m;
+        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i]*((-1)^rev),:m;
             maxsteps=10,maxiter=20,forcewait=false)
     end; end; end
 
