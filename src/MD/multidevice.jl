@@ -182,7 +182,8 @@ end
 
 const MD = MultiDevice
 
-import Base: setproperty!, getindex, eachindex, iterate, length, haskey, isopen, open, close
+import Base: setproperty!, getindex, eachindex, iterate, length, haskey, keys, values, 
+    isopen, open, close
 
 Base.getindex(md::MultiDevice,inds...) = getindex(md.devices,inds...)
 Base.setindex!(md::MultiDevice,X,inds...) = setindex!(md.devices,X,inds...)
@@ -191,6 +192,8 @@ Base.iterate(md::MultiDevice) = iterate(values(md.devices))
 Base.iterate(md::MultiDevice,i::Integer) = iterate(values(md.devices),i)
 Base.length(md::MultiDevice) = length(md.devices)
 Base.haskey(md::MultiDevice,key) = haskey(md.devices,key)
+Base.keys(md::MultiDevice) = keys(md.devices)
+Base.values(md::MultiDevice) = values(md.devices)
 
 function Base.setproperty!(md::MultiDevice,name::Symbol,x)
     if hasfield(MultiDevice,name)

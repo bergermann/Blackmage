@@ -102,7 +102,7 @@ function mcTargetFCM(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     @assert length(target) == length(md) "Target vector length mismatches multidevice length."
 
     idx = 1
-    for i in sort!(collect(keys(md.devices)))
+    for i in sort!(collect(keys(md)))
         mcTargetFCM(md[i],target[idx],unit); idx += 1
     end
 
@@ -160,7 +160,7 @@ function mcTargetP(md::MultiDevice,target::Vector{Float64},unit::Symbol=:m;
     
     idx = 1
 
-    for i in sort!(collect(keys(md.devices)))
+    for i in sort!(collect(keys(md)))
         mcTargetP(md[i],target[idx],unit;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
             maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
@@ -186,7 +186,7 @@ function mcTargetP(md::MultiDevice,target::Dict{Int,<:Real},unit::Symbol=:m;
         correctess::Bool=md.settings.psettings.correctess,
         doublepass::Bool=md.settings.psettings.doublepass)
 
-    for i in sort!(collect(keys(md.devices)))
+    for i in sort!(collect(keys(md)))
         mcTargetP(md[i],target[i],unit;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
             maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
@@ -207,7 +207,7 @@ function mcTargetP(md::MultiDevice;
         correctess::Bool=md.settings.psettings.correctess,
         doublepass::Bool=md.settings.psettings.doublepass)
 
-    for i in sort!(collect(keys(md.devices)))
+    for i in sort!(collect(keys(md)))
         mcTargetP(md[i],md[i].target.p0,:p0;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
             maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
@@ -240,7 +240,7 @@ function mcTarget(md::MultiDevice,target::Vector{<:Real},unit::Symbol=:m)
     md.moving[] = true
     
     idx = 1
-    for i in sort!(collect(keys(md.devices)))
+    for i in sort!(collect(keys(md)))
         mcTargetFCM(md[i],target[idx],unit); idx += 1
     end
 
@@ -360,56 +360,86 @@ end
 
 
 """
-    mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,
-        repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
+    mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligned::Bool=true,
+        dir::Int=0,repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
 Push all devices in `md` against hardpoint in direction `dir`, starting with the closest.
 Checks for stalling, see [`checkStalling`](@ref). If `repush`, push all devices at once for
-`pushsteps` steps against hardpoint.
+`pushsteps` steps against hardpoint. If `aligned`, use motor aligned movement to push, else
+drive all motors independently.
 """
-function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,
-        repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
+function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligned::Bool=true,
+        dir::Int=0,repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
     @assert pushsteps >= 0 "Amount of repush steps needs to be larger than 0."
 
-    d0 = getPos(md)
+    if md.interrupt[]; return; end
+
+    rev = dir==1
+
+    d0 = getAbsPos(md)
     timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
 
-    for i in sort!(collect(keys(md.devices)); by=x->d0[x][md[x].settings.master],rev=true)
-        mcTarget(md[i],d0[i][md[i].settings.master]-boosterlength)
+    devices = sort!(collect(keys(md)); by=i->d0[i][md[i].settings.master],rev=rev)
+
+    for i in devices
+        if md.interrupt[]; return; end
+
+        if aligned
+            mcTarget(md[i],d0[i][md[i].settings.master]-((-1)^rev)*boosterlength)
+        else
+            mcMove(md[i],[1,2,3],0,0)
+        end
 
         stalling = false; t0 = now()
         
         while !stalling && now()-t0 < timeout
+            if md.interrupt[]; return; end
+            
             stalling = checkStalling(md[i],interval)
         end
 
         mcStopAllMotors(md[i])
     end
 
-    if repush
-        for i in sort!(collect(keys(md.devices)); by=x->d0[x][md[x].settings.master],rev=true)
-            mcMove(md[i],[1,2,3],dir,pushsteps)
-        end
-    end
+    if repush; for i in devices; mcMove(md[i],[1,2,3],dir,pushsteps); end; end
 
-    return
+    return rev, devices
 end
 
-function mcZeroSoft(md::MultiDevice; kwargs...)
-    mcZeroHard(md; kwargs...)
 
-    for axis in 1:3
-        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=100,maxiter=10)
-    end
 
-    for axis in 1:3
-        mcTargetP(device_mc,device_ids,axis,dz[i]*units[unit],:m; maxsteps=10,maxiter=10)
-    end
+"""
+    mcZeroSoft(md::MultiDevice; doublepass::Bool=true,offset::Matrix{<:Real},kwargs...)
 
-    return
-end
+Perform hard zeroing (see [`mcZeroHard`](@ref)), then adjust each motor of each device in
+multidevice `md` by its respective offset value. kwargs are passed to mcZeroHard.
+Does not reset axes.
 
-function mcTargetPC()
+Offset matrix format:
+d1m1 d2m1 d3m1 d4m1
+d1m2 d2m2 d3m2 d4m2 ...
+d1m3 d2m3 d3m3 d4m3
+"""
+function mcZeroSoft(md::MultiDevice; doublepass::Bool=true,offset::Matrix{<:Real},kwargs...)
+    @assert size(offset) == (3,length(md)) "Offset matrix needs to be size 3 x length(md)."
     
+    rev, devices = mcZeroHard(md; kwargs...); sleep(1)
+    
+    if md.interrupt[]; return; end
+    mcWaitForTarget(sd); sleep(1)
+
+    d = getRelPos(md)
+
+    for i in reverse(devices); for axis in 1:3
+        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i],:m;
+            maxsteps=10,maxiter=20,forcewait=false)
+    end; end
+
+    if doublepass; for i in reverse(devices); for axis in 1:3
+        mcTargetP(md[i],axis,d[i][axis]*units[:pm]+offset[axis,i],:m;
+            maxsteps=10,maxiter=20,forcewait=false)
+    end; end; end
+
+    return
 end

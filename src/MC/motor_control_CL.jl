@@ -254,7 +254,7 @@ end
 
 
 """
-    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol;
+    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol=:m;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false)
 
@@ -264,7 +264,7 @@ step prediction with minimum allowed relative step size `mrss`. Perform a maximu
 `maxsteps` per iteration for a maximum of `maxiter` iterations. If `correctess`, reestimates
 step sizes `ess` after each step.
 """
-function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol;
+function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::Real,unit::Symbol=:m;
         ess::Float64=15e-6,mrss::Int=10,maxsteps::Int=10,maxiter::Int=10,
         correctess::Bool=false,interrupt::Base.RefValue{Bool}=Ref(false))
 
@@ -305,23 +305,27 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::
 end
 
 """
-    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+    mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol=:m;
         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false))
+        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,
+        doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false),
+        offset::Vector{<:Real}=[0.,0.,0.])
 
 Non-flexdriven sub-step precision corrections after target acquisition. Correct all motors
-of device at `device_mc` with IDS `device_ids`.
+of device at `device_mc` with IDS `device_ids`. Apply `offset[axis]` (in `unit` aswell).
 """
-function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol=:m;
         ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6),mrss::NTuple{3,Int}=(10,10,10),
-        maxsteps::Int=10,maxiter::Int=10,
-        correctess::Bool=false,doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false))
+        maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,
+        doublepass::Bool=true,interrupt::Base.RefValue{Bool}=Ref(false),
+        offset::Vector{<:Real}=[0.,0.,0.])
+
+    @assert length(offset) == 3 "Need exactly 3 offset values."
 
     for axis in 1:3
         if interrupt[]; return; end
 
-        mcTargetP(device_mc,device_ids,axis,target,unit;
+        mcTargetP(device_mc,device_ids,axis,target+offset[axis],unit;
             ess=ess[axis],mrss=mrss[axis],
             maxsteps=maxsteps,maxiter=maxiter,
             correctess=correctess)
@@ -330,7 +334,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit:
     if doublepass; for axis in 1:3
         if interrupt[]; return; end
 
-        mcTargetP(device_mc,device_ids,axis,target,unit;
+        mcTargetP(device_mc,device_ids,axis,target+offset[axis],unit;
             ess=ess[axis],mrss=mrss[axis],
             maxsteps=maxsteps,maxiter=maxiter,
             correctess=correctess)
@@ -341,66 +345,66 @@ end
 
 
 
-function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
-        master::Int=1,nsteps::Int=250,
-        mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
+# function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol;
+#         master::Int=1,nsteps::Int=250,
+#         mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
 
-    mcStopAll(device_mc)
-    mcSetupFCM(device_mc; master=master)
+#     mcStopAll(device_mc)
+#     mcSetupFCM(device_mc; master=master)
 
-    mcTargetFCM(device_mc,target,unit); mcWaitForTarget(device_mc); sleep(1)
-    mcTargetP(device_mc,device_ids,target,unit; mrss=mrss,ess=ess,maxiter=10); sleep(1)
+#     mcTargetFCM(device_mc,target,unit); mcWaitForTarget(device_mc); sleep(1)
+#     mcTargetP(device_mc,device_ids,target,unit; mrss=mrss,ess=ess,maxiter=10); sleep(1)
 
-    p0 = getAxesDisplacement(device_ids); p1 = copy(p0); p2 = copy(p0)
+#     p0 = getAxesDisplacement(device_ids); p1 = copy(p0); p2 = copy(p0)
 
-    for axis in 1:3
-        if axis==master; continue; end
+#     for axis in 1:3
+#         if axis==master; continue; end
 
-        mcMove(device_mc,axis,0,nsteps); sleep(1+nsteps/50)
+#         mcMove(device_mc,axis,0,nsteps); sleep(1+nsteps/50)
 
-        p1[axis] = getAxisDisplacement(device_ids,axis)
+#         p1[axis] = getAxisDisplacement(device_ids,axis)
 
-        mcReSetupFCM(device_mc; master=master)    
+#         mcReSetupFCM(device_mc; master=master)    
 
-        mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
-        mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
+#         mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
+#         mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
         
-        mcMove(device_mc,axis,1,nsteps); sleep(1+nsteps/50)
+#         mcMove(device_mc,axis,1,nsteps); sleep(1+nsteps/50)
 
-        p2[axis] = getAxisDisplacement(device_ids,axis)
+#         p2[axis] = getAxisDisplacement(device_ids,axis)
         
-        mcReSetupFCM(device_mc; master=master)
+#         mcReSetupFCM(device_mc; master=master)
         
-        mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
-        mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
-    end
+#         mcTargetFCM(device_mc,p0[1],:pm); mcWaitForTarget(device_mc); sleep(1)
+#         mcTargetP(device_mc,device_ids,p0[1],:pm; mrss=mrss,ess=ess,maxiter=10); sleep(1)
+#     end
 
-    for axis in 1:3
-        p = round(Int,(p1[axis]+p2[axis])/2)
+#     for axis in 1:3
+#         p = round(Int,(p1[axis]+p2[axis])/2)
 
-        mcTargetP(device_mc,device_ids,axis,p,:pm; mrss=mrss[axis],ess=ess[axis],
-            maxsteps=50,maxiter=10)
-    end
+#         mcTargetP(device_mc,device_ids,axis,p,:pm; mrss=mrss[axis],ess=ess[axis],
+#             maxsteps=50,maxiter=10)
+#     end
 
-    return p0, p1, p2
-end
+#     return p0, p1, p2
+# end
 
-function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,niter::Int;
-            master::Int=1,nsteps::Union{Int,AbstractArray{Int}}=250,
-            mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
+# function autoAlign(device_mc::TCPSocket,device_ids::TCPSocket,target::Real,unit::Symbol,niter::Int;
+#             master::Int=1,nsteps::Union{Int,AbstractArray{Int}}=250,
+#             mrss::NTuple{3,Int}=(10,10,10),ess::NTuple{3,Float64}=(15e-6,15e-6,15e-6))
 
-    @assert niter > 0 "Iteration number niter must be positive."
+#     @assert niter > 0 "Iteration number niter must be positive."
 
-    if niter != length(nsteps); @warn "Iteration number doesn't match steps input!"; end
+#     if niter != length(nsteps); @warn "Iteration number doesn't match steps input!"; end
 
-    for i in 1:niter
-        nsteps_ = nsteps[min(i,length(nsteps))]
+#     for i in 1:niter
+#         nsteps_ = nsteps[min(i,length(nsteps))]
 
-        autoAlign(device_mc,device_ids,target,unit;
-            master=master,nsteps=nsteps_,mrss=mrss,ess=ess)
+#         autoAlign(device_mc,device_ids,target,unit;
+#             master=master,nsteps=nsteps_,mrss=mrss,ess=ess)
 
-        resetAxes(device_ids)
-    end
+#         resetAxes(device_ids)
+#     end
     
-    return
-end
+#     return
+# end

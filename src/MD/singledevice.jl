@@ -38,7 +38,7 @@ mutable struct DiscSettings
             df=1.0,
             α=0.0,
             r=0.15,
-            stallspeed=3.75e-5)
+            stallspeed=15e-6*50*0.05)
     """
     function DiscSettings(;
             master=1,                      
@@ -51,7 +51,7 @@ mutable struct DiscSettings
             df=1.0,
             α=0.0,
             r=0.15,
-            stallspeed=3.75e-5)
+            stallspeed=15e-6*50*0.05)
 
         @assert 1 <= master <= 3 "Master axis has to be 1, 2 or 3."
         @assert all(@. 0 < ess <= 100e-6) "Estimated step size [m] needs to be between 0 and 100e-6."
