@@ -208,7 +208,7 @@ function mcTargetP(md::MultiDevice;
         doublepass::Bool=md.settings.psettings.doublepass)
 
     for i in sort!(collect(keys(md)))
-        mcTargetP(md[i],md[i].target.p0,:p0;
+        mcTargetP(md[i],md[i].target.p0,:m;
             ess=md[i].settings.ess,mrss=md[i].settings.mrss,
             maxsteps=maxsteps,maxiter=maxiter,correctess=correctess,doublepass=doublepass)
     end

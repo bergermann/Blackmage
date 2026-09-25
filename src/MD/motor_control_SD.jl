@@ -227,7 +227,7 @@ end
 
 """
     mcTargetP(sd::SingleDevice,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::Float64=sd.settings.ess,mrss::Int=sd.settings.mrss,
+        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,
         doublepass::Bool=true,forcewait::Bool=true
         offset::Vector{<:Real}=[0.,0.,0.])
@@ -236,7 +236,7 @@ Non-flexdriven sub-step precision corrections after `target` acquisition. Correc
 of single device `sd`. Does NOT update internal target.
 """
 function mcTargetP(sd::SingleDevice,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::Float64=sd.settings.ess,mrss::Int=sd.settings.mrss,
+        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,
         doublepass::Bool=true,forcewait::Bool=true,
         offset::Vector{<:Real}=[0.,0.,0.])
@@ -256,14 +256,14 @@ end
 
 """
     mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::Float64=sd.settings.ess,mrss::Int=sd.settings.mrss,
+        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false)
 
 Non-flexdriven sub-step precision corrections after `target` acquisition. Correct single
 `axis` of single device `sd`. Does NOT update internal target.
 """
 function mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::Float64=sd.settings.ess,mrss::Int=sd.settings.mrss,
+        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,forcewait::Bool=true)
 
     if sd.interrupt[]; return; end
