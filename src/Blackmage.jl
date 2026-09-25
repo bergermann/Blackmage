@@ -94,3 +94,4 @@ end
 # add lower threshold to getAxisSignalQuality?
 # streamline exported names
 # create individual precision correction function
+# move config loading from whitemage to here
