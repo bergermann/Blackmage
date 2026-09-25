@@ -251,3 +251,22 @@ function setAverageN(device::D,N::Int)
 
     request(device,:displace,"setAverageN"; params=[N]); return
 end
+
+
+
+# """
+#     measurePos(device::TCPSocket,n::Int; dt::Real=0.)
+
+# Measure IDS position `n` times, return mean and standard deviation of the distribution.
+# Enforce delay `dt` between each measurement.
+# """
+# function measurePos(device::TCPSocket,n::Int; dt::Real=0.)
+#     data = zeros(3,n)
+
+#     for i in 1:n
+#         data[:,i] = getAxesDisplacement(device)
+#         sleep(dt)   
+#     end
+    
+#     return sum(data; dims=2)[:]/n
+# end

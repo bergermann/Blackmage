@@ -79,9 +79,7 @@ include("MD/MD.jl")
 end
 
 # to fix:
-# targetP, direct target doc
 # add axes(device,axis) functions
-# add sd variants for manual IDS stuff?
 # interrupt race condition?
 
 # todo:

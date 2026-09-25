@@ -57,11 +57,6 @@ to be disabled. If measurement still hasn't started after `timeout` seconds, che
 (usually takes < 2 minutes). Checks every `dt` seconds.
 """
 function startMeasurement(md::MultiDevice; dt::Real=1.0,timeout::Real=300)
-    # for i in eachindex(md)
-    #     println("Starting measurement for device $i.")
-    #     startMeasurement(md[i]; dt=dt,timeout=timeout)
-    # end
-
     startMeasurement_(md)
 
     t = 0
@@ -152,19 +147,6 @@ function getAbsPos(md::MultiDevice)
     return Dict(i => getAbsPos(md[i]) for i in eachindex(md))
 end
 
-"""
-    getAbsPos!(md::MultiDevice)
-
-Update internal absolute position log of multidevice `md` in pm.
-"""
-function getAbsPos!(md::MultiDevice)
-    for i in eachindex(md)
-        getAbsPos!(md.logger.apos[i],md[i])
-    end
-
-    return
-end
-
 
 
 """
@@ -202,19 +184,6 @@ Get relative IDS positions in pm of all axes for all devices in multidevice `md`
 """
 function getRelPos(md::MultiDevice)
     return Dict(i => getRelPos(md[i]) for i in eachindex(md))
-end
-
-"""
-    getRelPos!(md::MultiDevice)
-
-Update internal relative position log of multidevice `md` in pm.
-"""
-function getRelPos!(md::MultiDevice)
-    for i in eachindex(md)
-        getRelPos!(md.logger.rpos[i],md[i])
-    end
-
-    return
 end
 
 
@@ -256,21 +225,7 @@ function getRefPos(md::MultiDevice)
     return Dict(i => getRefPos(md[i]) for i in eachindex(md))
 end
 
-# """
-#     getRefPos!(md::MultiDevice)
 
-# Update internal reference position log of multidevice `md` in pm.
-# """
-# function getRefPos!(md::MultiDevice)
-#     for i in eachindex(md)
-#         getRefPos!(md.logger.refpos[i],md[i])
-#     end
-
-#     return
-# end
-
-
-#
 
 """
     getSignal(sd::SingleDevice,axis::Int; threshold::Int=850)
@@ -312,43 +267,6 @@ function getSignal(md::MultiDevice; threshold::Int=850)
     return Dict(i => getSignal(md[i]; threshold=threshold) for i in eachindex(md))
 end
 
-"""
-    getSignal!(md::MultiDevice; threshold::Int=850)
-
-Update internal signal quality log of multidevice `md` in permille.Gives warning if value
-exceeds `threshold`.
-"""
-function getSignal!(md::MultiDevice; threshold::Int=850)
-    for i in eachindex(md)
-        getSignal!(md.logger.signal[i],md[i]; threshold=threshold)
-    end
-
-    return
-end
-
-
-
-"""
-    resetAxes(sd::SingleDevice)
-
-Re-zero relative values of all IDS axes at their current positions for single device `sd`.
-"""
-function resetAxes(sd::SingleDevice)
-    resetAxes(sd.ids); return
-end
-
-"""
-    resetAxes(md::MultiDevice)
-
-Re-zero relative values of all IDS axes at their current positions for all devices in
-multidevice `md`.
-"""
-function resetAxes(md::MultiDevice)
-    for device in md
-        resetAxes(device)
-    end; return
-end
-
 
 
 # """
@@ -366,4 +284,5 @@ end
     
 #     return data
 # end
+
 

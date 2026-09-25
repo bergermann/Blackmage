@@ -13,10 +13,8 @@ function getHumidityM(device::D,axis::Int)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # return request(device,:ecum,"getHumidityInPercent";
-    #     params=[axis-1])[2]
-    return request(device,:ecum,"getHumidityInPercent";
-        params=[-1])[2]
+    # return request(device,:ecum,"getHumidityInPercent"; params=[axis-1])[2]
+    return request(device,:ecum,"getHumidityInPercent"; params=[-1])[2]
 end
 
 """
@@ -51,10 +49,8 @@ function getPressureM(device::D,axis::Int)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # return request(device,:ecum,"getPressureInHPa";
-    #     params=[axis-1])[2]
-    return request(device,:ecum,"getPressureInHPa";
-        params=[-1])[2]
+    # return request(device,:ecum,"getPressureInHPa";  params=[axis-1])[2]
+    return request(device,:ecum,"getPressureInHPa";  params=[-1])[2]
 end
 
 """
@@ -69,10 +65,8 @@ function setPressureM(device::D,axis::Int,pressure::Float64)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # request(device,:ecum,"setPressureInHPa";
-    #     params=[axis-1,pressure]); return
-    request(device,:ecum,"setPressureInHPa";
-        params=[-1,pressure]); return
+    # request(device,:ecum,"setPressureInHPa"; params=[axis-1,pressure]); return
+    request(device,:ecum,"setPressureInHPa"; params=[-1,pressure]); return
 end
 
 
@@ -89,10 +83,8 @@ function getTemperatureM(device::D,axis::Int)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # return request(device,:ecum,"getTemperatureInDegrees";
-    #     params=[axis-1])[2]
-    return request(device,:ecum,"getTemperatureInDegrees";
-        params=[-1])[2]
+    # return request(device,:ecum,"getTemperatureInDegrees"; params=[axis-1])[2]
+    return request(device,:ecum,"getTemperatureInDegrees"; params=[-1])[2]
 end
 
 """
@@ -107,10 +99,8 @@ function setTemperatureM(device::D,axis::Int,temp::Float64)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # request(device,:ecum,"setPressureInHPa";
-    #     params=[axis-1,temp]); return
-    request(device,:ecum,"setPressureInHPa";
-        params=[-1,temp]); return
+    # request(device,:ecum,"setPressureInHPa"; params=[axis-1,temp]); return
+    request(device,:ecum,"setPressureInHPa"; params=[-1,temp]); return
 end
 
 
@@ -127,10 +117,8 @@ function getRefractiveIndexM(device::D,axis::Int)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # return request(device,:ecum,"getRefractiveIndex";
-    #     params=[axis-1])[2]
-    return request(device,:ecum,"getRefractiveIndex";
-        params=[-1])[2]
+    # return request(device,:ecum,"getRefractiveIndex"; params=[axis-1])[2]
+    return request(device,:ecum,"getRefractiveIndex"; params=[-1])[2]
 end
 
 """
@@ -145,9 +133,7 @@ function setRefractiveIndexM(device::D,axis::Int,index::Float64)
     @warn "This function is subject to change from suppliers side.
         Check manual if only axis = -1 is still supported."
     
-    # request(device,:ecum,"setRefractiveIndex";
-    #     params=[axis-1,index]); return
-    request(device,:ecum,"setRefractiveIndex";
-        params=[-1,index]); return
+    # request(device,:ecum,"setRefractiveIndex"; params=[axis-1,index]); return
+    request(device,:ecum,"setRefractiveIndex"; params=[-1,index]); return
 end
 

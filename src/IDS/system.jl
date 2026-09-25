@@ -9,10 +9,11 @@ function getDeviceType(device::D)
 end
 
 
+
 """
     getSystemError(device::D)
 
-Return IDS if one is present.
+Return IDS error if one is present.
 """
 function getSystemError(device::D)
     return request(device,:system,"getSystemError")[1]
@@ -28,10 +29,21 @@ function resetError(device::D)
 end
 
 
+
+"""
+    getInitMode(device::D)
+
+Get IDS initialization mode of `device` (duh).
+"""
 function getInitMode(device::D)
     return request(device,:system,"getInitMode")[2]
 end
 
+"""
+    setInitMode(device::D,mode::Int)
+
+Set IDS initialization mode of `device`. `mode` must be 0 or 1.
+"""
 function setInitMode(device::D,mode::Int)
     @assert mode == 0 || mode == 1 "Init mode must be 0 or 1."
 
@@ -60,13 +72,6 @@ function resetAxis(device::D,axis::Int)
 end
 
 """
-    resetAxes(device::TCPSocket,axis::Int)
-
-Re-zero relative value of IDS `axis` at it's current position.
-"""
-resetAxes(device::D,axis::Int) = resetAxis(device,axis)
-
-"""
     getMasterAxis(device::TCPSocket)
 
 Return current IDS master axis.
@@ -88,6 +93,7 @@ function setMasterAxis(device::D,axis::Int)
     
     return
 end
+
 
 
 """
