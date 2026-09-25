@@ -196,8 +196,8 @@ function getAxisSignalQuality(device::D,axis::Int,deviceid::Int=0;
     r = request(device,:displace,"getAxisSignalQuality"; params=[axis-1])
 
     if !(lower <= r[2]+r[3] <= upper)
-        @warn "Contrast limits [$lower,$upper] exceeded for axis $axis with $(r[2]+r[3])‰
-            on device $deviceid."
+        @warn "Contrast limits [$lower,$upper] exceeded for axis $axis with $(r[2]+r[3])‰"*
+            (deviceid == 0 ? "." : "on device $id")
     end
 
     return r[2], r[3]
