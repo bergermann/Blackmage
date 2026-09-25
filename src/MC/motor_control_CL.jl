@@ -276,7 +276,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::
     
     ess = round(Int,abs(ess)/1e-12)
 
-    d0 = getAxisDisplacement(device_ids,addr)
+    d0 = getAxisDisplacement(device_ids,axis)
     t = round(Int,target*units[unit]/1e-12)
     dt = abs(d0-t)
 
@@ -293,7 +293,7 @@ function mcTargetP(device_mc::TCPSocket,device_ids::TCPSocket,axis::Int,target::
 
         mcMove(device_mc,axis,dir,nsteps; rss=rss); sleep(0.1+1.5*nsteps/50)
 
-        d1 = getAxisDisplacement(device_ids,addr)
+        d1 = getAxisDisplacement(device_ids,axis)
 
         if correctess; ess = round(Int,abs(d1-d0)/nsteps*rss/100); end
         dt = abs(d1-t); d0 = d1
