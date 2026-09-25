@@ -205,18 +205,27 @@ end
 
 """
     mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
-        interrupt::Base.RefValue{Bool}=Ref(false))
+        timeout::Real=Inf64,interrupt::Base.RefValue{Bool}=Ref(false))
 
 Wait for flexdrive command to reach its target, check every `interval` seconds.
 """
 function mcWaitForTarget(device::TCPSocket; interval::Real=0.1,
-        interrupt::Base.RefValue{Bool}=Ref(false))
+        timeout::Real=Inf64,interrupt::Base.RefValue{Bool}=Ref(false))
 
     @assert interval >= 0 "Interval needs to be non-negative."
+    @assert timeout > 0 "Timeout needs to be non-negative"
 
     target = false
+    
+    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
+    t0 = now()
 
     while !target
+        if now()-t0 > timeout
+            @warn "Target not reached after $(timeout/1000) seconds! Aborting."
+            mcStopAllMotors(device); interrupt[] = true; break
+        end
+        
         if interrupt[]; mcStopAllMotors(device); break; end
 
         active, status, _ = mcStatusFCM(device)

@@ -302,15 +302,36 @@ end
 
 
 """
-    mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
+    mcWaitForTarget(md::MultiDevice; timeout::Real=Inf64,interval::Real=0.1)
 
 Wait for flexdrive command to reach its target, check every `interval` seconds.
 """
-function mcWaitForTarget(md::MultiDevice; interval::Real=0.1)
+function mcWaitForTarget(md::MultiDevice; timeout::Real=Inf64,interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
+    @assert timeout > 0 "Timeout needs to be non-negative"
 
+    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
+    t0 = now()
+        
     for device in md
-        mcWaitForTarget(device; interval=interval)
+        target = false
+        
+        while !target
+            if now()-t0 > timeout
+                @warn "Target not reached after $(timeout/1000) seconds! Aborting."
+                mcStopAllMotors(md); md.interrupt[] = true; break
+            end
+            
+            if md.interrupt[]; mcStopAllMotors(md); break; end
+
+            active, status, _ = mcStatusFCM(device)
+
+            # if !active; throw(InterruptException()); end
+
+            target = all(status)
+
+            sleep(interval)
+        end
     end
 
     md.moving[] = false

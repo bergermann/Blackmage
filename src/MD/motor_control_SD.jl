@@ -301,16 +301,25 @@ end
 
 
 """
-    mcWaitForTarget(sd::SingleDevice; interval::Real=0.1)
+    mcWaitForTarget(sd::SingleDevice; timeout::Real=Inf64,interval::Real=0.1)
 
 Wait for flexdrive command to reach its target, check every `interval` seconds.
 """
-function mcWaitForTarget(sd::SingleDevice; interval::Real=0.1)
+function mcWaitForTarget(sd::SingleDevice; timeout::Real=Inf64,interval::Real=0.1)
     @assert interval >= 0 "Interval needs to be non-negative."
+    @assert timeout > 0 "Timeout needs to be non-negative"
 
     target = false
     
+    timeout = Millisecond(isinf(timeout) ? typemax(Int) : round(Int,timeout*1000))
+    t0 = now()
+    
     while !target
+        if now()-t0 > timeout
+            @warn "Target not reached after $(timeout/1000) seconds! Aborting."
+            mcStopAllMotors(sd); sd.interrupt[] = true; break
+        end
+        
         if sd.interrupt[]; mcStopAllMotors(sd); break; end
 
         active, status, _ = mcStatusFCM(sd)

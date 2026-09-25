@@ -79,13 +79,11 @@ include("MD/MD.jl")
 end
 
 # to fix:
-# add axes(device,axis) functions
 # interrupt race condition?
 
 # todo:
 # make mcTargetP(md) write to and use logger data
 # target settings, target validation
-# add timeout to mcWait(md)
 # proper log writing
 # split raw IDS and MC controls into new packages?
 # add tilt corrections to mcTarget(md) (revisit motor_control_FL)
