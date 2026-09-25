@@ -181,32 +181,38 @@ end
 
 
 """
-    getAxisSignalQuality(device::D,axis::Int; threshold::Int=850)
+    getAxisSignalQuality(device::D,axis::Int,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
 
 Return IDS signal quality in permille for `axis`. Gives warning if value exceeds `threshold`.
 """
-function getAxisSignalQuality(device::D,axis::Int; threshold::Int=850)
+function getAxisSignalQuality(device::D,axis::Int,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
+
     @assert 1 <= axis <= 3 "Axis index must be 1, 2 or 3."
+
+    lower, upper = threshold
 
     r = request(device,:displace,"getAxisSignalQuality"; params=[axis-1])
 
-    if r[2]+r[3] > threshold
-        @warn "Contrast threshold is reached for axis $axis with $(r[2]+r[3]) > $threshold."
+    if !(lower <= r[2]+r[3] <= upper)
+        @warn "Contrast limits [$lower,$upper] exceeded for axis $axis with $(r[2]+r[3])‰
+            on device $deviceid."
     end
 
     return r[2], r[3]
 end
 
 """
-    getAxesSignalQuality(device::D; threshold::Int=850)
+    getAxesSignalQuality(device::D,deviceid::Int=0; threshold::Tuple{Int,Int}=(300,850))
 
 Return IDS signal quality in permille for all axes. Gives warning if values exceed `threshold`.
 """
-function getAxesSignalQuality(device::D; threshold::Int=850)
+function getAxesSignalQuality(device::D,deviceid::Int=0; threshold::Tuple{Int,Int}=(300,850))
     contrast = Vector{Int}(undef,3)
 
     for axis in 1:3
-        c, offset = getAxisSignalQuality(device,axis; threshold=threshold)
+        c, offset = getAxisSignalQuality(device,axis,deviceid; threshold=threshold)
         contrast[axis] = c+offset
     end
 
@@ -214,16 +220,19 @@ function getAxesSignalQuality(device::D; threshold::Int=850)
 end
 
 """
-    getAxesSignalQuality!(a::Vector{Int},device::D; threshold::Int=850)
+    getAxesSignalQuality!(a::Vector{Int},device::D,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
 
 Write IDS signal quality directly to vector `a` of length 3, see
 [`getAxesSignalQuality`](@ref). Gives warning if values exceed `threshold`.
 """
-function getAxesSignalQuality!(a::Vector{Int},device::D; threshold::Int=850)
+function getAxesSignalQuality!(a::Vector{Int},device::D,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
+
     @assert length(a) == 3 "Signal vector needs to be length 3."
 
     for axis in 1:3
-        c, offset = getAxisSignalQuality(device,axis; threshold=threshold)
+        c, offset = getAxisSignalQuality(device,axis,deviceid; threshold=threshold)
         a[axis] = c+offset
     end
 

@@ -228,43 +228,49 @@ end
 
 
 """
-    getSignal(sd::SingleDevice,axis::Int; threshold::Int=850)
+    getSignal(sd::SingleDevice,axis::Int,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
 
 Return IDS signal quality in permille of `axis` for single device `sd`.
 Gives warning if value exceeds `threshold`.
 """
-function getSignal(sd::SingleDevice,axis::Int; threshold::Int=850)
-    return getAxisSignalQuality(sd.ids,axis; threshold=threshold)
+function getSignal(sd::SingleDevice,axis::Int,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
+
+    return getAxisSignalQuality(sd.ids,axis,deviceid; threshold=threshold)
 end
 
 """
-    getSignal(sd::SingleDevice; threshold::Int=850)
+    getSignal(sd::SingleDevice,deviceid::Int=0; threshold::Tuple{Int,Int}=(300,850))
 
 Return IDS signal quality in permille of all axes for single device `sd`.
 Gives warning if value exceeds `threshold`.
 """
-function getSignal(sd::SingleDevice; threshold::Int=850)
-    return getAxesSignalQuality(sd.ids; threshold=threshold)
+function getSignal(sd::SingleDevice,deviceid::Int=0; threshold::Tuple{Int,Int}=(300,850))
+    return getAxesSignalQuality(sd.ids,deviceid; threshold=threshold)
 end
 
 """
-    getSignal!(a::Vector{Int},sd::SingleDevice; threshold::Int=850)
+    getSignal!(a::Vector{Int},sd::SingleDevice,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
 
 Write IDS signal quality in permille directly to vector `a` of length 3, see
 [`getSignal`](@ref). Gives warning if value exceeds `threshold`.
 """
-function getSignal!(a::Vector{Int},sd::SingleDevice; threshold::Int=850)
-    return getAxesSignalQuality!(a,sd.ids; threshold=threshold)
+function getSignal!(a::Vector{Int},sd::SingleDevice,deviceid::Int=0;
+        threshold::Tuple{Int,Int}=(300,850))
+
+    return getAxesSignalQuality!(a,sd.ids,deviceid; threshold=threshold)
 end
 
 """
-    getSignal(md::MultiDevice; threshold::Int=850)
+    getSignal(md::MultiDevice; threshold::Tuple{Int,Int}=(300,850))
     
 Return IDS signal quality in permille for all axes for all devices in multidevice `md`.
 Gives warning if value exceeds `threshold`.
 """
-function getSignal(md::MultiDevice; threshold::Int=850)
-    return Dict(i => getSignal(md[i]; threshold=threshold) for i in eachindex(md))
+function getSignal(md::MultiDevice; threshold::Tuple{Int,Int}=(300,850))
+    return Dict(i => getSignal(md[i],i; threshold=threshold) for i in eachindex(md))
 end
 
 
