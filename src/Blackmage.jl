@@ -85,8 +85,6 @@ end
 # make mcTargetP(md) write to and use logger data
 # target settings, target validation
 # proper log writing
-# split raw IDS and MC controls into new packages?
 # add tilt corrections to mcTarget(md) (revisit motor_control_FL)
 # streamline exported names
-# create individual precision correction function
 # move config loading from whitemage to here
