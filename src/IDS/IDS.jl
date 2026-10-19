@@ -68,8 +68,6 @@ function request(device::TCPSocket,interface::Symbol,method::String; params::Arr
     return result
 end
 
-include("record.jl")
-
 include("interfaces.jl")
 
 include("system.jl")
