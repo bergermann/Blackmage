@@ -234,7 +234,7 @@ end
 Return IDS signal quality in permille of `axis` for single device `sd`.
 Gives warning if value exceeds `threshold`.
 """
-function getSignal(sd::SingleDevice,axis::Int,deviceid::Int=0;
+function getSignal(sd::SingleDevice,axis::Int,deviceid::Int;
         threshold::Tuple{Int,Int}=(300,850))
 
     return getAxisSignalQuality(sd.ids,axis,deviceid; threshold=threshold)
@@ -247,6 +247,7 @@ Return IDS signal quality in permille of all axes for single device `sd`.
 Gives warning if value exceeds `threshold`.
 """
 function getSignal(sd::SingleDevice,deviceid::Int=0; threshold::Tuple{Int,Int}=(300,850))
+
     return getAxesSignalQuality(sd.ids,deviceid; threshold=threshold)
 end
 
