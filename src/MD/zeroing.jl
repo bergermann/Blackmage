@@ -1,14 +1,15 @@
 
 """
-    mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligned::Bool=true,
+    mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=60,aligned::Bool=true,
         dir::Int=0,repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
 Push all devices in `md` against hardpoint in direction `dir`, starting with the closest.
 Checks for stalling, see [`checkStalling`](@ref). If `repush`, push all devices at once for
 `pushsteps` steps against hardpoint. If `aligned`, use motor aligned movement to push, else
-drive all motors independently. Does not reset axes.
+drive all motors independently. Give estimate `boosterlength` in m for aligned movement.
+Does not reset axes.
 """
-function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligned::Bool=true,
+function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=60,aligned::Bool=true,
         dir::Int=0,repush::Bool=false,pushsteps::Int=10,boosterlength::Real=1.0)
 
     @assert pushsteps >= 0 "Amount of repush steps needs to be larger than 0."
@@ -24,9 +25,9 @@ function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=600,aligne
         if md.interrupt[]; return; end
 
         if aligned
-            mcTarget(md[i],d0[i][md[i].settings.master]-boosterlength*((-1)^rev))
+            mcTarget(md[i],d0[i][md[i].settings.master]/1e12-boosterlength*((-1)^rev))
         else
-            mcMove(md[i],[1,2,3],0,0)
+            mcMove(md[i],[1,2,3],dir,0)
         end
 
         stalling = false; t0 = now()
