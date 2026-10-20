@@ -68,7 +68,6 @@ function mcZeroSoft(md::MultiDevice,offset::Matrix{<:Real}; doublepass::Bool=tru
     rev, devices = mcZeroHard(md; kwargs...); sleep(1)
     
     if md.interrupt[]; return; end
-    mcWaitForTarget(sd); sleep(1)
 
     d = getRelPos(md)
 
@@ -88,3 +87,4 @@ function mcZeroSoft(md::MultiDevice,offset::Matrix{<:Real}; doublepass::Bool=tru
 
     return
 end
+
