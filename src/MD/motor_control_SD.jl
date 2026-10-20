@@ -263,7 +263,7 @@ Non-flexdriven sub-step precision corrections after `target` acquisition. Correc
 `axis` of single device `sd`. Does NOT update internal target.
 """
 function mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
+        ess::Float64=sd.settings.ess[axis],mrss::NTuple{3,Int}=sd.settings.mrss,
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,forcewait::Bool=true)
 
     if sd.interrupt[]; return; end
