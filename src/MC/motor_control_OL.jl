@@ -76,15 +76,16 @@ end
 
 
 """
-    checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Int)
+    checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Real)
 
 Measures distance change on IDS `device` `master` axis over time `interval`.
-Compares against `stallspeed` threshold. 
+Compares against `stallspeed` threshold in m/s. 
 """
-function checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Int)
+function checkStalling(device::TCPSocket,master::Int,interval::Real,stallspeed::Real)
     p0 = getAxisDisplacement(device,master)
     t0 = now(); sleep(interval)
     p1 = getAxisDisplacement(device,master)
 
-    return round(Int,abs(1000*(p1-p0)/((now()-t0).value))) < stallspeed
+    # now()-t0 in ms, p1-p0 in pm, stallspeed in m/s
+    return abs(1000*(10^-12)*(p1-p0)/((now()-t0).value)) < stallspeed
 end
