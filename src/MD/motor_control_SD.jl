@@ -256,14 +256,14 @@ end
 
 """
     mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::NTuple{3,Float64}=sd.settings.ess,mrss::NTuple{3,Int}=sd.settings.mrss,
+        ess::Float64=sd.settings.ess[axis],mrss::Int=sd.settings.mrss[axis],
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false)
 
 Non-flexdriven sub-step precision corrections after `target` acquisition. Correct single
 `axis` of single device `sd`. Does NOT update internal target.
 """
 function mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Symbol=:m;
-        ess::Float64=sd.settings.ess[axis],mrss::NTuple{3,Int}=sd.settings.mrss,
+        ess::Float64=sd.settings.ess[axis],mrss::Int=sd.settings.mrss[axis],
         maxsteps::Int=10,maxiter::Int=10,correctess::Bool=false,forcewait::Bool=true)
 
     if sd.interrupt[]; return; end
@@ -271,7 +271,7 @@ function mcTargetP(sd::SingleDevice,axis::Int,target::Real=sd.target.p0,unit::Sy
     if sd.stateFCM == FCM_ON; sd.stateFCM = FCM_SEMI; end
 
     mcTargetP(sd.mc,sd.ids,axis,target,unit;
-        ess=ess,mrsst=mrss,
+        ess=ess,mrss=mrss,
         maxsteps=maxsteps,maxiter=maxiter,
         correctess=correctess,interrupt=sd.interrupt)
 
