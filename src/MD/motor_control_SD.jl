@@ -350,11 +350,11 @@ end
 
 
 """
-    checkStalling(sd::SingleDevice,interval::Real,stallspeed::Int=sd.settings.stallspeed)
+    checkStalling(sd::SingleDevice,interval::Real,stallspeed::Real=sd.settings.stallspeed)
 
 Measures distance change on master axis of single device `sd` over time `interval`.
-Compares against `stallspeed` threshold. 
+Compares against `stallspeed` threshold in m/s. 
 """
-function checkStalling(sd::SingleDevice,interval::Real,stallspeed::Int=sd.settings.stallspeed)
+function checkStalling(sd::SingleDevice,interval::Real,stallspeed::Real=sd.settings.stallspeed)
     return checkStalling(sd.ids_ip,sd.settings.master,interval,stallspeed)
 end
