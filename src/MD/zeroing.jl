@@ -30,7 +30,7 @@ function mcZeroHard(md::MultiDevice; interval::Real=0.1,timeout::Real=60,aligned
             mcMove(md[i],[1,2,3],dir,0)
         end
 
-        stalling = false; t0 = now()
+        stalling = false; t0 = now(); sleep(1)
         
         while !stalling && now()-t0 < timeout
             if md.interrupt[]; break; end
